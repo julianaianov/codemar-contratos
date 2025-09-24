@@ -40,6 +40,22 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         />
         <div className={`${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'} pt-[68px]`}>
           <main className="p-4 sm:p-6 bg-transparent">
+            {/* Banner de logo centralizada - modo claro */}
+            <div className="flex dark:hidden items-center justify-center w-full mb-4 sm:mb-6">
+              <img
+                src="/logo-noturno.png"
+                alt="CODEMAR"
+                className="h-48 w-48 sm:h-56 sm:w-56 md:h-64 md:w-64 lg:h-72 lg:w-72"
+              />
+            </div>
+            {/* Banner de logo centralizada - modo escuro */}
+            <div className="hidden dark:flex items-center justify-center w-full mb-4 sm:mb-6">
+              <img
+                src="/logo-noturno.png"
+                alt="CODEMAR"
+                className="h-48 w-48 sm:h-56 sm:w-56 md:h-64 md:w-64 lg:h-72 lg:w-72"
+              />
+            </div>
             <div className="mx-auto w-full max-w-7xl">{children}</div>
           </main>
         </div>

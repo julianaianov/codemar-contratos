@@ -21,6 +21,7 @@ interface BarChartProps {
   className?: string;
   gradient?: boolean;
   neon?: boolean;
+  chartKey?: string;
 }
 
 export const BarChart: React.FC<BarChartProps> = ({
@@ -33,6 +34,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   className,
   gradient = true,
   neon = true,
+  chartKey,
 }) => {
   const formatTooltipValue = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
