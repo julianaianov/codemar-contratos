@@ -34,6 +34,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   };
 
   const formatChange = (changeValue: number) => {
+    if (changeValue === null || changeValue === undefined || isNaN(changeValue)) {
+      return '0.0%';
+    }
     const sign = changeValue >= 0 ? '+' : '';
     return `${sign}${changeValue.toFixed(1)}%`;
   };

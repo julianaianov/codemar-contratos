@@ -49,16 +49,16 @@ export const BarChart: React.FC<BarChartProps> = ({
         <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
       )}
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsBarChart data={data.labels.map((label, index) => ({
+        <RechartsBarChart data={data?.labels?.map((label, index) => ({
           name: label,
-          ...data.datasets.reduce((acc, dataset, datasetIndex) => ({
+          ...data.datasets?.reduce((acc, dataset, datasetIndex) => ({
             ...acc,
             [dataset.label]: dataset.data[index],
           }), {}),
-        }))} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        })) || []} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           {gradient && (
             <defs>
-              {data.datasets.map((ds, i) => (
+              {data?.datasets?.map((ds, i) => (
                 <linearGradient id={`barGradient-${i}`} key={i} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={colors[i % colors.length]} stopOpacity={0.9} />
                   <stop offset="100%" stopColor={colors[i % colors.length]} stopOpacity={0.2} />
@@ -99,7 +99,7 @@ export const BarChart: React.FC<BarChartProps> = ({
             }}
           />
           {showLegend && <Legend />}
-          {data.datasets.map((dataset, index) => (
+          {data?.datasets?.map((dataset, index) => (
             <Bar
               key={dataset.label}
               dataKey={dataset.label}

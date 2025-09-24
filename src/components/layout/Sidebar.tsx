@@ -26,13 +26,13 @@ interface SidebarProps {
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: HomeIcon },
-  { name: 'Financeiro', href: '/financeiro', icon: CurrencyDollarIcon },
-  { name: 'Tributário', href: '/tributario', icon: ChartBarIcon },
+  { name: 'Receitas', href: '/receitas', icon: CurrencyDollarIcon },
+  { name: 'Despesas', href: '/despesas', icon: ChartBarIcon },
+  { name: 'Pessoal', href: '/pessoal', icon: UsersIcon },
+  { name: 'Contratos', href: '/contratos', icon: ClipboardDocumentListIcon },
+  { name: 'Patrimonial', href: '/patrimonial', icon: BuildingOfficeIcon },
   { name: 'Educação', href: '/educacao', icon: AcademicCapIcon },
   { name: 'Saúde', href: '/saude', icon: HeartIcon },
-  { name: 'Recursos Humanos', href: '/recursos-humanos', icon: UsersIcon },
-  { name: 'Patrimonial', href: '/patrimonial', icon: BuildingOfficeIcon },
-  { name: 'Relatórios', href: '/relatorios', icon: ClipboardDocumentListIcon },
   { name: 'Configurações', href: '/configuracoes', icon: CogIcon },
 ];
 
