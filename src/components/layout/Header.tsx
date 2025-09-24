@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { useTheme } from '@/components/layout/ThemeProvider';
 import { clsx } from 'clsx';
 import {
   Bars3Icon,
@@ -11,19 +12,20 @@ import {
 
 interface HeaderProps {
   onMenuClick: () => void;
-  leftPadded?: boolean;
+  leftPaddingClass?: string; // e.g., 'lg:pl-64' or 'lg:pl-16'
 }
 
-export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPadded = true }) => {
+export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 'lg:pl-64' }) => {
+  const { theme, toggleTheme } = useTheme();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
-    <header className={`bg-[#0091ff] text-white shadow-sm border-b border-transparent fixed top-0 inset-x-0 z-40 ${leftPadded ? 'lg:pl-64' : 'lg:pl-0'}`}>
+    <header className={`text-white shadow-sm border-b border-transparent fixed top-0 inset-x-0 z-40 ${leftPaddingClass} bg-[#0091ff] dark:bg-[#111827]`}>
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-md text-white/80 hover:text-white hover:bg-white/10 lg:hidden"
+            className="p-2 rounded-md text-white/80 hover:text-white hover:bg-white/10"
           >
             <Bars3Icon className="w-6 h-6" />
           </button>
@@ -34,6 +36,15 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPadded = true }
         </div>
 
         <div className="flex items-center space-x-4">
+          {/* Theme toggle */}
+          <button
+            onClick={toggleTheme}
+            className="hidden sm:inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-white/10 hover:bg-white/20 text-white"
+            aria-label="Alternar tema"
+            title={`Tema: ${theme === 'dark' ? 'Escuro' : 'Claro'}`}
+          >
+            {theme === 'dark' ? '☾ Escuro' : '☀ Claro'}
+          </button>
           {/* Search */}
           <div className="hidden md:block">
             <div className="relative">

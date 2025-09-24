@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/Card';
 import { clsx } from 'clsx';
 import { ArrowTrendingUpIcon, ArrowTrendingDownIcon } from '@heroicons/react/24/outline';
@@ -37,14 +38,14 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     return `${sign}${changeValue.toFixed(1)}%`;
   };
 
-  const getChangeColor = () => {
+  const getChangeStyles = () => {
     switch (changeType) {
       case 'positive':
-        return 'text-green-600';
+        return { text: 'text-green-700', bg: 'bg-green-50', ring: 'ring-green-200' };
       case 'negative':
-        return 'text-red-600';
+        return { text: 'text-red-700', bg: 'bg-red-50', ring: 'ring-red-200' };
       default:
-        return 'text-gray-600';
+        return { text: 'text-gray-700', bg: 'bg-gray-100', ring: 'ring-gray-200' };
     }
   };
 
@@ -74,32 +75,45 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     );
   }
 
+  const changeStyles = getChangeStyles();
+
   return (
-    <Card className={clsx('hover:shadow-lg transition-shadow duration-200', className)}>
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-            <p className="text-2xl font-bold text-gray-900 mb-2">
-              {formatValue(value)}
-            </p>
-            {change !== undefined && (
-              <div className={clsx('flex items-center text-sm', getChangeColor())}>
-                {getChangeIcon()}
-                <span className="ml-1">{formatChange(change)}</span>
-                <span className="ml-1 text-gray-500">vs mês anterior</span>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Card className={clsx('group relative overflow-hidden hover:shadow-lg transition-all duration-200 rounded-xl dark:bg-secondary-800 dark:border-secondary-700', className)}>
+        <span className="pointer-events-none absolute inset-x-0 -top-1 h-1 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-brand" />
+        <CardContent>
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-1 truncate">{title}</p>
+              <p className="font-bold text-gray-900 dark:text-gray-100 mb-2 leading-7 whitespace-nowrap text-[clamp(18px,2.2vw,22px)]">
+                {formatValue(value)}
+              </p>
+              {change !== undefined && (
+                <div className={clsx('inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ring-1', changeStyles.bg, changeStyles.text, changeStyles.ring)}>
+                  {getChangeIcon()}
+                  <span className="ml-1">{formatChange(change)}</span>
+                  <span className="ml-1 text-gray-500 dark:text-gray-400">vs mês anterior</span>
+                </div>
+              )}
+            </div>
+            {icon && (
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full blur-md opacity-0 group-hover:opacity-80 transition-opacity bg-gradient-brand" />
+                  <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-50 text-blue-600 dark:bg-white/10 dark:text-blue-300 flex items-center justify-center transform transition-transform duration-200 group-hover:scale-110">
+                    {icon}
+                  </div>
+                </div>
               </div>
             )}
           </div>
-          {icon && (
-            <div className="flex-shrink-0 ml-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                {icon}
-              </div>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
