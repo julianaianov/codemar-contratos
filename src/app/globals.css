@@ -70,6 +70,21 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Degradê multicolor da barra inferior do header */
+  .bg-gradient-brand {
+    background: linear-gradient(90deg,
+      #ff0040 0%,
+      #ff7a00 12%,
+      #ffe600 24%,
+      #7bd500 36%,
+      #00a3ff 48%,
+      #0033ff 60%,
+      #00d92f 72%,
+      #1aff00 84%,
+      #00ff80 100%
+    );
+  }
   
   .scrollbar-hide {
     -ms-overflow-style: none;
