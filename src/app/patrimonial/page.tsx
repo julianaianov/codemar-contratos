@@ -21,7 +21,7 @@ export default function PatrimonialPage() {
   // Pie: distribuição de bens por categoria
   const distBensCategoria: ChartData = React.useMemo(() => {
     const counts = new Map<string, number>();
-    (bens?.data || []).forEach((b) => counts.set(b.category || b.categoria, (counts.get((b as any).categoria) || 0) + 1));
+    (bens?.data || []).forEach((b) => counts.set(b.categoria, (counts.get(b.categoria) || 0) + 1));
     const labels = Array.from(counts.keys());
     const data = labels.map((l) => counts.get(l) || 0);
     return {

@@ -15,6 +15,8 @@ export default function RHPage() {
   const { data: servidores } = useServidores();
   const { data: folha } = useFolhaPagamento();
   const { neon, gradient, getColorsForChart } = useChartStyle();
+  const cargoColors = getColorsForChart('rh-cargo-pie');
+  const lotacaoColors = getColorsForChart('rh-lotacao-bar');
 
   // Pie: distribuição por cargo
   const distPorCargo: ChartData = React.useMemo(() => {
@@ -24,9 +26,9 @@ export default function RHPage() {
     const data = labels.map((l) => counts.get(l) || 0);
     return {
       labels,
-      datasets: [{ label: 'Servidores por Cargo', data, backgroundColor: chartColors }],
+      datasets: [{ label: 'Servidores por Cargo', data, backgroundColor: cargoColors }],
     };
-  }, [servidores, chartColors]);
+  }, [servidores, cargoColors]);
 
   // Bar: distribuição por lotação
   const distPorLotacao: ChartData = React.useMemo(() => {
@@ -36,9 +38,9 @@ export default function RHPage() {
     const data = labels.map((l) => counts.get(l) || 0);
     return {
       labels,
-      datasets: [{ label: 'Servidores por Lotação', data, backgroundColor: chartColors }],
+      datasets: [{ label: 'Servidores por Lotação', data, backgroundColor: lotacaoColors }],
     };
-  }, [servidores, chartColors]);
+  }, [servidores, lotacaoColors]);
 
   // Line: evolução da folha (valor líquido por mês)
   const folhaSeries: TimeSeriesData[] = React.useMemo(() => {
