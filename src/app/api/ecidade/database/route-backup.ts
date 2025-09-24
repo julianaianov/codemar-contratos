@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const path = searchParams.get('path');
-    const year = searchParams.get('year');
-    const type = searchParams.get('type');
+    const year = searchParams.get('year') || undefined;
+    const type = searchParams.get('type') || undefined;
     const mode = searchParams.get('mode') || 'padrao';
     const page = parseInt(searchParams.get('page') || '1');
     const perPage = parseInt(searchParams.get('perPage') || '10');

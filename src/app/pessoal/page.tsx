@@ -1,221 +1,312 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FilterPanel } from '@/components/filters/FilterPanel';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { MetricCard } from '@/components/dashboard/MetricCard';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { BarChart } from '@/components/charts/BarChart';
-import { 
-  UsersIcon, 
-  CurrencyDollarIcon, 
-  ChartBarIcon,
-  UserGroupIcon 
-} from '@heroicons/react/24/outline';
+import { PieChart } from '@/components/charts/PieChart';
+import { LineChart } from '@/components/charts/LineChart';
+import { useChartStyle } from '@/components/layout/ChartStyleProvider';
+import { ChartColorPicker } from '@/components/charts/ChartColorPicker';
+
+interface Pessoal {
+  id: number;
+  nome: string;
+  cargo: string;
+  salario: number;
+  data_admissao: string;
+  instituicao_nome: string;
+}
 
 interface FilterData {
   exercicio: string;
-  instituicao?: string;
-  mes?: string;
+  instituicao?: number;
+  credor?: string;
+  elemento?: string;
+  fonte?: string;
+  funcao?: string;
+  subfuncao?: string;
+  programa?: string;
+  projeto?: string;
 }
 
 export default function PessoalPage() {
+  const [pessoal, setPessoal] = useState<Pessoal[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterData>({
-    exercicio: '2024',
-    instituicao: '',
-    mes: '',
+    exercicio: new Date().getFullYear().toString(),
   });
+  
+  const { neon, gradient, getColorsForChart } = useChartStyle();
 
-  const [data, setData] = useState({
-    totalServidores: 1250,
-    totalFolha: 2500000.00,
-    mediaSalarial: 2000.00,
-    ativos: 1200,
-  });
-
-  const handleFilter = (newFilters: FilterData) => {
-    setFilters(newFilters);
-    console.log('Filtros aplicados:', newFilters);
+  const fetchPessoal = async (filterData: FilterData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Mock data para demonstração
+      const mockPessoal: Pessoal[] = [
+        {
+          id: 1,
+          nome: 'João Silva',
+          cargo: 'Professor',
+          salario: 5000,
+          data_admissao: '2024-01-15',
+          instituicao_nome: 'Secretaria de Educação'
+        },
+        {
+          id: 2,
+          nome: 'Maria Santos',
+          cargo: 'Médico',
+          salario: 8000,
+          data_admissao: '2024-02-20',
+          instituicao_nome: 'Secretaria de Saúde'
+        },
+        {
+          id: 3,
+          nome: 'Pedro Costa',
+          cargo: 'Engenheiro',
+          salario: 6000,
+          data_admissao: '2024-03-10',
+          instituicao_nome: 'Secretaria de Obras'
+        }
+      ];
+      
+      setPessoal(mockPessoal);
+    } catch (err) {
+      setError('Erro ao carregar dados do pessoal');
+      console.error('Erro ao carregar dados do pessoal:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const chartData = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-    datasets: [
-      {
-        label: 'Folha de Pagamento',
-        data: [200000, 210000, 220000, 230000, 240000, 250000, 0, 0, 0, 0, 0, 0],
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-      },
-    ],
+  const handleFilter = (filterData: FilterData) => {
+    setFilters(filterData);
+    fetchPessoal(filterData);
   };
+
+  const handleClear = () => {
+    setFilters({
+      exercicio: new Date().getFullYear().toString(),
+    });
+    setPessoal([]);
+  };
+
+  // Carregar dados iniciais
+  useEffect(() => {
+    fetchPessoal(filters);
+  }, []);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const totalPessoal = pessoal.length;
+  const totalSalarios = pessoal.reduce((sum, p) => sum + p.salario, 0);
+  const salarioMedio = totalPessoal > 0 ? totalSalarios / totalPessoal : 0;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Pessoal</h1>
-              <nav className="flex space-x-2 text-sm text-gray-500 mt-1">
-                <span>Início</span>
-                <span>›</span>
-                <span className="text-gray-900">Pessoal</span>
-                <span>›</span>
-                <span className="text-gray-900">Servidores</span>
-              </nav>
-            </div>
-            <button className="text-gray-600 hover:text-gray-900">
-              ← Voltar
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Pessoal</h1>
+          <p className="text-gray-600">Gestão de recursos humanos</p>
+        </div>
+        <div className="text-sm text-gray-500">
+          <span>← Voltar</span>
         </div>
       </div>
 
-      <div className="px-6 py-6">
-        {/* Filtros */}
-        <div className="mb-8">
-          <FilterPanel
-            title="Consulta de Dados"
-            onFilter={handleFilter}
-            showInstitution={true}
-            showYear={true}
-            showMonth={true}
-          />
-        </div>
+      {/* Filtros */}
+      <FilterPanel 
+        onFilter={handleFilter}
+        onClear={handleClear}
+        loading={loading}
+      />
 
-        {/* Métricas Principais */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <MetricCard
-            title="Total de Servidores"
-            value={data.totalServidores.toLocaleString('pt-BR')}
-            icon={<UsersIcon className="w-6 h-6" />}
-            className="bg-blue-50 border-blue-200"
-          />
-          <MetricCard
-            title="Folha de Pagamento"
-            value={`R$ ${data.totalFolha.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            icon={<CurrencyDollarIcon className="w-6 h-6" />}
-            className="bg-green-50 border-green-200"
-          />
-          <MetricCard
-            title="Média Salarial"
-            value={`R$ ${data.mediaSalarial.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            icon={<ChartBarIcon className="w-6 h-6" />}
-            className="bg-purple-50 border-purple-200"
-          />
-          <MetricCard
-            title="Servidores Ativos"
-            value={data.ativos.toLocaleString('pt-BR')}
-            icon={<UserGroupIcon className="w-6 h-6" />}
-            className="bg-orange-50 border-orange-200"
-          />
-        </div>
-
-        {/* Gráficos */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Folha de Pagamento por Mês - Exercício {filters.exercicio}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BarChart
-                data={chartData}
-                height={300}
-                showLegend={true}
-                showGrid={true}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Distribuição por Órgão</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Prefeitura Municipal</span>
-                  <span className="text-sm font-medium">450 servidores</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Câmara Municipal</span>
-                  <span className="text-sm font-medium">25 servidores</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Fundação de Saúde</span>
-                  <span className="text-sm font-medium">300 servidores</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Companhia de Saneamento</span>
-                  <span className="text-sm font-medium">200 servidores</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Outros</span>
-                  <span className="text-sm font-medium">275 servidores</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tabela de Servidores */}
+      {/* Resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Servidores por Órgão - Exercício {filters.exercicio}</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <div className="p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Total de Servidores</h3>
+            <p className="text-2xl font-bold text-blue-600">
+              {totalPessoal}
+            </p>
+          </div>
+        </Card>
+        
+        <Card>
+          <div className="p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Total de Salários</h3>
+            <p className="text-2xl font-bold text-green-600">
+              {formatCurrency(totalSalarios)}
+            </p>
+          </div>
+        </Card>
+        
+        <Card>
+          <div className="p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Salário Médio</h3>
+            <p className="text-2xl font-bold text-purple-600">
+              {formatCurrency(salarioMedio)}
+            </p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Tabela de pessoal */}
+      <Card>
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Lista de Servidores
+            {filters.instituicao && (
+              <span className="text-sm text-gray-500 ml-2">
+                (Filtrado por instituição)
+              </span>
+            )}
+          </h2>
+          
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">{error}</p>
+            </div>
+          ) : pessoal.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Nenhum servidor encontrado</p>
+            </div>
+          ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Órgão
+                      Nome
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Total Servidores
+                      Cargo
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Ativos
+                      Instituição
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Inativos
+                      Data Admissão
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Folha Mensal
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Detalhar
+                      Salário
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      Prefeitura Municipal
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      450
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      430
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      20
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      R$ 900.000,00
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        👁️
-                      </button>
-                    </td>
-                  </tr>
-                  {/* Mais linhas aqui */}
+                  {pessoal.map((p) => (
+                    <tr key={p.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        {p.nome}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {p.cargo}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {p.instituicao_nome}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {formatDate(p.data_admissao)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 font-medium">
+                        {formatCurrency(p.salario)}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Pessoal por Instituição</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PieChart 
+              chartKey="pessoal-instituicao-pie" 
+              data={{
+                labels: [...new Set(pessoal.map(p => p.instituicao_nome || 'N/A'))],
+                datasets: [{
+                  label: 'Pessoal por Instituição',
+                  data: [...new Set(pessoal.map(p => p.instituicao_nome || 'N/A'))].map(instituicao => 
+                    pessoal.filter(p => p.instituicao_nome === instituicao).length
+                  ),
+                  backgroundColor: getColorsForChart('pessoal-instituicao-pie')
+                }]
+              }} 
+              height={320} 
+              colors={getColorsForChart('pessoal-instituicao-pie')} 
+              donut 
+              neon={neon} 
+            />
+            <ChartColorPicker chartKey="pessoal-instituicao-pie" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Salários por Cargo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BarChart 
+              chartKey="pessoal-cargo-bar" 
+              data={{
+                labels: pessoal.map(p => p.cargo),
+                datasets: [{
+                  label: 'Salários',
+                  data: pessoal.map(p => p.salario),
+                  backgroundColor: getColorsForChart('pessoal-cargo-bar')
+                }]
+              }} 
+              height={320} 
+              colors={getColorsForChart('pessoal-cargo-bar')} 
+              neon={neon} 
+              gradient={gradient} 
+            />
+            <ChartColorPicker chartKey="pessoal-cargo-bar" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Evolução dos Salários</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <LineChart 
+              chartKey="pessoal-salarios-line" 
+              data={pessoal.map((p, i) => ({ 
+                date: new Date(p.data_admissao).toISOString().split('T')[0], 
+                value: p.salario 
+              }))} 
+              height={320} 
+              title="Salários" 
+              colors={getColorsForChart('pessoal-salarios-line')} 
+              neon={neon} 
+              gradient={gradient} 
+            />
+            <ChartColorPicker chartKey="pessoal-salarios-line" />
           </CardContent>
         </Card>
       </div>

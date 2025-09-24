@@ -15,20 +15,33 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const path = searchParams.get('path');
+    const year = searchParams.get('year') || '2024';
 
     let result;
 
     switch (path) {
       case 'dashboard/metrics':
-        result = await getDashboardMetrics();
+        result = await getDashboardMetrics(year);
         break;
       
       case 'receitas-chart':
-        result = await getReceitasChart();
+        result = await getReceitasChart(year);
         break;
       
       case 'despesas-chart':
-        result = await getDespesasChart();
+        result = await getDespesasChart(year);
+        break;
+      
+      case 'institutions':
+        result = await getInstitutions();
+        break;
+      
+      case 'despesas':
+        result = await getDespesas(year, searchParams.get('instituicao'));
+        break;
+      
+      case 'receitas':
+        result = await getReceitas(year, searchParams.get('instituicao'));
         break;
       
       default:
@@ -43,11 +56,11 @@ export async function GET(request: NextRequest) {
 }
 
 // Função para obter métricas do dashboard
-async function getDashboardMetrics() {
-  const query1 = `SELECT COALESCE(SUM(r.valor), 0) as total FROM transparencia.receitas r WHERE r.exercicio = 2024`;
+async function getDashboardMetrics(year: string) {
+  const query1 = `SELECT COALESCE(SUM(r.valor), 0) as total FROM transparencia.receitas r WHERE r.exercicio = ${year}`;
   const query2 = `SELECT COALESCE(SUM(rm.valor), 0) as total FROM transparencia.receitas_movimentacoes rm`;
-  const query3 = `SELECT COALESCE(SUM(e.valor), 0) as total FROM transparencia.empenhos e WHERE e.exercicio = 2024`;
-  const query4 = `SELECT COALESCE(SUM(e.valor_pago), 0) as total FROM transparencia.empenhos e WHERE e.exercicio = 2024`;
+  const query3 = `SELECT COALESCE(SUM(e.valor), 0) as total FROM transparencia.empenhos e WHERE e.exercicio = ${year}`;
+  const query4 = `SELECT COALESCE(SUM(e.valor_pago), 0) as total FROM transparencia.empenhos e WHERE e.exercicio = ${year}`;
   
   const [result1, result2, result3, result4] = await Promise.all([
     pool.query(query1),
@@ -65,7 +78,7 @@ async function getDashboardMetrics() {
 }
 
 // Função para obter gráfico de receitas por mês
-async function getReceitasChart() {
+async function getReceitasChart(year: string) {
   const query = `
     SELECT 
       EXTRACT(MONTH FROM rm.data) as mes,
@@ -91,7 +104,7 @@ async function getReceitasChart() {
 }
 
 // Função para obter gráfico de despesas por mês
-async function getDespesasChart() {
+async function getDespesasChart(year: string) {
   const query = `
     SELECT 
       EXTRACT(MONTH FROM e.data_emissao) as mes,
@@ -99,7 +112,7 @@ async function getDespesasChart() {
       SUM(e.valor_liquidado) as total_liquidado,
       SUM(e.valor_pago) as total_pago
     FROM transparencia.empenhos e
-    WHERE e.exercicio = 2024
+    WHERE e.exercicio = ${year}
     GROUP BY EXTRACT(MONTH FROM e.data_emissao)
     ORDER BY mes
   `;
@@ -119,4 +132,62 @@ async function getDespesasChart() {
   });
   
   return chartData;
+}
+
+// Função para obter instituições
+async function getInstitutions() {
+  const query = `SELECT id, descricao FROM transparencia.instituicoes ORDER BY descricao`;
+  const result = await pool.query(query);
+  return result.rows;
+}
+
+// Função para obter despesas com filtros
+async function getDespesas(year: string, instituicao?: string | null) {
+  let query = `
+    SELECT 
+      e.id,
+      e.numero_empenho,
+      e.descricao,
+      e.valor,
+      e.valor_liquidado,
+      e.valor_pago,
+      e.data_emissao,
+      i.descricao as instituicao_nome
+    FROM transparencia.empenhos e
+    LEFT JOIN transparencia.instituicoes i ON e.orgao_id = i.id
+    WHERE e.exercicio = ${year}
+  `;
+  
+  if (instituicao) {
+    query += ` AND e.orgao_id = ${instituicao}`;
+  }
+  
+  query += ` ORDER BY e.data_emissao DESC`;
+  
+  const result = await pool.query(query);
+  return result.rows;
+}
+
+// Função para obter receitas com filtros
+async function getReceitas(year: string, instituicao?: string | null) {
+  let query = `
+    SELECT 
+      r.id,
+      r.descricao,
+      r.valor,
+      r.data,
+      i.descricao as instituicao_nome
+    FROM transparencia.receitas r
+    LEFT JOIN transparencia.instituicoes i ON r.instituicao_id = i.id
+    WHERE r.exercicio = ${year}
+  `;
+  
+  if (instituicao) {
+    query += ` AND r.instituicao_id = ${instituicao}`;
+  }
+  
+  query += ` ORDER BY r.data DESC`;
+  
+  const result = await pool.query(query);
+  return result.rows;
 }

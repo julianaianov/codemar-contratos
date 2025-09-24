@@ -37,7 +37,6 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
               height={112}
               className="h-28 w-28"
             />
-            <h1 className="ml-3 text-xl font-semibold text-white">Dashboard e-Cidade</h1>
           </div>
         </div>
 
@@ -46,11 +45,11 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="hidden sm:inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-white/10 hover:bg-white/20 text-white"
+            className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-white/10 hover:bg-white/20 text-white"
             aria-label="Alternar tema"
             title={`Tema: ${theme === 'dark' ? 'Escuro' : 'Claro'}`}
           >
-            {theme === 'dark' ? '☾ Escuro' : '☀ Claro'}
+            {theme === 'dark' ? '☾' : '☀'}
           </button>
           {/* Search */}
           <div className="hidden md:block">

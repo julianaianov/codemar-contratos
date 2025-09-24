@@ -4,170 +4,211 @@ import React, { useState, useEffect } from 'react';
 import { MagnifyingGlassIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface FilterPanelProps {
-  title: string;
   onFilter: (filters: FilterData) => void;
-  showInstitution?: boolean;
-  showYear?: boolean;
-  showMonth?: boolean;
+  onClear: () => void;
+  loading?: boolean;
 }
 
 interface FilterData {
   exercicio: string;
-  instituicao?: string;
-  mes?: string;
+  instituicao?: number;
+  credor?: string;
+  elemento?: string;
+  fonte?: string;
+  funcao?: string;
+  subfuncao?: string;
+  programa?: string;
+  projeto?: string;
 }
 
-export const FilterPanel: React.FC<FilterPanelProps> = ({
-  title,
-  onFilter,
-  showInstitution = true,
-  showYear = true,
-  showMonth = false,
-}) => {
+interface Institution {
+  id: number;
+  descricao: string;
+}
+
+export function FilterPanel({ onFilter, onClear, loading = false }: FilterPanelProps) {
   const [filters, setFilters] = useState<FilterData>({
     exercicio: new Date().getFullYear().toString(),
-    instituicao: '',
-    mes: '',
   });
+  
+  const [institutions, setInstitutions] = useState<Institution[]>([]);
+  const [filterBy, setFilterBy] = useState('instituicao');
 
-  const [years, setYears] = useState<string[]>([]);
-  const [institutions, setInstitutions] = useState<Array<{id: string, name: string}>>([]);
-  const [months] = useState([
-    { value: '01', label: 'Janeiro' },
-    { value: '02', label: 'Fevereiro' },
-    { value: '03', label: 'Março' },
-    { value: '04', label: 'Abril' },
-    { value: '05', label: 'Maio' },
-    { value: '06', label: 'Junho' },
-    { value: '07', label: 'Julho' },
-    { value: '08', label: 'Agosto' },
-    { value: '09', label: 'Setembro' },
-    { value: '10', label: 'Outubro' },
-    { value: '11', label: 'Novembro' },
-    { value: '12', label: 'Dezembro' },
-  ]);
+  const availableYears = ['2025', '2024', '2023', '2022', '2021'];
 
   useEffect(() => {
-    // Carregar anos disponíveis
-    const currentYear = new Date().getFullYear();
-    const availableYears = Array.from({ length: 5 }, (_, i) => (currentYear - i).toString());
-    setYears(availableYears);
+    // Buscar instituições
+    const fetchInstitutions = async () => {
+      try {
+        const response = await fetch('/api/ecidade/database?path=institutions');
+        const data = await response.json();
+        setInstitutions(data);
+      } catch (error) {
+        console.error('Erro ao carregar instituições:', error);
+      }
+    };
 
-    // Carregar instituições
-    setInstitutions([
-      { id: '', name: 'Todas as Instituições' },
-      { id: '1', name: 'Prefeitura Municipal' },
-      { id: '2', name: 'Câmara Municipal' },
-      { id: '3', name: 'Fundação Municipal de Saúde' },
-      { id: '4', name: 'Companhia de Saneamento' },
-      { id: '5', name: 'Companhia de Desenvolvimento' },
-    ]);
+    fetchInstitutions();
   }, []);
 
-  const handleFilter = () => {
+  const handleFilterChange = (key: keyof FilterData, value: string | number) => {
+    setFilters(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const handleSearch = () => {
     onFilter(filters);
   };
 
   const handleClear = () => {
     setFilters({
       exercicio: new Date().getFullYear().toString(),
-      instituicao: '',
-      mes: '',
     });
-    onFilter({
-      exercicio: new Date().getFullYear().toString(),
-      instituicao: '',
-      mes: '',
-    });
+    onClear();
+  };
+
+  const renderFilterInput = () => {
+    switch (filterBy) {
+      case 'instituicao':
+        return (
+          <select
+            value={filters.instituicao || ''}
+            onChange={(e) => handleFilterChange('instituicao', parseInt(e.target.value) || 0)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-secondary-700 text-gray-900 dark:text-gray-100"
+          >
+            <option value="">Selecione uma instituição</option>
+            {institutions.map(inst => (
+              <option key={inst.id} value={inst.id}>
+                {inst.descricao}
+              </option>
+            ))}
+          </select>
+        );
+      case 'credor':
+        return (
+          <input
+            type="text"
+            placeholder="Digite o nome do credor"
+            value={filters.credor || ''}
+            onChange={(e) => handleFilterChange('credor', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-secondary-700 text-gray-900 dark:text-gray-100"
+          />
+        );
+      case 'elemento':
+        return (
+          <input
+            type="text"
+            placeholder="Digite o elemento de despesa"
+            value={filters.elemento || ''}
+            onChange={(e) => handleFilterChange('elemento', e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-secondary-700 text-gray-900 dark:text-gray-100"
+          />
+        );
+      default:
+        return (
+          <input
+            type="text"
+            placeholder="Digite o filtro"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-secondary-700 text-gray-900 dark:text-gray-100"
+          />
+        );
+    }
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="px-6 py-4 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+    <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-md p-6 mb-6">
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Consulta de Dados</h3>
+        
+        {/* Aviso sobre filtros */}
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-3 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                No filtro de Exercício só são exibidos os anos que possuam elementos cadastrados. 
+                O fato de algum exercício não ser exibido indica que não existem dados para este período.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Exercício */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Exercício:
+            </label>
+            <select
+              value={filters.exercicio}
+              onChange={(e) => handleFilterChange('exercicio', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-secondary-700 text-gray-900 dark:text-gray-100"
+            >
+              {availableYears.map(year => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Filtrar Por */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Filtrar Por:
+            </label>
+            <select
+              value={filterBy}
+              onChange={(e) => setFilterBy(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-secondary-700 text-gray-900 dark:text-gray-100"
+            >
+              <option value="instituicao">INSTITUIÇÃO/ÓRGÃO</option>
+              <option value="credor">CREDOR/INSTITUIÇÃO</option>
+              <option value="elemento">ELEMENTO DE DESPESA</option>
+              <option value="fonte">FONTE DE RECURSO</option>
+              <option value="funcao">FUNÇÃO</option>
+              <option value="subfuncao">SUBFUNÇÃO</option>
+              <option value="programa">PROGRAMA</option>
+              <option value="projeto">PROJETO/ATIVIDADE</option>
+            </select>
+          </div>
+
+          {/* Campo de filtro dinâmico */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {filterBy === 'instituicao' ? 'Instituição:' : 
+               filterBy === 'credor' ? 'Credor:' :
+               filterBy === 'elemento' ? 'Elemento:' : 'Filtro:'}
+            </label>
+            {renderFilterInput()}
+          </div>
+        </div>
       </div>
-      
-      <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {showYear && (
-            <div>
-              <label htmlFor="exercicio" className="block text-sm font-medium text-gray-700 mb-2">
-                Exercício:
-              </label>
-              <select
-                id="exercicio"
-                value={filters.exercicio}
-                onChange={(e) => setFilters({ ...filters, exercicio: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
 
-          {showInstitution && (
-            <div>
-              <label htmlFor="instituicao" className="block text-sm font-medium text-gray-700 mb-2">
-                Filtrar Por:
-              </label>
-              <select
-                id="instituicao"
-                value={filters.instituicao}
-                onChange={(e) => setFilters({ ...filters, instituicao: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                {institutions.map((institution) => (
-                  <option key={institution.id} value={institution.id}>
-                    {institution.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {showMonth && (
-            <div>
-              <label htmlFor="mes" className="block text-sm font-medium text-gray-700 mb-2">
-                Mês:
-              </label>
-              <select
-                id="mes"
-                value={filters.mes}
-                onChange={(e) => setFilters({ ...filters, mes: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Todos os meses</option>
-                {months.map((month) => (
-                  <option key={month.value} value={month.value}>
-                    {month.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-end space-x-3">
-          <button
-            onClick={handleClear}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <TrashIcon className="h-4 w-4 mr-2" />
-            Limpar
-          </button>
-          <button
-            onClick={handleFilter}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <MagnifyingGlassIcon className="h-4 w-4 mr-2" />
-            Pesquisar
-          </button>
-        </div>
+      {/* Botões de ação */}
+      <div className="flex justify-end space-x-3">
+        <button
+          onClick={handleSearch}
+          disabled={loading}
+          className="inline-flex items-center px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50"
+        >
+          <MagnifyingGlassIcon className="w-4 h-4 mr-2" />
+          Pesquisar
+        </button>
+        <button
+          onClick={handleClear}
+          className="inline-flex items-center px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+        >
+          <TrashIcon className="w-4 h-4 mr-2" />
+          Limpar
+        </button>
       </div>
     </div>
   );
-};
+}

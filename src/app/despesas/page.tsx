@@ -1,233 +1,360 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FilterPanel } from '@/components/filters/FilterPanel';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { MetricCard } from '@/components/dashboard/MetricCard';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { BarChart } from '@/components/charts/BarChart';
+import { PieChart } from '@/components/charts/PieChart';
 import { LineChart } from '@/components/charts/LineChart';
-import { 
-  CurrencyDollarIcon, 
-  ChartBarIcon, 
-  ExclamationTriangleIcon,
-  CheckCircleIcon 
-} from '@heroicons/react/24/outline';
+import { useChartStyle } from '@/components/layout/ChartStyleProvider';
+import { ChartColorPicker } from '@/components/charts/ChartColorPicker';
+
+interface Despesa {
+  id: number;
+  numero_empenho: string;
+  descricao: string;
+  valor: number;
+  valor_liquidado: number;
+  valor_pago: number;
+  data_emissao: string;
+  instituicao_nome: string;
+}
 
 interface FilterData {
   exercicio: string;
-  instituicao?: string;
-  mes?: string;
+  instituicao?: number;
+  credor?: string;
+  elemento?: string;
+  fonte?: string;
+  funcao?: string;
+  subfuncao?: string;
+  programa?: string;
+  projeto?: string;
 }
 
 export default function DespesasPage() {
+  const [despesas, setDespesas] = useState<Despesa[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterData>({
-    exercicio: '2024',
-    instituicao: '',
-    mes: '',
+    exercicio: new Date().getFullYear().toString(),
   });
+  
+  const { neon, gradient, getColorsForChart } = useChartStyle();
 
-  const [data, setData] = useState({
-    empenhado: 420000.00,
-    liquidado: 360000.00,
-    anulado: 0.00,
-    pago: 360000.00,
-  });
-
-  const handleFilter = (newFilters: FilterData) => {
-    setFilters(newFilters);
-    // Aqui você faria a chamada para a API com os novos filtros
-    console.log('Filtros aplicados:', newFilters);
+  const fetchDespesas = async (filterData: FilterData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const params = new URLSearchParams({
+        path: 'despesas',
+        year: filterData.exercicio,
+      });
+      
+      if (filterData.instituicao) {
+        params.append('instituicao', filterData.instituicao.toString());
+      }
+      
+      const response = await fetch(`/api/ecidade/database?${params}`);
+      const data = await response.json();
+      
+      setDespesas(data);
+    } catch (err) {
+      setError('Erro ao carregar despesas');
+      console.error('Erro ao carregar despesas:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const chartData = {
-    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-    datasets: [
-      {
-        label: 'Empenhado',
-        data: [80000, 120000, 90000, 60000, 70000, 0, 0, 0, 0, 0, 0, 0],
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-      },
-      {
-        label: 'Liquidado',
-        data: [75000, 110000, 85000, 55000, 65000, 0, 0, 0, 0, 0, 0, 0],
-        borderColor: '#10b981',
-        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-      },
-      {
-        label: 'Pago',
-        data: [70000, 100000, 80000, 50000, 60000, 0, 0, 0, 0, 0, 0, 0],
-        borderColor: '#f59e0b',
-        backgroundColor: 'rgba(245, 158, 11, 0.1)',
-      },
-    ],
+  const handleFilter = (filterData: FilterData) => {
+    setFilters(filterData);
+    fetchDespesas(filterData);
   };
+
+  const handleClear = () => {
+    setFilters({
+      exercicio: new Date().getFullYear().toString(),
+    });
+    setDespesas([]);
+  };
+
+  // Carregar dados iniciais
+  useEffect(() => {
+    fetchDespesas(filters);
+  }, []);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const totalEmpenhado = despesas.reduce((sum, despesa) => sum + parseFloat(despesa.valor.toString()), 0);
+  const totalLiquidado = despesas.reduce((sum, despesa) => sum + parseFloat(despesa.valor_liquidado.toString()), 0);
+  const totalPago = despesas.reduce((sum, despesa) => sum + parseFloat(despesa.valor_pago.toString()), 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Despesas</h1>
-              <nav className="flex space-x-2 text-sm text-gray-500 mt-1">
-                <span>Início</span>
-                <span>›</span>
-                <span className="text-gray-900">Despesas</span>
-                <span>›</span>
-                <span className="text-gray-900">Instituições</span>
-              </nav>
-            </div>
-            <button className="text-gray-600 hover:text-gray-900">
-              ← Voltar
-            </button>
-          </div>
+    <div className="space-y-6">
+      {/* Cabeçalho */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Despesas</h1>
+          <p className="text-gray-600">Consulta de despesas municipais</p>
+        </div>
+        <div className="text-sm text-gray-500">
+          <span>← Voltar</span>
         </div>
       </div>
 
-      <div className="px-6 py-6">
-        {/* Aviso */}
-        <div className="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <div className="flex">
-            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400 mr-3 mt-0.5" />
-            <div className="text-sm text-yellow-800">
-              <p>
-                O filtro "Exercício" mostra apenas os anos com dados registrados. 
-                Se um ano não aparecer na lista, significa que não existem dados para aquele período.
-              </p>
-            </div>
-          </div>
-        </div>
+      {/* Filtros */}
+      <FilterPanel 
+        onFilter={handleFilter}
+        onClear={handleClear}
+        loading={loading}
+      />
 
-        {/* Filtros */}
-        <div className="mb-8">
-          <FilterPanel
-            title="Consulta de Dados"
-            onFilter={handleFilter}
-            showInstitution={true}
-            showYear={true}
-            showMonth={false}
-          />
-        </div>
-
-        {/* Métricas Principais */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <MetricCard
-            title="Empenhado"
-            value={`R$ ${data.empenhado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            icon={<CurrencyDollarIcon className="w-6 h-6" />}
-            className="bg-blue-50 border-blue-200"
-          />
-          <MetricCard
-            title="Liquidado"
-            value={`R$ ${data.liquidado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            icon={<CheckCircleIcon className="w-6 h-6" />}
-            className="bg-green-50 border-green-200"
-          />
-          <MetricCard
-            title="Anulado"
-            value={`R$ ${data.anulado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            icon={<ExclamationTriangleIcon className="w-6 h-6" />}
-            className="bg-red-50 border-red-200"
-          />
-          <MetricCard
-            title="Pago"
-            value={`R$ ${data.pago.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-            icon={<ChartBarIcon className="w-6 h-6" />}
-            className="bg-orange-50 border-orange-200"
-          />
-        </div>
-
-        {/* Gráficos */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Despesas por Mês - Exercício {filters.exercicio}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <BarChart
-                data={chartData}
-                height={300}
-                showLegend={true}
-                showGrid={true}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Evolução das Despesas</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <LineChart
-                data={chartData}
-                xKey="mes"
-                yKey="empenhado"
-                height={300}
-                multipleYKeys={['empenhado', 'liquidado', 'pago']}
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tabela de Instituições */}
+      {/* Resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
-          <CardHeader>
-            <CardTitle>Despesas por Instituição - Exercício {filters.exercicio}</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <div className="p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Empenhado</h3>
+            <p className="text-2xl font-bold text-blue-600">
+              {formatCurrency(totalEmpenhado)}
+            </p>
+          </div>
+        </Card>
+        
+        <Card>
+          <div className="p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Liquidado</h3>
+            <p className="text-2xl font-bold text-yellow-600">
+              {formatCurrency(totalLiquidado)}
+            </p>
+          </div>
+        </Card>
+        
+        <Card>
+          <div className="p-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Pago</h3>
+            <p className="text-2xl font-bold text-green-600">
+              {formatCurrency(totalPago)}
+            </p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Tabela de despesas */}
+      <Card>
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Lista de Despesas
+            {filters.instituicao && (
+              <span className="text-sm text-gray-500 ml-2">
+                (Filtrado por instituição)
+              </span>
+            )}
+          </h2>
+          
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : error ? (
+            <div className="text-center py-8">
+              <p className="text-red-600">{error}</p>
+            </div>
+          ) : despesas.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">Nenhuma despesa encontrada</p>
+            </div>
+          ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-secondary-700">
+                <thead className="bg-gray-50 dark:bg-secondary-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Empenho
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Descrição
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Instituição
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                      Data
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Empenhado
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Liquidado
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Anulado
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Pago
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Detalhar
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  <tr>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      Prefeitura Municipal
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      R$ 150.000,00
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      R$ 140.000,00
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      R$ 0,00
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      R$ 140.000,00
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        👁️
-                      </button>
-                    </td>
-                  </tr>
-                  {/* Mais linhas aqui */}
+                <tbody className="bg-white dark:bg-secondary-800 divide-y divide-gray-200 dark:divide-secondary-700">
+                  {despesas.map((despesa) => (
+                    <tr key={despesa.id} className="hover:bg-gray-50 dark:hover:bg-secondary-700">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {despesa.numero_empenho}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">
+                        {despesa.descricao}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                        {despesa.instituicao_nome || 'N/A'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                        {formatDate(despesa.data_emissao)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 dark:text-blue-400 font-medium">
+                        {formatCurrency(parseFloat(despesa.valor.toString()))}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-600 dark:text-yellow-400 font-medium">
+                        {formatCurrency(parseFloat(despesa.valor_liquidado.toString()))}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 dark:text-green-400 font-medium">
+                        {formatCurrency(parseFloat(despesa.valor_pago.toString()))}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
+          )}
+        </div>
+      </Card>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Despesas por Instituição</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PieChart 
+              chartKey="despesas-instituicao-pie" 
+              data={{
+                labels: [...new Set(despesas.map(d => d.instituicao_nome || 'N/A'))],
+                datasets: [{
+                  label: 'Despesas por Instituição',
+                  data: [...new Set(despesas.map(d => d.instituicao_nome || 'N/A'))].map(instituicao => 
+                    despesas
+                      .filter(d => d.instituicao_nome === instituicao)
+                      .reduce((sum, d) => sum + parseFloat(d.valor.toString()), 0)
+                  ),
+                  backgroundColor: getColorsForChart('despesas-instituicao-pie')
+                }]
+              }} 
+              height={320} 
+              colors={getColorsForChart('despesas-instituicao-pie')} 
+              donut 
+              neon={neon} 
+            />
+            <ChartColorPicker chartKey="despesas-instituicao-pie" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Status das Despesas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BarChart 
+              chartKey="despesas-status-bar" 
+              data={{
+                labels: ['Status das Despesas'],
+                datasets: [
+                  {
+                    label: 'Empenhado',
+                    data: [totalEmpenhado],
+                    backgroundColor: '#3B82F6' // Azul
+                  },
+                  {
+                    label: 'Liquidado',
+                    data: [totalLiquidado],
+                    backgroundColor: '#EF4444' // Vermelho
+                  },
+                  {
+                    label: 'Pago',
+                    data: [totalPago],
+                    backgroundColor: '#10B981' // Verde
+                  }
+                ]
+              }} 
+              height={320} 
+              colors={['#3B82F6', '#EF4444', '#10B981']} 
+              neon={neon} 
+              gradient={false} 
+            />
+            <ChartColorPicker chartKey="despesas-status-bar" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Despesas por Mês</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BarChart 
+              chartKey="despesas-mes-bar" 
+              data={{
+                labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+                datasets: [
+                  {
+                    label: 'Empenhado',
+                    data: [600000, 380000, 180000, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: '#3B82F6' // Azul
+                  },
+                  {
+                    label: 'Liquidado',
+                    data: [550000, 330000, 160000, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: '#EF4444' // Vermelho
+                  },
+                  {
+                    label: 'Pago',
+                    data: [480000, 290000, 140000, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: '#10B981' // Verde
+                  }
+                ]
+              }} 
+              height={320} 
+              colors={['#3B82F6', '#EF4444', '#10B981']} 
+              neon={neon} 
+              gradient={false} 
+            />
+            <ChartColorPicker chartKey="despesas-mes-bar" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Evolução das Despesas</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <LineChart 
+              chartKey="despesas-evolucao-line" 
+              data={despesas.map((d, i) => ({ 
+                date: new Date(d.data_emissao).toISOString().split('T')[0], 
+                value: parseFloat(d.valor.toString()) 
+              }))} 
+              height={320} 
+              title="Despesas" 
+              colors={getColorsForChart('despesas-evolucao-line')} 
+              neon={neon} 
+              gradient={gradient} 
+            />
+            <ChartColorPicker chartKey="despesas-evolucao-line" />
           </CardContent>
         </Card>
       </div>

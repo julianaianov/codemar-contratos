@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { MetricCard } from './MetricCard';
-import { useDashboardMetrics } from '@/hooks/useECidadeDatabaseData';
+import { LineChart } from '@/components/charts/LineChart';
+import { BarChart } from '@/components/charts/BarChart';
 import {
   CurrencyDollarIcon,
   ArrowTrendingUpIcon,
@@ -15,7 +16,8 @@ import {
 
 interface DashboardOverviewProps {
   filters?: {
-    dateRange: {
+    exercicio?: string;
+    dateRange?: {
       start: string;
       end: string;
     };
@@ -23,8 +25,60 @@ interface DashboardOverviewProps {
   };
 }
 
+interface MetricsData {
+  total_receitas_previstas: string;
+  total_receitas_arrecadadas: string;
+  total_despesas_empenhadas: string;
+  total_despesas_pagas: string;
+}
+
+interface ChartData {
+  mes: number;
+  total_arrecadado?: number;
+  total_empenhado?: number;
+  total_liquidado?: number;
+  total_pago?: number;
+}
+
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters }) => {
-  const { data: metrics, isLoading, error } = useDashboardMetrics(filters);
+  const [metrics, setMetrics] = useState<MetricsData | null>(null);
+  const [receitasChart, setReceitasChart] = useState<ChartData[]>([]);
+  const [despesasChart, setDespesasChart] = useState<ChartData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        
+        const year = filters?.exercicio || new Date().getFullYear().toString();
+        
+        // Buscar métricas
+        const metricsResponse = await fetch(`/api/ecidade/database?path=dashboard/metrics&year=${year}`);
+        const metricsData = await metricsResponse.json();
+        setMetrics(metricsData);
+
+        // Buscar gráfico de receitas
+        const receitasResponse = await fetch(`/api/ecidade/database?path=receitas-chart&year=${year}`);
+        const receitasData = await receitasResponse.json();
+        setReceitasChart(receitasData);
+
+        // Buscar gráfico de despesas
+        const despesasResponse = await fetch(`/api/ecidade/database?path=despesas-chart&year=${year}`);
+        const despesasData = await despesasResponse.json();
+        setDespesasChart(despesasData);
+
+      } catch (err) {
+        setError('Erro ao carregar dados');
+        console.error('Erro ao carregar dados:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [filters]);
 
   if (error) {
     return (
@@ -34,67 +88,62 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters })
     );
   }
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 2xl:gap-8">
+          {[...Array(4)].map((_, index) => (
+            <div key={index} className="bg-white border border-gray-200 dark:bg-secondary-900 dark:border-secondary-800 p-6 shadow-md rounded-lg animate-pulse">
+              <div className="text-gray-600 dark:text-gray-300">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                  </div>
+                  <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   const metricCards = [
     {
-      title: 'Receitas Totais',
-      value: metrics?.receitas_totais || 0,
+      title: 'Receitas Previstas',
+      value: parseFloat(metrics?.total_receitas_previstas || '0'),
       change: 5.2,
       changeType: 'positive' as const,
       icon: <CurrencyDollarIcon className="w-6 h-6 text-blue-600" />,
     },
     {
-      title: 'Despesas Totais',
-      value: metrics?.despesas_totais || 0,
+      title: 'Receitas Arrecadadas',
+      value: parseFloat(metrics?.total_receitas_arrecadadas || '0'),
+      change: 8.2,
+      changeType: 'positive' as const,
+      icon: <ArrowTrendingUpIcon className="w-6 h-6 text-green-600" />,
+    },
+    {
+      title: 'Despesas Empenhadas',
+      value: parseFloat(metrics?.total_despesas_empenhadas || '0'),
       change: -2.1,
       changeType: 'negative' as const,
-      icon: <ArrowTrendingUpIcon className="w-6 h-6 text-red-600" />,
+      icon: <ChartBarIcon className="w-6 h-6 text-red-600" />,
     },
     {
-      title: 'Saldo Orçamentário',
-      value: metrics?.saldo_orcamentario || 0,
-      change: 8.3,
-      changeType: 'positive' as const,
-      icon: <ChartBarIcon className="w-6 h-6 text-green-600" />,
-    },
-    {
-      title: 'Execução Orçamentária',
-      value: `${metrics?.percentual_execucao || 0}%`,
-      change: 2.5,
+      title: 'Despesas Pagas',
+      value: parseFloat(metrics?.total_despesas_pagas || '0'),
+      change: 5.3,
       changeType: 'positive' as const,
       icon: <ClipboardDocumentListIcon className="w-6 h-6 text-purple-600" />,
-    },
-    {
-      title: 'Servidores Ativos',
-      value: metrics?.servidores_ativos || 0,
-      change: 1.2,
-      changeType: 'positive' as const,
-      icon: <UsersIcon className="w-6 h-6 text-indigo-600" />,
-    },
-    {
-      title: 'Alunos Matriculados',
-      value: metrics?.alunos_matriculados || 0,
-      change: 3.7,
-      changeType: 'positive' as const,
-      icon: <AcademicCapIcon className="w-6 h-6 text-yellow-600" />,
-    },
-    {
-      title: 'Atendimentos Saúde',
-      value: metrics?.atendimentos_saude || 0,
-      change: -1.8,
-      changeType: 'negative' as const,
-      icon: <HeartIcon className="w-6 h-6 text-pink-600" />,
-    },
-    {
-      title: 'Bens Patrimoniais',
-      value: metrics?.bens_patrimoniais || 0,
-      change: 0.5,
-      changeType: 'neutral' as const,
-      icon: <BuildingOfficeIcon className="w-6 h-6 text-gray-600" />,
     },
   ];
 
   return (
     <div className="space-y-6">
+      {/* Cards de Métricas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 2xl:gap-8">
         {metricCards.map((metric, index) => (
           <MetricCard
@@ -104,11 +153,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters })
             change={metric.change}
             changeType={metric.changeType}
             icon={metric.icon}
-            loading={isLoading}
+            loading={false}
           />
         ))}
       </div>
 
+      {/* Resumo Financeiro e Indicadores */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -122,7 +172,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters })
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL',
-                  }).format(metrics?.arrecadacao_mes || 0)}
+                  }).format(parseFloat(metrics?.total_receitas_arrecadadas || '0'))}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -131,7 +181,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters })
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL',
-                  }).format(metrics?.empenhos_mes || 0)}
+                  }).format(parseFloat(metrics?.total_despesas_empenhadas || '0'))}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -140,7 +190,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters })
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL',
-                  }).format((metrics?.receitas_totais || 0) - (metrics?.despesas_totais || 0))}
+                  }).format(parseFloat(metrics?.total_receitas_arrecadadas || '0') - parseFloat(metrics?.total_despesas_pagas || '0'))}
                 </span>
               </div>
             </div>
@@ -156,7 +206,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters })
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Eficiência Orçamentária</span>
                 <span className="font-semibold text-green-600">
-                  {metrics?.percentual_execucao || 0}%
+                  {Math.round((parseFloat(metrics?.total_despesas_pagas || '0') / parseFloat(metrics?.total_receitas_previstas || '1')) * 100)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -165,7 +215,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters })
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL',
-                  }).format((metrics?.despesas_totais || 0) / (metrics?.servidores_ativos || 1))}
+                  }).format(parseFloat(metrics?.total_despesas_pagas || '0') / 1250)}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -174,10 +224,91 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ filters })
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL',
-                  }).format((metrics?.despesas_totais || 0) / (metrics?.alunos_matriculados || 1))}
+                  }).format(parseFloat(metrics?.total_despesas_pagas || '0') / 5000)}
                 </span>
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Receitas por Mês</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {receitasChart && receitasChart.length > 0 ? (
+              <BarChart
+                data={{
+                  labels: receitasChart.map(item => {
+                    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                    return months[item.mes - 1] || `Mês ${item.mes}`;
+                  }),
+                  datasets: [
+                    {
+                      label: 'Receitas Arrecadadas',
+                      data: receitasChart.map(item => item.total_arrecadado || 0),
+                      borderColor: '#3b82f6',
+                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    },
+                  ],
+                }}
+                height={300}
+                showLegend={true}
+                showGrid={true}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-64 text-gray-500">
+                Nenhum dado disponível
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Despesas por Mês</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {despesasChart && despesasChart.length > 0 ? (
+              <BarChart
+                data={{
+                  labels: despesasChart.map(item => {
+                    const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                    return months[item.mes - 1] || `Mês ${item.mes}`;
+                  }),
+                  datasets: [
+                    {
+                      label: 'Empenhado',
+                      data: despesasChart.map(item => item.total_empenhado || 0),
+                      borderColor: '#ef4444',
+                      backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    },
+                    {
+                      label: 'Liquidado',
+                      data: despesasChart.map(item => item.total_liquidado || 0),
+                      borderColor: '#10b981',
+                      backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    },
+                    {
+                      label: 'Pago',
+                      data: despesasChart.map(item => item.total_pago || 0),
+                      borderColor: '#f59e0b',
+                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    },
+                  ],
+                }}
+                height={300}
+                showLegend={true}
+                showGrid={true}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-64 text-gray-500">
+                Nenhum dado disponível
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
