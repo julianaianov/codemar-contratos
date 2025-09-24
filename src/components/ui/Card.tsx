@@ -41,7 +41,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       className={clsx(
-        'bg-white border border-gray-200',
+        'bg-white border border-gray-200 dark:bg-secondary-900 dark:border-secondary-800',
         paddingClasses[padding],
         shadowClasses[shadow],
         roundedClasses[rounded],
@@ -87,7 +87,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
 
   return (
     <h3 className={clsx(
-      'font-semibold text-gray-900',
+      'font-semibold text-gray-900 dark:text-gray-100',
       sizeClasses[size],
       className
     )}>
@@ -103,7 +103,7 @@ interface CardContentProps {
 
 export const CardContent: React.FC<CardContentProps> = ({ children, className }) => {
   return (
-    <div className={clsx('text-gray-600', className)}>
+    <div className={clsx('text-gray-600 dark:text-gray-300', className)}>
       {children}
     </div>
   );
@@ -116,7 +116,7 @@ interface CardFooterProps {
 
 export const CardFooter: React.FC<CardFooterProps> = ({ children, className }) => {
   return (
-    <div className={clsx('mt-4 pt-4 border-t border-gray-200', className)}>
+    <div className={clsx('mt-4 pt-4 border-t border-gray-200 dark:border-secondary-800', className)}>
       {children}
     </div>
   );
