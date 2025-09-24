@@ -24,21 +24,7 @@ import {
 export const useDashboardMetrics = (filters?: DashboardFilters) => {
   return useQuery(
     ['dashboard-metrics', filters],
-    () => {
-      // Usar dados mockados por enquanto
-      return Promise.resolve({
-        receitas_totais: 2500000,
-        despesas_totais: 2200000,
-        saldo_orcamentario: 300000,
-        percentual_execucao: 88.5,
-        arrecadacao_mes: 180000,
-        empenhos_mes: 195000,
-        servidores_ativos: 1250,
-        alunos_matriculados: 8500,
-        atendimentos_saude: 3200,
-        bens_patrimoniais: 4500,
-      });
-    },
+    () => ecidadeAPI.getDashboardMetrics(filters),
     {
       staleTime: 5 * 60 * 1000, // 5 minutos
       cacheTime: 10 * 60 * 1000, // 10 minutos
@@ -50,22 +36,7 @@ export const useDashboardMetrics = (filters?: DashboardFilters) => {
 export const useOrcamento = (filters?: DashboardFilters) => {
   return useQuery(
     ['orcamento', filters],
-    () => {
-      return Promise.resolve({
-        receitas: [
-          { id: 1, codigo: '1.1.1.01', descricao: 'IPTU', valor_previsto: 800000, valor_arrecadado: 750000, percentual: 93.75, categoria: 'Tributária', mes: 9, ano: 2024 },
-          { id: 2, codigo: '1.1.1.02', descricao: 'ISSQN', valor_previsto: 600000, valor_arrecadado: 580000, percentual: 96.67, categoria: 'Tributária', mes: 9, ano: 2024 },
-          { id: 3, codigo: '1.1.1.03', descricao: 'Taxas', valor_previsto: 400000, valor_arrecadado: 350000, percentual: 87.5, categoria: 'Taxas', mes: 9, ano: 2024 },
-        ],
-        despesas: [
-          { id: 1, codigo: '3.1.1.01', descricao: 'Pessoal', valor_empenhado: 1200000, valor_liquidado: 1150000, valor_pago: 1100000, percentual: 91.67, categoria: 'Pessoal', mes: 9, ano: 2024 },
-          { id: 2, codigo: '3.1.1.02', descricao: 'Educação', valor_empenhado: 400000, valor_liquidado: 380000, valor_pago: 370000, percentual: 92.5, categoria: 'Educação', mes: 9, ano: 2024 },
-          { id: 3, codigo: '3.1.1.03', descricao: 'Saúde', valor_empenhado: 350000, valor_liquidado: 320000, valor_pago: 300000, percentual: 85.71, categoria: 'Saúde', mes: 9, ano: 2024 },
-        ],
-        saldo: 300000,
-        percentual_execucao: 88.5,
-      });
-    },
+    () => ecidadeAPI.getOrcamento(filters),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -101,24 +72,7 @@ export const useDespesas = (filters?: DashboardFilters) => {
 export const useReceitasChart = (filters?: DashboardFilters) => {
   return useQuery(
     ['receitas-chart', filters],
-    () => {
-      return Promise.resolve({
-        labels: ['IPTU', 'ISSQN', 'Taxas', 'Transferências', 'Outros'],
-        datasets: [
-          {
-            label: 'Receitas por Categoria',
-            data: [800000, 600000, 400000, 500000, 200000],
-            backgroundColor: [
-              '#3b82f6',
-              '#10b981',
-              '#f59e0b',
-              '#ef4444',
-              '#8b5cf6',
-            ],
-          },
-        ],
-      });
-    },
+    () => ecidadeAPI.getReceitasChart(filters),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -130,24 +84,7 @@ export const useReceitasChart = (filters?: DashboardFilters) => {
 export const useDespesasChart = (filters?: DashboardFilters) => {
   return useQuery(
     ['despesas-chart', filters],
-    () => {
-      return Promise.resolve({
-        labels: ['Pessoal', 'Educação', 'Saúde', 'Infraestrutura', 'Outros'],
-        datasets: [
-          {
-            label: 'Despesas por Categoria',
-            data: [1200000, 400000, 350000, 200000, 50000],
-            backgroundColor: [
-              '#ef4444',
-              '#3b82f6',
-              '#10b981',
-              '#f59e0b',
-              '#8b5cf6',
-            ],
-          },
-        ],
-      });
-    },
+    () => ecidadeAPI.getDespesasChart(filters),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -159,22 +96,7 @@ export const useDespesasChart = (filters?: DashboardFilters) => {
 export const useExecucaoOrcamentaria = (filters?: DashboardFilters) => {
   return useQuery(
     ['execucao-orcamentaria', filters],
-    () => {
-      return Promise.resolve([
-        { date: '2024-01-01', value: 150000 },
-        { date: '2024-02-01', value: 180000 },
-        { date: '2024-03-01', value: 220000 },
-        { date: '2024-04-01', value: 195000 },
-        { date: '2024-05-01', value: 250000 },
-        { date: '2024-06-01', value: 280000 },
-        { date: '2024-07-01', value: 300000 },
-        { date: '2024-08-01', value: 275000 },
-        { date: '2024-09-01', value: 320000 },
-        { date: '2024-10-01', value: 350000 },
-        { date: '2024-11-01', value: 380000 },
-        { date: '2024-12-01', value: 400000 },
-      ]);
-    },
+    () => ecidadeAPI.getExecucaoOrcamentaria(filters),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,

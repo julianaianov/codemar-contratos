@@ -65,7 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, collapsed = f
       >
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 bg-[#0091ff] dark:bg-[#0f172a] lg:hidden">
           <div className={clsx('flex items-center', collapsed ? 'justify-center' : '')}>
-            <img src="/logo-codemar.svg" alt="CODEMAR" className={clsx('h-10 w-10', collapsed ? '' : 'h-14 w-14')} />
+            <img src="/logo-codemar.png" alt="CODEMAR" className={clsx('h-10 w-10', collapsed ? '' : 'h-14 w-14')} />
             {!collapsed && (
               <span className="ml-3 text-lg font-semibold text-white">e-Cidade Dashboard</span>
             )}
@@ -114,6 +114,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, collapsed = f
                 </Link>
               );
             })}
+          </div>
+          {/* Logo abaixo de Configurações */}
+          <div className={clsx('flex items-center justify-center', collapsed ? 'mt-4' : 'mt-6')}>
+            <img
+              src="/logo-codemar.png"
+              alt="CODEMAR"
+              className={clsx('rounded', collapsed ? 'h-10 w-10' : 'h-16 w-16')}
+            />
           </div>
         </nav>
 
