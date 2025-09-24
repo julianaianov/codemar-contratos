@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   return (
-    <header className={`text-white shadow-sm border-b border-transparent fixed top-0 inset-x-0 z-40 ${leftPaddingClass} bg-secondary-900 dark:bg-[#111827]`}>
+    <header className={`text-white shadow-sm border-b border-transparent fixed top-0 inset-x-0 z-40 ${leftPaddingClass} bg-[#0091ff] dark:bg-[#111827]`}>
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           <button

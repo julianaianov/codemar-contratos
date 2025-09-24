@@ -425,7 +425,7 @@ export const useAuth = () => {
     }
   );
 
-  const logout = useMutation(() => {
+  const logout = useMutation<void, unknown, void>(async () => {
     ecidadeAPI.setAccessToken('');
     queryClient.clear();
   });

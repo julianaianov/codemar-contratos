@@ -58,12 +58,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, collapsed = f
       {/* Sidebar */}
       <div
         className={clsx(
-          'fixed inset-y-0 left-0 z-50 text-white shadow-lg transform transition-transform duration-300 ease-in-out bg-secondary-900 dark:bg-[#0f172a] border-r border-transparent dark:border-secondary-800',
+          'fixed inset-y-0 left-0 z-50 text-white shadow-lg transform transition-transform duration-300 ease-in-out bg-[#0091ff] dark:bg-[#0f172a] border-r border-transparent dark:border-secondary-800',
           collapsed ? 'w-16' : 'w-64',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 bg-secondary-900 lg:hidden">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 bg-[#0091ff] dark:bg-[#0f172a] lg:hidden">
           <div className={clsx('flex items-center', collapsed ? 'justify-center' : '')}>
             <img src="/logo-codemar.svg" alt="CODEMAR" className={clsx('h-10 w-10', collapsed ? '' : 'h-14 w-14')} />
             {!collapsed && (
