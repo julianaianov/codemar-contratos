@@ -40,7 +40,7 @@ export const RealDataDashboard: React.FC = () => {
   if (metricsError) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">Erro ao carregar dados: {metricsError.message}</p>
+        <p className="text-red-800">Erro ao carregar dados: {(metricsError as any)?.message || 'Erro desconhecido'}</p>
       </div>
     );
   }
@@ -51,28 +51,28 @@ export const RealDataDashboard: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           title="Receitas Previstas"
-          value={metrics?.total_receitas_previstas ? `R$ ${metrics.total_receitas_previstas.toLocaleString('pt-BR')}` : 'R$ 0'}
+          value={metrics?.receitas_totais ? `R$ ${metrics.receitas_totais.toLocaleString('pt-BR')}` : 'R$ 0'}
           change={12.5}
           changeType="positive"
           icon={<CurrencyDollarIcon className="w-6 h-6" />}
         />
         <MetricCard
           title="Receitas Arrecadadas"
-          value={metrics?.total_receitas_arrecadadas ? `R$ ${metrics.total_receitas_arrecadadas.toLocaleString('pt-BR')}` : 'R$ 0'}
+          value={metrics?.arrecadacao_mes ? `R$ ${metrics.arrecadacao_mes.toLocaleString('pt-BR')}` : 'R$ 0'}
           change={8.2}
           changeType="positive"
           icon={<ArrowTrendingUpIcon className="w-6 h-6" />}
         />
         <MetricCard
           title="Despesas Empenhadas"
-          value={metrics?.total_despesas_empenhadas ? `R$ ${metrics.total_despesas_empenhadas.toLocaleString('pt-BR')}` : 'R$ 0'}
+          value={metrics?.empenhos_mes ? `R$ ${metrics.empenhos_mes.toLocaleString('pt-BR')}` : 'R$ 0'}
           change={-2.1}
           changeType="negative"
           icon={<ArrowTrendingDownIcon className="w-6 h-6" />}
         />
         <MetricCard
           title="Despesas Pagas"
-          value={metrics?.total_despesas_pagas ? `R$ ${metrics.total_despesas_pagas.toLocaleString('pt-BR')}` : 'R$ 0'}
+          value={metrics?.despesas_totais ? `R$ ${metrics.despesas_totais.toLocaleString('pt-BR')}` : 'R$ 0'}
           change={5.3}
           changeType="positive"
           icon={<ChartBarIcon className="w-6 h-6" />}
@@ -92,10 +92,12 @@ export const RealDataDashboard: React.FC = () => {
               </div>
             ) : (
               <LineChart
-                data={receitasChart || []}
-                xKey="mes"
-                yKey="total_arrecadado"
+                data={receitasChart?.datasets?.[0]?.data?.map((value, index) => ({
+                  date: receitasChart.labels[index] || `Mês ${index + 1}`,
+                  value: value
+                })) || []}
                 height={300}
+                title="Receitas por Mês"
               />
             )}
           </CardContent>
@@ -112,9 +114,7 @@ export const RealDataDashboard: React.FC = () => {
               </div>
             ) : (
               <BarChart
-                data={despesasChart || []}
-                xKey="mes"
-                yKey="total_empenhado"
+                data={despesasChart || { labels: [], datasets: [] }}
                 height={300}
               />
             )}
@@ -135,10 +135,8 @@ export const RealDataDashboard: React.FC = () => {
           ) : (
             <LineChart
               data={execucaoData || []}
-              xKey="mes"
-              yKey="empenhado"
               height={400}
-              multipleYKeys={['empenhado', 'pago']}
+              title="Execução Orçamentária"
             />
           )}
         </CardContent>

@@ -53,11 +53,11 @@ export async function GET(request: NextRequest) {
         break;
       
       case 'receitas/chart':
-        result = await getReceitasChart(year, type);
+        result = await getReceitasChart(year);
         break;
       
       case 'despesas/chart':
-        result = await getDespesasChart(year, type);
+        result = await getDespesasChart(year);
         break;
       
       case 'execucao-orcamentaria':

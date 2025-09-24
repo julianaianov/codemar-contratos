@@ -204,10 +204,10 @@ export default function ReceitasPage() {
             <PieChart 
               chartKey="receitas-instituicao-pie" 
               data={{
-                labels: [...new Set(receitas.map(r => r.instituicao_nome || 'N/A'))],
+                labels: Array.from(new Set(receitas.map(r => r.instituicao_nome || 'N/A'))),
                 datasets: [{
                   label: 'Receitas por Instituição',
-                  data: [...new Set(receitas.map(r => r.instituicao_nome || 'N/A'))].map(instituicao => 
+                  data: Array.from(new Set(receitas.map(r => r.instituicao_nome || 'N/A'))).map(instituicao => 
                     receitas
                       .filter(r => r.instituicao_nome === instituicao)
                       .reduce((sum, r) => sum + parseFloat(r.valor.toString()), 0)

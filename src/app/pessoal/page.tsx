@@ -247,10 +247,10 @@ export default function PessoalPage() {
             <PieChart 
               chartKey="pessoal-instituicao-pie" 
               data={{
-                labels: [...new Set(pessoal.map(p => p.instituicao_nome || 'N/A'))],
+                labels: Array.from(new Set(pessoal.map(p => p.instituicao_nome || 'N/A'))),
                 datasets: [{
                   label: 'Pessoal por Instituição',
-                  data: [...new Set(pessoal.map(p => p.instituicao_nome || 'N/A'))].map(instituicao => 
+                  data: Array.from(new Set(pessoal.map(p => p.instituicao_nome || 'N/A'))).map(instituicao => 
                     pessoal.filter(p => p.instituicao_nome === instituicao).length
                   ),
                   backgroundColor: getColorsForChart('pessoal-instituicao-pie')

@@ -245,10 +245,10 @@ export default function DespesasPage() {
             <PieChart 
               chartKey="despesas-instituicao-pie" 
               data={{
-                labels: [...new Set(despesas.map(d => d.instituicao_nome || 'N/A'))],
+                labels: Array.from(new Set(despesas.map(d => d.instituicao_nome || 'N/A'))),
                 datasets: [{
                   label: 'Despesas por Instituição',
-                  data: [...new Set(despesas.map(d => d.instituicao_nome || 'N/A'))].map(instituicao => 
+                  data: Array.from(new Set(despesas.map(d => d.instituicao_nome || 'N/A'))).map(instituicao => 
                     despesas
                       .filter(d => d.instituicao_nome === instituicao)
                       .reduce((sum, d) => sum + parseFloat(d.valor.toString()), 0)

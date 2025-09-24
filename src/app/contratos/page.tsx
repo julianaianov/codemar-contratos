@@ -273,10 +273,10 @@ export default function ContratosPage() {
             <PieChart 
               chartKey="contratos-instituicao-pie" 
               data={{
-                labels: [...new Set(contratos.map(c => c.instituicao_nome || 'N/A'))],
+                labels: Array.from(new Set(contratos.map(c => c.instituicao_nome || 'N/A'))),
                 datasets: [{
                   label: 'Contratos por Instituição',
-                  data: [...new Set(contratos.map(c => c.instituicao_nome || 'N/A'))].map(instituicao => 
+                  data: Array.from(new Set(contratos.map(c => c.instituicao_nome || 'N/A'))).map(instituicao => 
                     contratos.filter(c => c.instituicao_nome === instituicao).length
                   ),
                   backgroundColor: getColorsForChart('contratos-instituicao-pie')
