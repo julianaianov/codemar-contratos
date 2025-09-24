@@ -22,6 +22,7 @@ interface LineChartProps {
   className?: string;
   gradient?: boolean;
   neon?: boolean;
+  chartKey?: string; // identificador para override por gráfico
 }
 
 export const LineChart: React.FC<LineChartProps> = ({
@@ -35,6 +36,7 @@ export const LineChart: React.FC<LineChartProps> = ({
   className,
   gradient = true,
   neon = true,
+  chartKey,
 }) => {
   const formatTooltipValue = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

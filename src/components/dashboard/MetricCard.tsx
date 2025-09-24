@@ -41,20 +41,37 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   const getChangeStyles = () => {
     switch (changeType) {
       case 'positive':
-        return { text: 'text-green-700', bg: 'bg-green-50', ring: 'ring-green-200' };
+        return {
+          // Verde sólido em ambos os modos
+          text: 'text-green-900 dark:text-white',
+          bg: 'bg-green-500 dark:bg-green-600',
+          ring: 'ring-green-500 dark:ring-green-400',
+          gradient: '',
+        };
       case 'negative':
-        return { text: 'text-red-700', bg: 'bg-red-50', ring: 'ring-red-200' };
+        return {
+          // Vermelho sólido em ambos os modos
+          text: 'text-red-900 dark:text-white',
+          bg: 'bg-red-500 dark:bg-red-600',
+          ring: 'ring-red-500 dark:ring-red-400',
+          gradient: '',
+        };
       default:
-        return { text: 'text-gray-700', bg: 'bg-gray-100', ring: 'ring-gray-200' };
+        return {
+          text: 'text-gray-700 dark:text-gray-300',
+          bg: 'bg-gray-100 dark:bg-white/10',
+          ring: 'ring-gray-200 dark:ring-white/20',
+          gradient: '',
+        };
     }
   };
 
   const getChangeIcon = () => {
     if (changeType === 'positive') {
-      return <ArrowTrendingUpIcon className="w-4 h-4" />;
+      return <ArrowTrendingUpIcon className="w-4 h-4 text-green-700 dark:text-green-300" />;
     }
     if (changeType === 'negative') {
-      return <ArrowTrendingDownIcon className="w-4 h-4" />;
+      return <ArrowTrendingDownIcon className="w-4 h-4 text-red-700 dark:text-red-300" />;
     }
     return null;
   };
@@ -94,11 +111,23 @@ export const MetricCard: React.FC<MetricCardProps> = ({
                 {formatValue(value)}
               </p>
               {change !== undefined && (
-                <div className={clsx('inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ring-1', changeStyles.bg, changeStyles.text, changeStyles.ring)}>
+                <motion.div
+                  key={`badge-${title}`}
+                  initial={{ opacity: 0, scale: 0.85, x: -6 }}
+                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 20, mass: 0.8 }}
+                  className={clsx(
+                    'inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ring-1 shadow-sm',
+                    changeStyles.bg,
+                    changeStyles.text,
+                    changeStyles.ring,
+                    changeStyles.gradient
+                  )}
+                >
                   {getChangeIcon()}
                   <span className="ml-1">{formatChange(change)}</span>
-                  <span className="ml-1 text-gray-500 dark:text-gray-400">vs mês anterior</span>
-                </div>
+                  <span className="ml-1 text-gray-600 dark:text-gray-400">vs mês anterior</span>
+                </motion.div>
               )}
             </div>
             {icon && (

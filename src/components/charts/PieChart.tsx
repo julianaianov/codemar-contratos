@@ -20,6 +20,7 @@ interface PieChartProps {
   outerRadius?: number;
   donut?: boolean;
   neon?: boolean;
+  chartKey?: string;
 }
 
 export const PieChart: React.FC<PieChartProps> = ({
@@ -33,6 +34,7 @@ export const PieChart: React.FC<PieChartProps> = ({
   outerRadius = 80,
   donut = true,
   neon = true,
+  chartKey,
 }) => {
   const formatTooltipValue = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

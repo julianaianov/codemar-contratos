@@ -7,6 +7,7 @@ import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
 import { useOrcamento, useReceitasChart, useDespesasChart, useExecucaoOrcamentaria } from '@/hooks/useECidadeData';
 import { useChartStyle } from '@/components/layout/ChartStyleProvider';
+import { ChartColorPicker } from '@/components/charts/ChartColorPicker';
 
 export default function FinanceiroPage() {
   const [filters, setFilters] = useState({
@@ -21,7 +22,7 @@ export default function FinanceiroPage() {
   const { data: despesasChart, isLoading: despesasLoading } = useDespesasChart(filters);
   const { data: execucaoData, isLoading: execucaoLoading } = useExecucaoOrcamentaria(filters);
 
-  const { neon, gradient, colors: chartColors } = useChartStyle();
+  const { neon, gradient, getColorsForChart } = useChartStyle();
 
   return (
     <>
@@ -93,7 +94,8 @@ export default function FinanceiroPage() {
             <CardTitle>Evolução das Receitas</CardTitle>
           </CardHeader>
           <CardContent>
-            <LineChart data={execucaoData || []} height={300} title="Receitas por Mês" colors={chartColors} neon={neon} gradient={gradient} />
+            <LineChart chartKey="financeiro-receitas-line" data={execucaoData || []} height={300} title="Receitas por Mês" colors={getColorsForChart('financeiro-receitas-line')} neon={neon} gradient={gradient} />
+            <ChartColorPicker chartKey="financeiro-receitas-line" />
           </CardContent>
         </Card>
 
@@ -102,7 +104,8 @@ export default function FinanceiroPage() {
             <CardTitle>Evolução das Despesas</CardTitle>
           </CardHeader>
           <CardContent>
-            <LineChart data={execucaoData || []} height={300} title="Despesas por Mês" colors={chartColors} neon={neon} gradient={gradient} />
+            <LineChart chartKey="financeiro-despesas-line" data={execucaoData || []} height={300} title="Despesas por Mês" colors={getColorsForChart('financeiro-despesas-line')} neon={neon} gradient={gradient} />
+            <ChartColorPicker chartKey="financeiro-despesas-line" />
           </CardContent>
         </Card>
       </div>
@@ -113,7 +116,8 @@ export default function FinanceiroPage() {
             <CardTitle>Distribuição das Receitas</CardTitle>
           </CardHeader>
           <CardContent>
-            <PieChart data={receitasChart || { labels: [], datasets: [] }} height={300} colors={chartColors} donut neon={neon} />
+            <PieChart chartKey="financeiro-receitas-pie" data={receitasChart || { labels: [], datasets: [] }} height={300} colors={getColorsForChart('financeiro-receitas-pie')} donut neon={neon} />
+            <ChartColorPicker chartKey="financeiro-receitas-pie" />
           </CardContent>
         </Card>
 
@@ -122,7 +126,8 @@ export default function FinanceiroPage() {
             <CardTitle>Distribuição das Despesas</CardTitle>
           </CardHeader>
           <CardContent>
-            <PieChart data={despesasChart || { labels: [], datasets: [] }} height={300} colors={chartColors} donut neon={neon} />
+            <PieChart chartKey="financeiro-despesas-pie" data={despesasChart || { labels: [], datasets: [] }} height={300} colors={getColorsForChart('financeiro-despesas-pie')} donut neon={neon} />
+            <ChartColorPicker chartKey="financeiro-despesas-pie" />
           </CardContent>
         </Card>
       </div>

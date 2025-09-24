@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { ecidadeAPI } from '@/services/ecidade-api';
+// Modo mock: sem chamadas reais à API
 import { 
   DashboardFilters, 
   DashboardMetrics, 
@@ -19,12 +19,34 @@ import {
   ChartData,
   TimeSeriesData
 } from '@/types/ecidade';
+import {
+  mockDashboardMetrics,
+  mockOrcamento,
+  mockReceitasChart,
+  mockDespesasChart,
+  mockExecucaoData,
+  mockEscolas,
+  mockAlunos,
+  mockUnidadesSaude,
+  mockAtendimentos,
+  mockSaudeMetrics,
+  mockBens,
+  mockLicitacoes,
+  mockPatrimonialMetrics,
+  mockServidores,
+  mockFolhaPagamento,
+  mockRHMetrics,
+  mockRelatorioFinanceiro,
+  mockRelatorioTributario,
+  mockRelatorioEducacao,
+  mockRelatorioSaude,
+} from '@/data/mockData';
 
 // Hook para métricas do dashboard
 export const useDashboardMetrics = (filters?: DashboardFilters) => {
   return useQuery(
     ['dashboard-metrics', filters],
-    () => ecidadeAPI.getDashboardMetrics(filters),
+    () => Promise.resolve(mockDashboardMetrics as DashboardMetrics),
     {
       staleTime: 5 * 60 * 1000, // 5 minutos
       cacheTime: 10 * 60 * 1000, // 10 minutos
@@ -36,7 +58,7 @@ export const useDashboardMetrics = (filters?: DashboardFilters) => {
 export const useOrcamento = (filters?: DashboardFilters) => {
   return useQuery(
     ['orcamento', filters],
-    () => ecidadeAPI.getOrcamento(filters),
+    () => Promise.resolve(mockOrcamento as Orcamento),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -48,7 +70,7 @@ export const useOrcamento = (filters?: DashboardFilters) => {
 export const useReceitas = (filters?: DashboardFilters) => {
   return useQuery(
     ['receitas', filters],
-    () => ecidadeAPI.getReceitas(filters),
+    () => Promise.resolve({ data: mockOrcamento.receitas, total: 3, page: 1, per_page: 50, total_pages: 1 } as import('@/types/ecidade').PaginatedResponse<Receita>),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -60,7 +82,7 @@ export const useReceitas = (filters?: DashboardFilters) => {
 export const useDespesas = (filters?: DashboardFilters) => {
   return useQuery(
     ['despesas', filters],
-    () => ecidadeAPI.getDespesas(filters),
+    () => Promise.resolve({ data: mockOrcamento.despesas, total: 3, page: 1, per_page: 50, total_pages: 1 } as import('@/types/ecidade').PaginatedResponse<Despesa>),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -72,7 +94,7 @@ export const useDespesas = (filters?: DashboardFilters) => {
 export const useReceitasChart = (filters?: DashboardFilters) => {
   return useQuery(
     ['receitas-chart', filters],
-    () => ecidadeAPI.getReceitasChart(filters),
+    () => Promise.resolve(mockReceitasChart as ChartData),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -84,7 +106,7 @@ export const useReceitasChart = (filters?: DashboardFilters) => {
 export const useDespesasChart = (filters?: DashboardFilters) => {
   return useQuery(
     ['despesas-chart', filters],
-    () => ecidadeAPI.getDespesasChart(filters),
+    () => Promise.resolve(mockDespesasChart as ChartData),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -96,7 +118,7 @@ export const useDespesasChart = (filters?: DashboardFilters) => {
 export const useExecucaoOrcamentaria = (filters?: DashboardFilters) => {
   return useQuery(
     ['execucao-orcamentaria', filters],
-    () => ecidadeAPI.getExecucaoOrcamentaria(filters),
+    () => Promise.resolve(mockExecucaoData as TimeSeriesData[]),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -108,7 +130,7 @@ export const useExecucaoOrcamentaria = (filters?: DashboardFilters) => {
 export const useIPTU = (filters?: DashboardFilters) => {
   return useQuery(
     ['iptu', filters],
-    () => ecidadeAPI.getIPTU(filters),
+    () => Promise.resolve({ data: [], total: 0, page: 1, per_page: 50, total_pages: 0 } as import('@/types/ecidade').PaginatedResponse<IPTU>),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -120,7 +142,7 @@ export const useIPTU = (filters?: DashboardFilters) => {
 export const useISSQN = (filters?: DashboardFilters) => {
   return useQuery(
     ['issqn', filters],
-    () => ecidadeAPI.getISSQN(filters),
+    () => Promise.resolve({ data: [], total: 0, page: 1, per_page: 50, total_pages: 0 } as import('@/types/ecidade').PaginatedResponse<ISSQN>),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -132,7 +154,7 @@ export const useISSQN = (filters?: DashboardFilters) => {
 export const useArrecadacaoChart = (filters?: DashboardFilters) => {
   return useQuery(
     ['arrecadacao-chart', filters],
-    () => ecidadeAPI.getArrecadacaoChart(filters),
+    () => Promise.resolve(mockReceitasChart as ChartData),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -144,7 +166,7 @@ export const useArrecadacaoChart = (filters?: DashboardFilters) => {
 export const useEscolas = () => {
   return useQuery(
     ['escolas'],
-    () => ecidadeAPI.getEscolas(),
+    () => Promise.resolve(mockEscolas as Escola[]),
     {
       staleTime: 10 * 60 * 1000, // 10 minutos
       cacheTime: 30 * 60 * 1000, // 30 minutos
@@ -156,7 +178,7 @@ export const useEscolas = () => {
 export const useAlunos = (filters?: DashboardFilters) => {
   return useQuery(
     ['alunos', filters],
-    () => ecidadeAPI.getAlunos(filters),
+    () => Promise.resolve(mockAlunos),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -168,7 +190,7 @@ export const useAlunos = (filters?: DashboardFilters) => {
 export const useEducacaoMetrics = (filters?: DashboardFilters) => {
   return useQuery(
     ['educacao-metrics', filters],
-    () => ecidadeAPI.getEducacaoMetrics(filters),
+    () => Promise.resolve({ ...{ total_escolas: 0, total_alunos: 0, total_professores: 0, total_turmas: 0 }, ... ( { total_escolas: (mockEscolas?.length || 0), total_alunos: 8500, total_professores: 650, total_turmas: 320 } ) }),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -180,7 +202,7 @@ export const useEducacaoMetrics = (filters?: DashboardFilters) => {
 export const useUnidadesSaude = () => {
   return useQuery(
     ['unidades-saude'],
-    () => ecidadeAPI.getUnidadesSaude(),
+    () => Promise.resolve(mockUnidadesSaude as UnidadeSaude[]),
     {
       staleTime: 10 * 60 * 1000,
       cacheTime: 30 * 60 * 1000,
@@ -192,7 +214,7 @@ export const useUnidadesSaude = () => {
 export const useAtendimentos = (filters?: DashboardFilters) => {
   return useQuery(
     ['atendimentos', filters],
-    () => ecidadeAPI.getAtendimentos(filters),
+    () => Promise.resolve(mockAtendimentos),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -204,7 +226,7 @@ export const useAtendimentos = (filters?: DashboardFilters) => {
 export const useSaudeMetrics = (filters?: DashboardFilters) => {
   return useQuery(
     ['saude-metrics', filters],
-    () => ecidadeAPI.getSaudeMetrics(filters),
+    () => Promise.resolve(mockSaudeMetrics),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -216,7 +238,7 @@ export const useSaudeMetrics = (filters?: DashboardFilters) => {
 export const useBens = (filters?: DashboardFilters) => {
   return useQuery(
     ['bens', filters],
-    () => ecidadeAPI.getBens(filters),
+    () => Promise.resolve(mockBens),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -228,7 +250,7 @@ export const useBens = (filters?: DashboardFilters) => {
 export const useLicitacoes = (filters?: DashboardFilters) => {
   return useQuery(
     ['licitacoes', filters],
-    () => ecidadeAPI.getLicitacoes(filters),
+    () => Promise.resolve(mockLicitacoes),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -240,7 +262,7 @@ export const useLicitacoes = (filters?: DashboardFilters) => {
 export const usePatrimonialMetrics = (filters?: DashboardFilters) => {
   return useQuery(
     ['patrimonial-metrics', filters],
-    () => ecidadeAPI.getPatrimonialMetrics(filters),
+    () => Promise.resolve(mockPatrimonialMetrics),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -252,7 +274,7 @@ export const usePatrimonialMetrics = (filters?: DashboardFilters) => {
 export const useServidores = (filters?: DashboardFilters) => {
   return useQuery(
     ['servidores', filters],
-    () => ecidadeAPI.getServidores(filters),
+    () => Promise.resolve(mockServidores),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -264,7 +286,7 @@ export const useServidores = (filters?: DashboardFilters) => {
 export const useFolhaPagamento = (filters?: DashboardFilters) => {
   return useQuery(
     ['folha-pagamento', filters],
-    () => ecidadeAPI.getFolhaPagamento(filters),
+    () => Promise.resolve(mockFolhaPagamento),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -276,7 +298,7 @@ export const useFolhaPagamento = (filters?: DashboardFilters) => {
 export const useRHMetrics = (filters?: DashboardFilters) => {
   return useQuery(
     ['rh-metrics', filters],
-    () => ecidadeAPI.getRHMetrics(filters),
+    () => Promise.resolve(mockRHMetrics),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -288,7 +310,7 @@ export const useRHMetrics = (filters?: DashboardFilters) => {
 export const useRelatorioFinanceiro = (filters?: DashboardFilters) => {
   return useQuery(
     ['relatorio-financeiro', filters],
-    () => ecidadeAPI.getRelatorioFinanceiro(filters),
+    () => Promise.resolve(mockRelatorioFinanceiro),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -300,7 +322,7 @@ export const useRelatorioFinanceiro = (filters?: DashboardFilters) => {
 export const useRelatorioTributario = (filters?: DashboardFilters) => {
   return useQuery(
     ['relatorio-tributario', filters],
-    () => ecidadeAPI.getRelatorioTributario(filters),
+    () => Promise.resolve(mockRelatorioTributario),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -312,7 +334,7 @@ export const useRelatorioTributario = (filters?: DashboardFilters) => {
 export const useRelatorioEducacao = (filters?: DashboardFilters) => {
   return useQuery(
     ['relatorio-educacao', filters],
-    () => ecidadeAPI.getRelatorioEducacao(filters),
+    () => Promise.resolve(mockRelatorioEducacao),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -324,7 +346,7 @@ export const useRelatorioEducacao = (filters?: DashboardFilters) => {
 export const useRelatorioSaude = (filters?: DashboardFilters) => {
   return useQuery(
     ['relatorio-saude', filters],
-    () => ecidadeAPI.getRelatorioSaude(filters),
+    () => Promise.resolve(mockRelatorioSaude),
     {
       staleTime: 5 * 60 * 1000,
       cacheTime: 10 * 60 * 1000,
@@ -337,18 +359,33 @@ export const useAuth = () => {
   const queryClient = useQueryClient();
 
   const login = useMutation(
-    ({ cpf, password }: { cpf: string; password: string }) =>
-      ecidadeAPI.authenticate(cpf, password),
+    async ({ cpf, password }: { cpf: string; password: string }) => {
+      // Mock de autenticação: retorna um token fake e payload mínimo
+      const token = 'mock-token-123';
+      return {
+        access_token: token,
+        token_type: 'Bearer',
+        expires_in: 3600,
+        user: {
+          id: 1,
+          nome: 'Usuário Mock',
+          cpf: cpf || '00000000000',
+          email: 'mock@ecidade.local',
+          perfil: 'admin',
+          instituicao: 1,
+        },
+      } as any;
+    },
     {
       onSuccess: (data) => {
-        ecidadeAPI.setAccessToken(data.access_token);
+        // no-op em modo mock; poderíamos guardar em memória/localStorage se necessário
         queryClient.invalidateQueries();
       },
     }
   );
 
   const logout = useMutation<void, unknown, void>(async () => {
-    ecidadeAPI.setAccessToken('');
+    // no-op em modo mock
     queryClient.clear();
   });
 
@@ -361,10 +398,13 @@ export const useAuth = () => {
 // Hook para exportar dados
 export const useExportData = () => {
   return useMutation(
-    ({ endpoint, format, filters }: { 
+    async ({ endpoint, format, filters }: { 
       endpoint: string; 
       format: 'csv' | 'xlsx' | 'pdf'; 
       filters?: DashboardFilters 
-    }) => ecidadeAPI.exportData(endpoint, format, filters)
+    }) => {
+      const content = `mock export for ${endpoint} (${format})`;
+      return new Blob([content], { type: 'text/plain' });
+    }
   );
 };

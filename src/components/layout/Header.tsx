@@ -31,11 +31,11 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
           </button>
           <div className="ml-4 lg:ml-0 flex items-center">
             <Image
-              src={theme === 'dark' ? '/logo-codemar.png' : '/logo-codemar-branca.png'}
+              src={theme === 'dark' ? '/logo-noturno.png' : '/logo-claro.png'}
               alt="CODEMAR"
-              width={56}
-              height={56}
-              className="h-14 w-14"
+              width={112}
+              height={112}
+              className="h-28 w-28"
             />
             <h1 className="ml-3 text-xl font-semibold text-white">Dashboard e-Cidade</h1>
           </div>
