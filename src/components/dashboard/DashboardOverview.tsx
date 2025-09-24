@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { MetricCard } from './MetricCard';
-import { useDashboardMetrics } from '@/hooks/useECidadeData';
+import { useDashboardMetrics } from '@/hooks/useECidadeDatabaseData';
 import {
   CurrencyDollarIcon,
   ArrowTrendingUpIcon,
