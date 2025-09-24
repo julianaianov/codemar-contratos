@@ -19,6 +19,8 @@ interface BarChartProps {
   showGrid?: boolean;
   colors?: string[];
   className?: string;
+  gradient?: boolean;
+  neon?: boolean;
 }
 
 export const BarChart: React.FC<BarChartProps> = ({
@@ -29,6 +31,8 @@ export const BarChart: React.FC<BarChartProps> = ({
   showGrid = true,
   colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6'],
   className,
+  gradient = true,
+  neon = true,
 }) => {
   const formatTooltipValue = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -50,6 +54,25 @@ export const BarChart: React.FC<BarChartProps> = ({
             [dataset.label]: dataset.data[index],
           }), {}),
         }))} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          {gradient && (
+            <defs>
+              {data.datasets.map((ds, i) => (
+                <linearGradient id={`barGradient-${i}`} key={i} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={colors[i % colors.length]} stopOpacity={0.9} />
+                  <stop offset="100%" stopColor={colors[i % colors.length]} stopOpacity={0.2} />
+                </linearGradient>
+              ))}
+              {neon && (
+                <filter id="barGlow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              )}
+            </defs>
+          )}
           {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />}
           <XAxis 
             dataKey="name" 
@@ -78,8 +101,9 @@ export const BarChart: React.FC<BarChartProps> = ({
             <Bar
               key={dataset.label}
               dataKey={dataset.label}
-              fill={colors[index % colors.length]}
+              fill={gradient ? `url(#barGradient-${index})` : colors[index % colors.length]}
               radius={[4, 4, 0, 0]}
+              filter={neon ? 'url(#barGlow)' : undefined}
             />
           ))}
         </RechartsBarChart>

@@ -6,6 +6,7 @@ import { LineChart } from '@/components/charts/LineChart';
 import { BarChart } from '@/components/charts/BarChart';
 import { PieChart } from '@/components/charts/PieChart';
 import { useOrcamento, useReceitasChart, useDespesasChart, useExecucaoOrcamentaria } from '@/hooks/useECidadeData';
+import { useChartStyle } from '@/components/layout/ChartStyleProvider';
 
 export default function FinanceiroPage() {
   const [filters, setFilters] = useState({
@@ -20,12 +21,16 @@ export default function FinanceiroPage() {
   const { data: despesasChart, isLoading: despesasLoading } = useDespesasChart(filters);
   const { data: execucaoData, isLoading: execucaoLoading } = useExecucaoOrcamentaria(filters);
 
+  const { neon, gradient, colors: chartColors } = useChartStyle();
+
   return (
     <>
       <div className="mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Gestão Financeira</h1>
         <p className="mt-2 text-gray-600">Controle orçamentário e execução financeira</p>
       </div>
+
+      {/* Estilo global vem do header; mantemos a área limpa na página */}
 
       {/* Resumo Orçamentário */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
@@ -88,7 +93,7 @@ export default function FinanceiroPage() {
             <CardTitle>Evolução das Receitas</CardTitle>
           </CardHeader>
           <CardContent>
-            <LineChart data={execucaoData || []} height={300} title="Receitas por Mês" />
+            <LineChart data={execucaoData || []} height={300} title="Receitas por Mês" colors={chartColors} neon={neon} gradient={gradient} />
           </CardContent>
         </Card>
 
@@ -97,7 +102,7 @@ export default function FinanceiroPage() {
             <CardTitle>Evolução das Despesas</CardTitle>
           </CardHeader>
           <CardContent>
-            <LineChart data={execucaoData || []} height={300} title="Despesas por Mês" />
+            <LineChart data={execucaoData || []} height={300} title="Despesas por Mês" colors={chartColors} neon={neon} gradient={gradient} />
           </CardContent>
         </Card>
       </div>
@@ -108,7 +113,7 @@ export default function FinanceiroPage() {
             <CardTitle>Distribuição das Receitas</CardTitle>
           </CardHeader>
           <CardContent>
-            <PieChart data={receitasChart || { labels: [], datasets: [] }} height={300} />
+            <PieChart data={receitasChart || { labels: [], datasets: [] }} height={300} colors={chartColors} donut neon={neon} />
           </CardContent>
         </Card>
 
@@ -117,7 +122,7 @@ export default function FinanceiroPage() {
             <CardTitle>Distribuição das Despesas</CardTitle>
           </CardHeader>
           <CardContent>
-            <PieChart data={despesasChart || { labels: [], datasets: [] }} height={300} />
+            <PieChart data={despesasChart || { labels: [], datasets: [] }} height={300} colors={chartColors} donut neon={neon} />
           </CardContent>
         </Card>
       </div>

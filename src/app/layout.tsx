@@ -4,6 +4,7 @@ import './globals.css';
 import React from 'react';
 import AppShell from '@/components/layout/AppShell';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
+import { ChartStyleProvider } from '@/components/layout/ChartStyleProvider';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -17,7 +18,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR">
       <body className={inter.className}>
         <ThemeProvider>
-          <AppShell>{children}</AppShell>
+          <ChartStyleProvider>
+            <AppShell>{children}</AppShell>
+          </ChartStyleProvider>
         </ThemeProvider>
       </body>
     </html>

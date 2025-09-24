@@ -30,12 +30,19 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
             <Bars3Icon className="w-6 h-6" />
           </button>
           <div className="ml-4 lg:ml-0 flex items-center">
-            <Image src="/logo-codemar.svg" alt="CODEMAR" width={56} height={56} className="h-14 w-14" />
+            <Image
+              src={theme === 'dark' ? '/logo-codemar.png' : '/logo-codemar-branca.png'}
+              alt="CODEMAR"
+              width={56}
+              height={56}
+              className="h-14 w-14"
+            />
             <h1 className="ml-3 text-xl font-semibold text-white">Dashboard e-Cidade</h1>
           </div>
         </div>
 
         <div className="flex items-center space-x-4">
+          
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}

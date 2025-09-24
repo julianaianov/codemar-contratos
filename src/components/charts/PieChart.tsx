@@ -18,6 +18,8 @@ interface PieChartProps {
   className?: string;
   innerRadius?: number;
   outerRadius?: number;
+  donut?: boolean;
+  neon?: boolean;
 }
 
 export const PieChart: React.FC<PieChartProps> = ({
@@ -29,6 +31,8 @@ export const PieChart: React.FC<PieChartProps> = ({
   className,
   innerRadius = 0,
   outerRadius = 80,
+  donut = true,
+  neon = true,
 }) => {
   const formatTooltipValue = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -57,14 +61,26 @@ export const PieChart: React.FC<PieChartProps> = ({
       )}
       <ResponsiveContainer width="100%" height={height}>
         <RechartsPieChart>
+          {neon && (
+            <defs>
+              <filter id="pieGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+          )}
           <Pie
             data={pieData}
             cx="50%"
             cy="50%"
-            innerRadius={innerRadius}
+            innerRadius={donut ? Math.max(innerRadius, outerRadius * 0.5) : innerRadius}
             outerRadius={outerRadius}
             paddingAngle={2}
             dataKey="value"
+            filter={neon ? 'url(#pieGlow)' : undefined}
           >
             {pieData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />

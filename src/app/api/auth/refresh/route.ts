@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const ECIDADE_API_URL = process.env.ECIDADE_API_URL || 'http://localhost:8000/api';
+// Refresh do Laravel não consta explicitamente; mantendo endpoint compatível se existir
+const ECIDADE_AUTH_URL = process.env.ECIDADE_AUTH_URL || 'http://localhost:8000/v4';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const response = await fetch(`${ECIDADE_API_URL}/auth/refresh`, {
+    const response = await fetch(`${ECIDADE_AUTH_URL}/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -27,11 +28,23 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const text = await response.text().catch(() => '');
+      return NextResponse.json(
+        { error: 'Falha ao renovar', details: text?.slice(0, 500) },
+        { status: response.status }
+      );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      return NextResponse.json(data);
+    }
+    const text = await response.text();
+    return new NextResponse(text, {
+      status: 200,
+      headers: { 'content-type': contentType || 'text/plain; charset=utf-8' },
+    });
   } catch (error) {
     console.error('Erro ao renovar token:', error);
     return NextResponse.json(

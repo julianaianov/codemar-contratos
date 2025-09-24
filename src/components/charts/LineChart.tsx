@@ -20,6 +20,8 @@ interface LineChartProps {
   colors?: string[];
   strokeWidth?: number;
   className?: string;
+  gradient?: boolean;
+  neon?: boolean;
 }
 
 export const LineChart: React.FC<LineChartProps> = ({
@@ -31,6 +33,8 @@ export const LineChart: React.FC<LineChartProps> = ({
   colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'],
   strokeWidth = 2,
   className,
+  gradient = true,
+  neon = true,
 }) => {
   const formatTooltipValue = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -53,6 +57,23 @@ export const LineChart: React.FC<LineChartProps> = ({
       )}
       <ResponsiveContainer width="100%" height={height}>
         <RechartsLineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          {gradient && (
+            <defs>
+              <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={colors[0]} stopOpacity={0.5} />
+                <stop offset="100%" stopColor={colors[0]} stopOpacity={0} />
+              </linearGradient>
+              {neon && (
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3.5" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              )}
+            </defs>
+          )}
           {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />}
           <XAxis 
             dataKey="date" 
@@ -83,6 +104,8 @@ export const LineChart: React.FC<LineChartProps> = ({
             strokeWidth={strokeWidth}
             dot={{ fill: colors[0], strokeWidth: 2, r: 4 }}
             activeDot={{ r: 6, stroke: colors[0], strokeWidth: 2 }}
+            fill={gradient ? 'url(#lineGradient)' : undefined}
+            filter={neon ? 'url(#glow)' : undefined}
           />
         </RechartsLineChart>
       </ResponsiveContainer>
