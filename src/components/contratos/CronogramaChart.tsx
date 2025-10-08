@@ -65,7 +65,6 @@ export const CronogramaChart: React.FC = () => {
     const labels: string[] = [];
     const values: number[] = [];
     const chartColors = getColorsForChart('cronograma');
-    const barColors: string[] = [];
 
     years.forEach(year => {
       months.forEach((month, index) => {
@@ -74,9 +73,6 @@ export const CronogramaChart: React.FC = () => {
         // Buscar dados do mês/ano ou usar valor padrão
         const monthData = data.find(d => d.mes === (index + 1) && d.ano === year);
         values.push(monthData?.valor_previsto || Math.random() * 2000000000 + 500000000);
-        
-        // Cada barra terá uma cor diferente
-        barColors.push(chartColors[index % chartColors.length]);
       });
     });
 
@@ -85,8 +81,8 @@ export const CronogramaChart: React.FC = () => {
       datasets: [{
         label: 'Valor Contratado',
         data: values,
-        backgroundColor: barColors,
-        borderColor: barColors,
+        backgroundColor: chartColors,
+        borderColor: chartColors,
         borderWidth: 1,
       }]
     };

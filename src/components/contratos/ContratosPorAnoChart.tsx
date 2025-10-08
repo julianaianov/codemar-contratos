@@ -61,7 +61,6 @@ export const ContratosPorAnoChart: React.FC = () => {
   // Ordenar dados por ano (mais recente primeiro)
   const sortedData = [...data].sort((a, b) => b.ano - a.ano);
   const chartColors = getColorsForChart('por-ano');
-  const barColors = sortedData.map((_, index) => chartColors[index % chartColors.length]);
 
   const chartData = {
     labels: sortedData.map(item => item.ano.toString()),
@@ -69,8 +68,8 @@ export const ContratosPorAnoChart: React.FC = () => {
       {
         label: 'Valor Total',
         data: sortedData.map(item => item.valor_total),
-        backgroundColor: barColors,
-        borderColor: barColors,
+        backgroundColor: chartColors,
+        borderColor: chartColors,
         borderWidth: 1,
       }
     ]
