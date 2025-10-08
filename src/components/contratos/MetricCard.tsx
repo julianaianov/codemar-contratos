@@ -45,20 +45,20 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   }
 
   return (
-    <div className={`${colorClasses[color]} p-6 rounded-lg shadow-md`}>
+    <div className={`${colorClasses[color]} p-3 sm:p-4 rounded-lg shadow-md`}>
       <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <h3 className="text-sm font-medium opacity-90 mb-1">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xs font-medium opacity-90 mb-1 truncate">
             {title}
           </h3>
-          <div className="text-3xl font-bold mb-2">
+          <div className="text-lg sm:text-xl md:text-2xl font-bold mb-1">
             {value.toLocaleString('pt-BR')}
           </div>
-          <p className="text-sm opacity-90">
+          <p className="text-xs opacity-90 truncate">
             {description}
           </p>
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 ml-2">
           {icon}
         </div>
       </div>

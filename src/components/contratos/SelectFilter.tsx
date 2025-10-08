@@ -103,7 +103,7 @@ export const SelectFilter: React.FC<SelectFilterProps> = ({
         <div className="flex items-center justify-between">
           <span className={`
             block truncate
-            ${selectedOption ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'}
+            ${selectedOption ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-300'}
           `}>
             {displayValue}
           </span>
@@ -148,11 +148,11 @@ export const SelectFilter: React.FC<SelectFilterProps> = ({
           {/* Lista de opções */}
           <div className="max-h-48 overflow-y-auto">
             {loading ? (
-              <div className="p-3 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-3 text-center text-gray-500 dark:text-gray-300">
                 Carregando...
               </div>
             ) : filteredOptions.length === 0 ? (
-              <div className="p-3 text-center text-gray-500 dark:text-gray-400">
+              <div className="p-3 text-center text-gray-500 dark:text-gray-300">
                 Nenhuma opção encontrada
               </div>
             ) : (

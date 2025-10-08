@@ -35,12 +35,12 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
               alt="CODEMAR Contratos"
               width={112}
               height={112}
-              className="h-28 w-28"
+              className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28"
             />
           </div>
         </div>
 
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 md:space-x-4">
           
           {/* Theme toggle */}
           <button
@@ -77,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
               className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-offset-[#0091ff]"
             >
               <UserCircleIcon className="w-8 h-8 text-white/80" />
-              <span className="ml-2 text-white font-medium">Usuário</span>
+              <span className="ml-1 md:ml-2 text-white font-medium text-xs md:text-sm truncate max-w-16 md:max-w-none">Usuário</span>
             </button>
 
             {isProfileOpen && (

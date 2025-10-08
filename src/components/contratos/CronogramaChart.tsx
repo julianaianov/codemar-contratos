@@ -10,6 +10,31 @@ export const CronogramaChart: React.FC = () => {
   const [data, setData] = useState<CronogramaContrato[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chartHeight, setChartHeight] = useState(500);
+
+  // Função para calcular altura responsiva
+  const calculateChartHeight = () => {
+    const width = window.innerWidth;
+    if (width >= 1920) return 800; // Telas muito grandes
+    if (width >= 1536) return 700; // xl
+    if (width >= 1280) return 600; // lg
+    if (width >= 1024) return 500; // md
+    return 400; // sm e menores
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setChartHeight(calculateChartHeight());
+    };
+
+    // Definir altura inicial
+    setChartHeight(calculateChartHeight());
+
+    // Adicionar listener para redimensionamento
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,7 +119,7 @@ export const CronogramaChart: React.FC = () => {
     <div className="w-full">
       <BarChart
         data={chartData}
-        height={400}
+        height={chartHeight}
         showLegend={false}
         showGrid={true}
         colors={getColorsForChart('cronograma')}

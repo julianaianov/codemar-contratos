@@ -139,15 +139,15 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   return (
     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
       {/* Header do filtro */}
-      <div className="flex items-center gap-2 mb-4">
-        <MagnifyingGlassIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-        <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">Filtro</h3>
+      <div className="flex items-center gap-2 mb-3">
+        <MagnifyingGlassIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+        <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-200">Filtro</h3>
       </div>
 
       {/* Campos de filtro */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Órgão
           </label>
           <SelectFilter
@@ -161,7 +161,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Unidade Gestora
           </label>
           <SelectFilter
@@ -176,7 +176,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Fornecedor
           </label>
           <SelectFilter
@@ -190,7 +190,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Contrato
           </label>
           <SelectFilter
@@ -205,11 +205,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       </div>
 
       {/* Botões de ação */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <button
           onClick={onFilter}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors"
+          className="flex items-center justify-center gap-2 px-3 py-2 sm:px-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg transition-colors text-sm"
         >
           <MagnifyingGlassIcon className="w-4 h-4" />
           Filtrar
@@ -217,7 +217,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         
         <button
           onClick={clearFilters}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
+          className="flex items-center justify-center gap-2 px-3 py-2 sm:px-4 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm"
         >
           <XMarkIcon className="w-4 h-4" />
           Limpar

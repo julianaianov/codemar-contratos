@@ -38,9 +38,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           }}
           leftPaddingClass={sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}
         />
-        <div className={`${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'} pt-[68px]`}>
-          <main className="p-4 sm:p-6 bg-transparent">
-            <div className="mx-auto w-full max-w-7xl">{children}</div>
+        <div className={`${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'} pt-[80px]`}>
+          <main className="p-2 sm:p-3 md:p-4 bg-transparent">
+            <div className="mx-auto w-full max-w-full overflow-x-hidden">{children}</div>
           </main>
         </div>
       </div>

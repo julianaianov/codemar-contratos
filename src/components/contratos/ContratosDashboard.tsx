@@ -109,14 +109,14 @@ export const ContratosDashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-4">
       {/* Título com SVG */}
-      <div className="flex justify-center">
-        <div className="w-full max-w-4xl">
+      <div className="flex justify-center mb-6">
+        <div className="w-full max-w-3xl">
           <img
             src={theme === 'dark' ? '/logo-contratos-light.svg' : '/logo-contratos-dark.svg'}
             alt="CODEMAR Contratos"
-            className="w-full h-auto max-h-32 object-contain"
+            className="w-full h-auto max-h-20 object-contain"
           />
         </div>
       </div>
@@ -130,7 +130,7 @@ export const ContratosDashboard: React.FC = () => {
       />
 
       {/* Cards de Métricas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6 2xl:gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 mb-8">
         {/* Total de Contratos */}
         <MetricCard
           title="TOTAL CONTRATOS"
@@ -193,23 +193,23 @@ export const ContratosDashboard: React.FC = () => {
       </div>
 
       {/* Segunda linha de cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 mb-8">
         {/* Valor Contratado */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CurrencyDollarIcon className="w-5 h-5 text-blue-600" />
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <CurrencyDollarIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Valor Contratado
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-blue-600">
+            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
               {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL',
               }).format(dashboardData?.valor_total_contratado || 0)}
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+            <p className="text-sm text-gray-600 dark:text-gray-200 mt-2">
               Valor total dos contratos ativos
             </p>
           </CardContent>
@@ -218,8 +218,8 @@ export const ContratosDashboard: React.FC = () => {
         {/* Categoria Contratos */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ChartPieIcon className="w-5 h-5 text-blue-600" />
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <ChartPieIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Categoria Contratos
             </CardTitle>
           </CardHeader>
@@ -231,8 +231,8 @@ export const ContratosDashboard: React.FC = () => {
         {/* Por Ano */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ChartBarIcon className="w-5 h-5 text-blue-600" />
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <ChartBarIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Por Ano
             </CardTitle>
           </CardHeader>
@@ -243,11 +243,11 @@ export const ContratosDashboard: React.FC = () => {
       </div>
 
       {/* Gráfico de Cronograma */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Cronograma mensal - (2023 - 2027)</CardTitle>
+      <Card className="mt-8">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-gray-900 dark:text-gray-100">Cronograma mensal - (2023 - 2027)</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0">
           <CronogramaChart />
         </CardContent>
       </Card>
