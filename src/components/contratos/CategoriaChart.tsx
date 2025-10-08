@@ -10,6 +10,31 @@ export const CategoriaChart: React.FC = () => {
   const [data, setData] = useState<ContratoPorCategoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [chartHeight, setChartHeight] = useState(350);
+
+  // Função para calcular altura responsiva
+  const calculateChartHeight = () => {
+    const width = window.innerWidth;
+    if (width >= 1920) return 500; // Telas muito grandes
+    if (width >= 1536) return 450; // xl
+    if (width >= 1280) return 400; // lg
+    if (width >= 1024) return 350; // md
+    return 300; // sm e menores
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setChartHeight(calculateChartHeight());
+    };
+
+    // Definir altura inicial
+    setChartHeight(calculateChartHeight());
+
+    // Adicionar listener para redimensionamento
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,7 +101,7 @@ export const CategoriaChart: React.FC = () => {
     <div className="w-full">
       <PieChart
         data={chartData}
-        height={300}
+        height={chartHeight}
         showLegend={true}
       />
     </div>

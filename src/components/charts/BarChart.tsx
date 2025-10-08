@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { ChartData } from '@/types/ecidade';
+import { IndividualColorBarChart } from './IndividualColorBarChart';
 
 interface BarChartProps {
   data: ChartData;
@@ -43,19 +44,43 @@ export const BarChart: React.FC<BarChartProps> = ({
     }).format(value);
   };
 
+  // Verificar se devemos usar cores individuais (quando há muitas cores na paleta)
+  const useIndividualColors = colors.length > 5;
+
+  // Se usar cores individuais, usar componente customizado
+  if (useIndividualColors) {
+    return (
+      <IndividualColorBarChart
+        data={data}
+        title={title}
+        height={height}
+        showLegend={showLegend}
+        showGrid={showGrid}
+        colors={colors}
+        className={className}
+        gradient={gradient}
+        neon={neon}
+        chartKey={chartKey}
+      />
+    );
+  }
+
   return (
     <div className={`w-full ${className}`}>
       {title && (
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{title}</h3>
       )}
       <ResponsiveContainer width="100%" height={height}>
-        <RechartsBarChart data={data?.labels?.map((label, index) => ({
-          name: label,
-          ...data.datasets?.reduce((acc, dataset, datasetIndex) => ({
-            ...acc,
-            [dataset.label]: dataset.data[index],
-          }), {}),
-        })) || []} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <RechartsBarChart 
+          data={data?.labels?.map((label, index) => ({
+            name: label,
+            ...data.datasets?.reduce((acc, dataset, datasetIndex) => ({
+              ...acc,
+              [dataset.label]: dataset.data[index],
+            }), {}),
+          })) || []} 
+          margin={{ top: 40, right: 30, left: 60, bottom: 80 }}
+        >
           {gradient && (
             <defs>
               {data?.datasets?.map((ds, i) => (
@@ -75,10 +100,11 @@ export const BarChart: React.FC<BarChartProps> = ({
               )}
             </defs>
           )}
-          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />}
+          {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-300 dark:text-gray-600" />}
           <XAxis 
             dataKey="name" 
-            stroke="#6b7280"
+            stroke="currentColor"
+            className="text-gray-600 dark:text-gray-200"
             fontSize={12}
             angle={-45}
             textAnchor="end"
@@ -86,7 +112,8 @@ export const BarChart: React.FC<BarChartProps> = ({
           />
           <YAxis 
             tickFormatter={(value) => formatTooltipValue(value)}
-            stroke="#6b7280"
+            stroke="currentColor"
+            className="text-gray-600 dark:text-gray-200"
             fontSize={12}
           />
           <Tooltip
