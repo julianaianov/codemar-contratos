@@ -9,6 +9,8 @@ interface MetricCardProps {
   icon: React.ReactNode;
   color: 'green' | 'red' | 'orange' | 'yellow' | 'blue' | 'indigo' | 'purple';
   loading?: boolean;
+  onClick?: () => void;
+  clickable?: boolean;
 }
 
 const colorClasses = {
@@ -27,7 +29,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   description,
   icon,
   color,
-  loading = false
+  loading = false,
+  onClick,
+  clickable = false
 }) => {
   if (loading) {
     return (
@@ -45,7 +49,10 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   }
 
   return (
-    <div className={`${colorClasses[color]} p-3 sm:p-4 rounded-lg shadow-md`}>
+    <div 
+      className={`${colorClasses[color]} p-3 sm:p-4 rounded-lg shadow-md ${clickable ? 'cursor-pointer hover:opacity-90 transition-opacity' : ''}`}
+      onClick={clickable ? onClick : undefined}
+    >
       <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <h3 className="text-xs font-medium opacity-90 mb-1 truncate">
