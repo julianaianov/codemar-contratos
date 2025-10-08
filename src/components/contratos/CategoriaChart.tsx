@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { PieChart } from '@/components/charts/PieChart';
 import { ContratoPorCategoria } from '@/types/contratos';
+import { useChartStyle } from '@/components/layout/ChartStyleProvider';
 
 export const CategoriaChart: React.FC = () => {
+  const { getColorsForChart } = useChartStyle();
   const [data, setData] = useState<ContratoPorCategoria[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,13 +58,16 @@ export const CategoriaChart: React.FC = () => {
     );
   }
 
+  const chartColors = getColorsForChart('categorias');
+  const pieColors = data.map((_, index) => chartColors[index % chartColors.length]);
+  
   const chartData = {
     labels: data.map(item => item.categoria),
     datasets: [{
       label: 'Contratos por Categoria',
       data: data.map(item => item.quantidade),
-      backgroundColor: data.map(item => item.cor),
-      borderColor: data.map(item => item.cor),
+      backgroundColor: pieColors,
+      borderColor: pieColors,
       borderWidth: 2,
     }]
   };

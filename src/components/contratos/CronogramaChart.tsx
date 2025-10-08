@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart } from '@/components/charts/BarChart';
 import { CronogramaContrato } from '@/types/contratos';
+import { useChartStyle } from '@/components/layout/ChartStyleProvider';
 
 export const CronogramaChart: React.FC = () => {
+  const { getColorsForChart, gradient, neon } = useChartStyle();
   const [data, setData] = useState<CronogramaContrato[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,7 +64,8 @@ export const CronogramaChart: React.FC = () => {
     const years = [2023, 2024, 2025, 2026, 2027];
     const labels: string[] = [];
     const values: number[] = [];
-    const colors: string[] = [];
+    const chartColors = getColorsForChart('cronograma');
+    const barColors: string[] = [];
 
     years.forEach(year => {
       months.forEach((month, index) => {
@@ -72,13 +75,8 @@ export const CronogramaChart: React.FC = () => {
         const monthData = data.find(d => d.mes === (index + 1) && d.ano === year);
         values.push(monthData?.valor_previsto || Math.random() * 2000000000 + 500000000);
         
-        // Cores alternadas para visualização
-        const colorIndex = (year - 2023) * 12 + index;
-        const colorPalette = [
-          '#8B5CF6', '#10B981', '#F59E0B', '#EF4444', '#3B82F6',
-          '#F97316', '#84CC16', '#EC4899', '#06B6D4', '#8B5A2B'
-        ];
-        colors.push(colorPalette[colorIndex % colorPalette.length]);
+        // Cada barra terá uma cor diferente
+        barColors.push(chartColors[index % chartColors.length]);
       });
     });
 
@@ -87,8 +85,8 @@ export const CronogramaChart: React.FC = () => {
       datasets: [{
         label: 'Valor Contratado',
         data: values,
-        backgroundColor: colors,
-        borderColor: colors,
+        backgroundColor: barColors,
+        borderColor: barColors,
         borderWidth: 1,
       }]
     };
@@ -103,6 +101,10 @@ export const CronogramaChart: React.FC = () => {
         height={400}
         showLegend={false}
         showGrid={true}
+        colors={getColorsForChart('cronograma')}
+        gradient={gradient}
+        neon={neon}
+        chartKey="cronograma"
       />
     </div>
   );

@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart } from '@/components/charts/BarChart';
 import { ContratoPorAno } from '@/types/contratos';
+import { useChartStyle } from '@/components/layout/ChartStyleProvider';
 
 export const ContratosPorAnoChart: React.FC = () => {
+  const { getColorsForChart, gradient, neon } = useChartStyle();
   const [data, setData] = useState<ContratoPorAno[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +60,8 @@ export const ContratosPorAnoChart: React.FC = () => {
 
   // Ordenar dados por ano (mais recente primeiro)
   const sortedData = [...data].sort((a, b) => b.ano - a.ano);
+  const chartColors = getColorsForChart('por-ano');
+  const barColors = sortedData.map((_, index) => chartColors[index % chartColors.length]);
 
   const chartData = {
     labels: sortedData.map(item => item.ano.toString()),
@@ -65,14 +69,8 @@ export const ContratosPorAnoChart: React.FC = () => {
       {
         label: 'Valor Total',
         data: sortedData.map(item => item.valor_total),
-        backgroundColor: [
-          '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444',
-          '#F97316', '#84CC16', '#EC4899', '#06B6D4', '#8B5A2B'
-        ],
-        borderColor: [
-          '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444',
-          '#F97316', '#84CC16', '#EC4899', '#06B6D4', '#8B5A2B'
-        ],
+        backgroundColor: barColors,
+        borderColor: barColors,
         borderWidth: 1,
       }
     ]
@@ -85,6 +83,10 @@ export const ContratosPorAnoChart: React.FC = () => {
         height={300}
         showLegend={false}
         showGrid={true}
+        colors={chartColors}
+        gradient={gradient}
+        neon={neon}
+        chartKey="por-ano"
       />
     </div>
   );

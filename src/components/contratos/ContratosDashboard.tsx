@@ -114,7 +114,7 @@ export const ContratosDashboard: React.FC = () => {
       <div className="flex justify-center">
         <div className="w-full max-w-4xl">
           <img
-            src={theme === 'dark' ? '/logo-contratos-dark.svg' : '/logo-contratos-light.svg'}
+            src={theme === 'dark' ? '/logo-contratos-light.svg' : '/logo-contratos-dark.svg'}
             alt="CODEMAR Contratos"
             className="w-full h-auto max-h-32 object-contain"
           />
