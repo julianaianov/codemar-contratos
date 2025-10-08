@@ -36,3 +36,6 @@ echo "   ✅ Dados atualizados com IDs das fontes"
 echo "   ✅ Schema completo verificado"
 echo ""
 echo "🎉 Banco de dados totalmente funcional!"
+
+
+

@@ -120,3 +120,6 @@ echo "   ✅ recursos: tabela criada"
 echo "   ✅ Índices criados para melhor performance"
 echo ""
 echo "🎉 Banco de dados corrigido! Agora o dashboard deve funcionar."
+
+
+

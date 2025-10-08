@@ -129,3 +129,6 @@ echo "   ✅ Índices criados para performance"
 echo "   ✅ Dados de exemplo inseridos"
 echo ""
 echo "🎉 Banco de dados totalmente funcional!"
+
+
+

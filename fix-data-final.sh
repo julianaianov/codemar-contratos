@@ -38,3 +38,6 @@ echo "   ✅ Movimentações: 10 registros (R$ 335.000,00)"
 echo "   ✅ Planocontas: 5 registros (R$ 650.000,00)"
 echo ""
 echo "🎉 Agora os dados devem aparecer no dashboard!"
+
+
+

@@ -9,8 +9,8 @@ import { ChartStyleProvider } from '@/components/layout/ChartStyleProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'e-Cidade Dashboard',
-  description: 'Dashboard interativo para gestão municipal',
+  title: 'Sistema de Contratos CODEMAR',
+  description: 'Sistema de gestão de contratos da CODEMAR',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -26,4 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
+
+
 

@@ -31,3 +31,6 @@ echo "   npm run dev"
 echo ""
 
 echo "✅ Configuração concluída!"
+
+
+

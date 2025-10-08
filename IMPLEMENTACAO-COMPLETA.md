@@ -204,3 +204,6 @@ O sistema está **100% implementado** e funcionando! Agora você tem:
 - **Dados reais** conectados ao PostgreSQL
 
 **Acesse `http://localhost:3000` e explore o sistema completo!** 🎊
+
+
+

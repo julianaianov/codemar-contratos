@@ -31,8 +31,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
           </button>
           <div className="ml-4 lg:ml-0 flex items-center">
             <Image
-              src={theme === 'dark' ? '/logo-noturno.png' : '/logo-claro.png'}
-              alt="CODEMAR"
+              src={theme === 'dark' ? '/logo-contratos.png' : '/contrato-claro.png'}
+              alt="CODEMAR Contratos"
               width={112}
               height={112}
               className="h-28 w-28"

@@ -114,3 +114,6 @@ echo "   - Usuário: postgres"
 echo "   - Senha: postgres"
 echo ""
 echo "✅ Configuração do PostgreSQL concluída!"
+
+
+

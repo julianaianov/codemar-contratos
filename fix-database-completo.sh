@@ -97,3 +97,6 @@ echo "   ✅ Dados de exemplo inseridos"
 echo "   ✅ Schema completo verificado"
 echo ""
 echo "🎉 Banco de dados totalmente funcional!"
+
+
+

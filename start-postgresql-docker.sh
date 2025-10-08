@@ -142,3 +142,6 @@ echo "   docker stop ecidade-postgres"
 echo ""
 echo "🔄 Para reiniciar:"
 echo "   ./start-postgresql-docker.sh"
+
+
+

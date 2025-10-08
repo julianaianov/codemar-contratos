@@ -66,3 +66,6 @@ echo "   ✅ Empenhos: 5 registros (R$ 420.000,00)"
 echo "   ✅ Movimentações: 10 registros (R$ 295.000,00)"
 echo ""
 echo "🎉 Agora os dados devem aparecer no dashboard!"
+
+
+

@@ -84,3 +84,6 @@ echo "   ✅ Empenhos: 5 registros distribuídos por mês"
 echo "   ✅ Movimentações: 10 registros distribuídos por mês"
 echo ""
 echo "🎉 Agora os dados devem aparecer com filtros de mês/ano!"
+
+
+

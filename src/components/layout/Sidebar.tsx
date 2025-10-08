@@ -16,6 +16,11 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   XMarkIcon,
+  ChevronDownIcon,
+  EyeIcon,
+  DocumentTextIcon,
+  CreditCardIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -25,24 +30,43 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon },
-  { name: 'Receitas', href: '/receitas', icon: CurrencyDollarIcon },
-  { name: 'Despesas', href: '/despesas', icon: ChartBarIcon },
-  { name: 'Pessoal', href: '/pessoal', icon: UsersIcon },
-  { name: 'Contratos', href: '/contratos', icon: ClipboardDocumentListIcon },
-  { name: 'Patrimonial', href: '/patrimonial', icon: BuildingOfficeIcon },
-  { name: 'Educação', href: '/educacao', icon: AcademicCapIcon },
-  { name: 'Saúde', href: '/saude', icon: HeartIcon },
+  { name: 'Transparência', href: '/', icon: EyeIcon },
+  { 
+    name: 'Consulta', 
+    href: '/consulta', 
+    icon: DocumentTextIcon,
+    submenu: [
+      { name: 'Contratos', href: '/consulta/contratos', icon: ClipboardDocumentListIcon },
+      { name: 'Instrumentos de Cobrança', href: '/consulta/cobranca', icon: CreditCardIcon },
+      { name: 'Terceirizados', href: '/consulta/terceirizados', icon: UserGroupIcon },
+    ]
+  },
   { name: 'Configurações', href: '/configuracoes', icon: CogIcon },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, collapsed = false }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const handleLogout = () => {
     // Implementar logout
     router.push('/login');
+  };
+
+  const toggleExpanded = (itemName: string) => {
+    setExpandedItems(prev => 
+      prev.includes(itemName) 
+        ? prev.filter(item => item !== itemName)
+        : [...prev, itemName]
+    );
+  };
+
+  const isItemActive = (item: any) => {
+    if (item.submenu) {
+      return item.submenu.some((subItem: any) => pathname === subItem.href);
+    }
+    return pathname === item.href;
   };
 
   return (
@@ -78,7 +102,75 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, collapsed = f
         <nav className={clsx('mt-8', collapsed ? 'px-2' : 'px-4')}>
           <div className="space-y-2">
             {navigation.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = isItemActive(item);
+              const isExpanded = expandedItems.includes(item.name);
+              
+              if (item.submenu) {
+                return (
+                  <div key={item.name}>
+                    <button
+                      onClick={() => !collapsed && toggleExpanded(item.name)}
+                      className={clsx(
+                        'relative group flex items-center py-2 text-sm font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-white/40 active:bg-white/30 w-full',
+                        collapsed ? 'justify-center' : 'px-3',
+                        isActive ? 'bg-white/90 text-blue-900 shadow-sm dark:bg-white/20 dark:text-white' : 'text-white/90 hover:bg-white/20 hover:text-white'
+                      )}
+                    >
+                      {!collapsed && (
+                        <span
+                          className={clsx(
+                            'absolute left-0 top-0 h-full w-1.5 rounded-r-md transition-opacity duration-200 bg-gradient-brand',
+                            isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-60'
+                          )}
+                        />
+                      )}
+                      <item.icon
+                        className={clsx(
+                          'h-5 w-5 flex-shrink-0 transition-colors duration-200',
+                          collapsed ? '' : 'mr-3',
+                          isActive ? 'text-blue-700' : 'text-white/80 group-hover:text-white'
+                        )}
+                      />
+                      {!collapsed && (
+                        <>
+                          <span className="transition-colors duration-200 flex-1 text-left">{item.name}</span>
+                          <ChevronDownIcon
+                            className={clsx(
+                              'h-4 w-4 transition-transform duration-200',
+                              isExpanded ? 'rotate-180' : ''
+                            )}
+                          />
+                        </>
+                      )}
+                    </button>
+                    
+                    {!collapsed && isExpanded && (
+                      <div className="ml-6 mt-1 space-y-1">
+                        {item.submenu.map((subItem) => {
+                          const isSubActive = pathname === subItem.href;
+                          return (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              className={clsx(
+                                'flex items-center py-2 px-3 text-sm rounded-md transition-colors duration-200',
+                                isSubActive 
+                                  ? 'bg-white/20 text-white' 
+                                  : 'text-white/70 hover:bg-white/10 hover:text-white'
+                              )}
+                              onClick={onClose}
+                            >
+                              <subItem.icon className="h-4 w-4 mr-3" />
+                              {subItem.name}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              
               return (
                 <Link
                   key={item.name}

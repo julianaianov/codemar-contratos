@@ -23,3 +23,6 @@ curl -s "http://localhost:3000/api/ecidade/database?path=despesas-chart" | jq '.
 
 echo ""
 echo "✅ Comparação concluída!"
+
+
+
