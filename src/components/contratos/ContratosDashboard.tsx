@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { FilterPanel } from './FilterPanel';
 import { MetricCard } from './MetricCard';
@@ -20,6 +21,7 @@ import {
 
 export const ContratosDashboard: React.FC = () => {
   const { theme } = useTheme();
+  const router = useRouter();
   const [filters, setFilters] = useState<FiltrosContratos>({});
   const [dashboardData, setDashboardData] = useState<DashboardContratos | null>(null);
   const [metricas, setMetricas] = useState<MetricasContratos | null>(null);
@@ -74,6 +76,32 @@ export const ContratosDashboard: React.FC = () => {
 
   const handleFilter = () => {
     // Os dados já são recarregados automaticamente quando os filtros mudam
+  };
+
+  // Funções de navegação para cada card
+  const handleCardClick = (cardType: string) => {
+    switch (cardType) {
+      case 'total':
+        router.push('/consulta/contratos');
+        break;
+      case 'vencendo-30':
+        router.push('/consulta/contratos?filter=vencendo-30');
+        break;
+      case 'vencendo-30-60':
+        router.push('/consulta/contratos?filter=vencendo-30-60');
+        break;
+      case 'vencendo-60-90':
+        router.push('/consulta/contratos?filter=vencendo-60-90');
+        break;
+      case 'vencendo-90-180':
+        router.push('/consulta/contratos?filter=vencendo-90-180');
+        break;
+      case 'vencendo-180':
+        router.push('/consulta/contratos?filter=vencendo-180');
+        break;
+      default:
+        break;
+    }
   };
 
   if (error) {
@@ -139,6 +167,8 @@ export const ContratosDashboard: React.FC = () => {
           icon={<DocumentTextIcon className="w-6 h-6 text-green-600" />}
           color="green"
           loading={loading}
+          clickable={true}
+          onClick={() => handleCardClick('total')}
         />
 
         {/* Vencem em -30 dias */}
@@ -149,6 +179,8 @@ export const ContratosDashboard: React.FC = () => {
           icon={<ExclamationTriangleIcon className="w-6 h-6 text-red-600" />}
           color="red"
           loading={loading}
+          clickable={true}
+          onClick={() => handleCardClick('vencendo-30')}
         />
 
         {/* Vencem em 30-60 dias */}
@@ -159,6 +191,8 @@ export const ContratosDashboard: React.FC = () => {
           icon={<ClockIcon className="w-6 h-6 text-orange-600" />}
           color="orange"
           loading={loading}
+          clickable={true}
+          onClick={() => handleCardClick('vencendo-30-60')}
         />
 
         {/* Vencem em 60-90 dias */}
@@ -169,6 +203,8 @@ export const ContratosDashboard: React.FC = () => {
           icon={<ClockIcon className="w-6 h-6 text-yellow-600" />}
           color="yellow"
           loading={loading}
+          clickable={true}
+          onClick={() => handleCardClick('vencendo-60-90')}
         />
 
         {/* Vencem em 90-180 dias */}
@@ -179,6 +215,8 @@ export const ContratosDashboard: React.FC = () => {
           icon={<ClockIcon className="w-6 h-6 text-blue-600" />}
           color="blue"
           loading={loading}
+          clickable={true}
+          onClick={() => handleCardClick('vencendo-90-180')}
         />
 
         {/* Vencem em +180 dias */}
@@ -189,6 +227,8 @@ export const ContratosDashboard: React.FC = () => {
           icon={<ClockIcon className="w-6 h-6 text-indigo-600" />}
           color="indigo"
           loading={loading}
+          clickable={true}
+          onClick={() => handleCardClick('vencendo-180')}
         />
       </div>
 
