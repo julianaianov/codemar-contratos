@@ -59,11 +59,25 @@ class FileImportController extends Controller
             // Para produção, usar jobs: ProcessFileImportJob::dispatch($fileImport);
             $this->importService->processFile($fileImport);
 
-            return response()->json([
+            // Buscar diretoria mais comum nos contratos importados
+            $diretoriaMaisComum = $fileImport->contratosImportados()
+                ->whereNotNull('secretaria')
+                ->select('secretaria', \DB::raw('count(*) as total'))
+                ->groupBy('secretaria')
+                ->orderByDesc('total')
+                ->first();
+
+            $response = [
                 'success' => true,
                 'message' => 'Arquivo importado com sucesso',
                 'data' => $fileImport->fresh(),
-            ], 201);
+            ];
+
+            if ($diretoriaMaisComum) {
+                $response['diretoria'] = $diretoriaMaisComum->secretaria;
+            }
+
+            return response()->json($response, 201);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

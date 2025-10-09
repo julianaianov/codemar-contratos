@@ -458,16 +458,26 @@ export default function ContratosPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Secretaria
+                Diretoria *
               </label>
-              <input
-                type="text"
+              <select
                 name="secretaria"
                 value={formData.secretaria}
                 onChange={handleInputChange}
-                placeholder="Ex: Secretaria de Educação"
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              />
+                required
+              >
+                <option value="">Selecione uma diretoria</option>
+                <option value="Presidência">Presidência</option>
+                <option value="Diretoria Jurídica">Diretoria Jurídica</option>
+                <option value="Diretoria de Assuntos Imobiliários">Diretoria de Assuntos Imobiliários</option>
+                <option value="Diretoria de Operações">Diretoria de Operações</option>
+                <option value="Diretoria de Tecnologia da Informação e Inovação">Diretoria de Tecnologia da Informação e Inovação</option>
+                <option value="Diretoria de Governança em Licitações e Contratações">Diretoria de Governança em Licitações e Contratações</option>
+              </select>
+              {errors.secretaria && (
+                <p className="text-red-500 text-xs mt-1">{errors.secretaria[0]}</p>
+              )}
             </div>
           </div>
 

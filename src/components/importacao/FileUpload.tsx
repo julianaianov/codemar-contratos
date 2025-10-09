@@ -7,6 +7,8 @@ interface FileUploadProps {
   acceptedFormats: string;
   fileType: 'xml' | 'excel' | 'csv';
   onUploadSuccess?: (data: any) => void;
+  disabled?: boolean;
+  diretoria?: string;
 }
 
 interface UploadResult {
@@ -16,7 +18,7 @@ interface UploadResult {
   error?: string;
 }
 
-export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess }: FileUploadProps) {
+export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess, disabled = false, diretoria }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<UploadResult | null>(null);
@@ -61,6 +63,9 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
 
     const formData = new FormData();
     formData.append('file', file);
+    if (diretoria) {
+      formData.append('diretoria', diretoria);
+    }
 
     try {
       const response = await fetch(`${API_URL}/api/imports`, {
@@ -119,14 +124,16 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
       {/* Área de Drop */}
       <div
         className={`relative border-2 border-dashed rounded-lg p-8 transition-all duration-200 ${
-          dragActive
+          disabled
+            ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 opacity-50'
+            : dragActive
             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
             : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800'
         } ${file ? 'bg-green-50 dark:bg-green-900/20 border-green-500' : ''}`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
+        onDragEnter={disabled ? undefined : handleDrag}
+        onDragLeave={disabled ? undefined : handleDrag}
+        onDragOver={disabled ? undefined : handleDrag}
+        onDrop={disabled ? undefined : handleDrop}
       >
         <input
           ref={fileInputRef}
@@ -140,7 +147,7 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
         {!file ? (
           <label
             htmlFor="file-upload"
-            className="cursor-pointer flex flex-col items-center justify-center"
+            className={`flex flex-col items-center justify-center ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <ArrowUpTrayIcon className="h-12 w-12 text-gray-400 mb-4" />
             <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -181,9 +188,9 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
       {file && !result && (
         <button
           onClick={handleUpload}
-          disabled={uploading}
+          disabled={uploading || disabled}
           className={`mt-4 w-full py-3 px-6 rounded-lg font-medium text-white transition-all duration-200 ${
-            uploading
+            uploading || disabled
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'
           }`}

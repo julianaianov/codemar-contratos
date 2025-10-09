@@ -22,6 +22,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   const [unidadeGestoraOptions, setUnidadeGestoraOptions] = useState<SelectOption[]>([]);
   const [fornecedorOptions, setFornecedorOptions] = useState<SelectOption[]>([]);
   const [contratoOptions, setContratoOptions] = useState<SelectOption[]>([]);
+  const [diretoriaOptions] = useState<SelectOption[]>([
+    { value: 'Presidência', label: 'Presidência' },
+    { value: 'Diretoria Jurídica', label: 'Diretoria Jurídica' },
+    { value: 'Diretoria de Assuntos Imobiliários', label: 'Diretoria de Assuntos Imobiliários' },
+    { value: 'Diretoria de Operações', label: 'Diretoria de Operações' },
+    { value: 'Diretoria de Tecnologia da Informação e Inovação', label: 'Diretoria de Tecnologia da Informação e Inovação' },
+    { value: 'Diretoria de Governança em Licitações e Contratações', label: 'Diretoria de Governança em Licitações e Contratações' },
+  ]);
   const [loadingOptions, setLoadingOptions] = useState({
     orgao: false,
     unidadeGestora: false,
@@ -125,6 +133,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     loadContratos();
   }, []);
 
+
   const handleFilterChange = (field: keyof FiltrosContratos, value: string | number | undefined) => {
     onFiltersChange({
       ...filters,
@@ -145,7 +154,20 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       </div>
 
       {/* Campos de filtro */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+            Diretoria
+          </label>
+          <SelectFilter
+            value={filters.diretoria}
+            onChange={(value) => handleFilterChange('diretoria', value)}
+            options={diretoriaOptions}
+            placeholder="Todas"
+            clearable
+          />
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Órgão

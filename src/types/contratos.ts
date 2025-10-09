@@ -92,11 +92,35 @@ export interface FiltrosContratos {
   fornecedor_id?: number;
   contrato_id?: number;
   situacao?: string;
+  status?: string;
   data_inicio?: string;
   data_fim?: string;
   valor_minimo?: number;
   valor_maximo?: number;
   categoria_id?: number;
+  diretoria?: string;
+  ano?: number;
+}
+
+export interface ContratoImportado {
+  id: number;
+  numero_contrato?: string;
+  objeto?: string;
+  contratante?: string;
+  contratado?: string;
+  cnpj_contratado?: string;
+  valor_global?: number;
+  data_inicio?: string;
+  data_fim?: string;
+  modalidade?: string;
+  status?: string;
+  tipo_contrato?: string;
+  secretaria?: string;
+  fonte_recurso?: string;
+  observacoes?: string;
+  file_import_id?: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ContratoPorAno {

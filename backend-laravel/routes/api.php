@@ -35,6 +35,7 @@ Route::prefix('contratos')->group(function () {
     Route::get('/', [ContratoController::class, 'index']);
     Route::post('/', [ContratoController::class, 'store']);
     Route::get('/stats', [ContratoController::class, 'stats']);
+    Route::get('/diretorias', [ContratoController::class, 'diretorias']);
     Route::get('/{id}', [ContratoController::class, 'show']);
     Route::put('/{id}', [ContratoController::class, 'update']);
     Route::delete('/{id}', [ContratoController::class, 'destroy']);

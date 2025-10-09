@@ -1,11 +1,33 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DocumentTextIcon, ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import FileUpload from '@/components/importacao/FileUpload';
 
 export default function ImportacaoXMLPage() {
+  const router = useRouter();
+  const [selectedDiretoria, setSelectedDiretoria] = useState('');
+
+  const diretorias = [
+    'Presidência',
+    'Diretoria Jurídica',
+    'Diretoria de Assuntos Imobiliários',
+    'Diretoria de Operações',
+    'Diretoria de Tecnologia da Informação e Inovação',
+    'Diretoria de Governança em Licitações e Contratações'
+  ];
+
+  const handleUploadSuccess = (data: any) => {
+    // Redirecionar para o dashboard da diretoria selecionada
+    if (selectedDiretoria) {
+      setTimeout(() => {
+        router.push(`/contratos/diretoria/${encodeURIComponent(selectedDiretoria)}`);
+      }, 2000);
+    }
+  };
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {/* Header */}
@@ -27,11 +49,50 @@ export default function ImportacaoXMLPage() {
         </p>
       </div>
 
+      {/* Seleção de Diretoria */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6 border border-gray-200 dark:border-gray-700">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Selecionar Diretoria
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          Escolha a diretoria responsável pelos contratos que serão importados:
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {diretorias.map((diretoria) => (
+            <label key={diretoria} className="flex items-center space-x-3 p-3 border border-gray-200 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <input
+                type="radio"
+                name="diretoria"
+                value={diretoria}
+                checked={selectedDiretoria === diretoria}
+                onChange={(e) => setSelectedDiretoria(e.target.value)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+              />
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {diretoria}
+              </span>
+            </label>
+          ))}
+        </div>
+        
+        {!selectedDiretoria && (
+          <p className="text-red-500 text-sm mt-3">
+            ⚠️ Por favor, selecione uma diretoria antes de fazer o upload
+          </p>
+        )}
+      </div>
+
       {/* Componente de Upload */}
-      <FileUpload
-        acceptedFormats=".xml"
-        fileType="xml"
-      />
+      <div className={selectedDiretoria ? '' : 'opacity-50 pointer-events-none'}>
+        <FileUpload
+          acceptedFormats=".xml"
+          fileType="xml"
+          onUploadSuccess={handleUploadSuccess}
+          disabled={!selectedDiretoria}
+          diretoria={selectedDiretoria}
+        />
+      </div>
 
       {/* Informações sobre o formato */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
