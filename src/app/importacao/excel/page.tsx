@@ -1,0 +1,145 @@
+'use client';
+
+import React from 'react';
+import { ClipboardDocumentListIcon, ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import FileUpload from '@/components/importacao/FileUpload';
+
+export default function ImportacaoExcelPage() {
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <Link
+          href="/importacao"
+          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 mb-4 transition-colors"
+        >
+          <ArrowLeftIcon className="h-4 w-4" />
+          Voltar para Importação
+        </Link>
+
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+          <ClipboardDocumentListIcon className="h-8 w-8 text-green-500" />
+          Importar Planilha Excel
+        </h1>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">
+          Faça upload de planilhas Excel (.xlsx ou .xls) contendo dados de contratos
+        </p>
+      </div>
+
+      {/* Componente de Upload */}
+      <FileUpload
+        acceptedFormats=".xlsx,.xls"
+        fileType="excel"
+      />
+
+      {/* Informações sobre o formato */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Estrutura Esperada */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 mb-4">
+            <InformationCircleIcon className="h-6 w-6 text-green-500" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Estrutura da Planilha
+            </h2>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            A primeira linha deve conter os cabeçalhos das colunas:
+          </p>
+          <div className="bg-gray-50 dark:bg-gray-900 rounded p-4 overflow-x-auto">
+            <table className="min-w-full text-xs">
+              <thead>
+                <tr className="border-b border-gray-300 dark:border-gray-600">
+                  <th className="px-2 py-1 text-left font-semibold">numero</th>
+                  <th className="px-2 py-1 text-left font-semibold">objeto</th>
+                  <th className="px-2 py-1 text-left font-semibold">contratado</th>
+                  <th className="px-2 py-1 text-left font-semibold">valor</th>
+                  <th className="px-2 py-1 text-left font-semibold">...</th>
+                </tr>
+              </thead>
+              <tbody className="text-gray-700 dark:text-gray-300">
+                <tr>
+                  <td className="px-2 py-1">001/2025</td>
+                  <td className="px-2 py-1">Serviços</td>
+                  <td className="px-2 py-1">Empresa XYZ</td>
+                  <td className="px-2 py-1">150000</td>
+                  <td className="px-2 py-1">...</td>
+                </tr>
+                <tr>
+                  <td className="px-2 py-1">002/2025</td>
+                  <td className="px-2 py-1">Materiais</td>
+                  <td className="px-2 py-1">Empresa ABC</td>
+                  <td className="px-2 py-1">80000</td>
+                  <td className="px-2 py-1">...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Nomes de Colunas Aceitos */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 mb-4">
+            <InformationCircleIcon className="h-6 w-6 text-blue-500" />
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Colunas Flexíveis
+            </h2>
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            O sistema aceita diferentes nomes para as mesmas colunas:
+          </p>
+          <ul className="space-y-2 text-xs text-gray-700 dark:text-gray-300">
+            <li>• <strong>Número:</strong> numero, numero_contrato, nº contrato</li>
+            <li>• <strong>Objeto:</strong> objeto, descricao, descrição</li>
+            <li>• <strong>Contratante:</strong> contratante, orgao, órgão</li>
+            <li>• <strong>Contratado:</strong> contratado, fornecedor, empresa</li>
+            <li>• <strong>CNPJ:</strong> cnpj, cnpj_contratado</li>
+            <li>• <strong>Valor:</strong> valor, valor_contrato</li>
+            <li>• <strong>Data Início:</strong> data_inicio, inicio, vigencia_inicio</li>
+            <li>• <strong>Data Fim:</strong> data_fim, fim, vigencia_fim</li>
+            <li>• <strong>Modalidade:</strong> modalidade</li>
+            <li>• <strong>Status:</strong> status, situacao, situação</li>
+            <li>• <strong>Tipo:</strong> tipo, tipo_contrato</li>
+            <li>• <strong>Secretaria:</strong> secretaria, unidade</li>
+            <li>• <strong>Fonte:</strong> fonte_recurso, fonte</li>
+            <li>• <strong>Observações:</strong> observacoes, observações, obs</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Dicas */}
+      <div className="mt-8 p-6 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+        <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-3 flex items-center gap-2">
+          <InformationCircleIcon className="h-5 w-5" />
+          Dicas Importantes
+        </h3>
+        <ul className="list-disc list-inside text-green-800 dark:text-green-200 space-y-2 text-sm">
+          <li>Formatos aceitos: .xlsx (Excel 2007+) e .xls (Excel 97-2003)</li>
+          <li>A primeira linha DEVE conter os nomes das colunas</li>
+          <li>Datas podem estar em diversos formatos (01/01/2025, 2025-01-01, etc.)</li>
+          <li>Valores podem ter formatação monetária (R$ 1.000,00 ou 1000.00)</li>
+          <li>Tamanho máximo do arquivo: 10MB</li>
+          <li>Linhas vazias são automaticamente ignoradas</li>
+          <li>O sistema é flexível com os nomes das colunas (veja lista ao lado)</li>
+          <li>Todos os campos são opcionais</li>
+        </ul>
+      </div>
+
+      {/* Exemplo de Download */}
+      <div className="mt-8 text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+          Precisa de um modelo? Baixe nosso template de exemplo:
+        </p>
+        <a
+          href="/api/templates/excel"
+          download="template-contratos.xlsx"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+        >
+          <ClipboardDocumentListIcon className="h-5 w-5" />
+          Baixar Template Excel
+        </a>
+      </div>
+    </div>
+  );
+}
+

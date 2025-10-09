@@ -14,18 +14,25 @@ export default function ImportacaoPage() {
       color: 'bg-blue-500',
     },
     {
-      title: 'Importar Contratos',
-      description: 'Importe contratos em lote através de planilhas ou arquivos CSV',
+      title: 'Importar Excel',
+      description: 'Importe contratos em lote através de planilhas Excel (.xlsx, .xls)',
       icon: ClipboardDocumentListIcon,
-      href: '/importacao/contratos',
+      href: '/importacao/excel',
       color: 'bg-green-500',
     },
     {
-      title: 'Importar Fornecedores',
-      description: 'Importe cadastro de fornecedores de outros sistemas',
-      icon: TruckIcon,
-      href: '/importacao/fornecedores',
+      title: 'Importar CSV',
+      description: 'Importe contratos através de arquivos CSV (valores separados por vírgula)',
+      icon: DocumentTextIcon,
+      href: '/importacao/csv',
       color: 'bg-purple-500',
+    },
+    {
+      title: 'Ver Importações',
+      description: 'Visualize o histórico e status de todas as importações realizadas',
+      icon: ClipboardDocumentListIcon,
+      href: '/importacao/historico',
+      color: 'bg-orange-500',
     },
   ];
 

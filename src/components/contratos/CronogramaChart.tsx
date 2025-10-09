@@ -5,7 +5,11 @@ import { BarChart } from '@/components/charts/BarChart';
 import { CronogramaContrato } from '@/types/contratos';
 import { useChartStyle } from '@/components/layout/ChartStyleProvider';
 
-export const CronogramaChart: React.FC = () => {
+interface CronogramaChartProps {
+  anoSelecionado?: string | number;
+}
+
+export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado }) => {
   const { getColorsForChart, gradient, neon } = useChartStyle();
   const [data, setData] = useState<CronogramaContrato[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,23 +87,38 @@ export const CronogramaChart: React.FC = () => {
     );
   }
 
-  // Gerar dados para o gráfico (2023-2027)
+  // Gerar dados para o gráfico
   const generateChartData = () => {
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const years = [2023, 2024, 2025, 2026, 2027];
     const labels: string[] = [];
     const values: number[] = [];
     const chartColors = getColorsForChart('cronograma');
 
-    years.forEach(year => {
+    // Se um ano específico foi selecionado, mostrar apenas esse ano
+    if (anoSelecionado && anoSelecionado !== 'geral') {
+      const ano = typeof anoSelecionado === 'string' ? parseInt(anoSelecionado) : anoSelecionado;
+      
       months.forEach((month, index) => {
-        labels.push(`${String(index + 1).padStart(2, '0')}/${year}`);
+        labels.push(`${String(index + 1).padStart(2, '0')}/${ano}`);
         
         // Buscar dados do mês/ano ou usar valor padrão
-        const monthData = data.find(d => d.mes === (index + 1) && d.ano === year);
+        const monthData = data.find(d => d.mes === (index + 1) && d.ano === ano);
         values.push(monthData?.valor_previsto || Math.random() * 2000000000 + 500000000);
       });
-    });
+    } else {
+      // Modo geral: mostrar todos os anos (2023-2027)
+      const years = [2023, 2024, 2025, 2026, 2027];
+      
+      years.forEach(year => {
+        months.forEach((month, index) => {
+          labels.push(`${String(index + 1).padStart(2, '0')}/${year}`);
+          
+          // Buscar dados do mês/ano ou usar valor padrão
+          const monthData = data.find(d => d.mes === (index + 1) && d.ano === year);
+          values.push(monthData?.valor_previsto || Math.random() * 2000000000 + 500000000);
+        });
+      });
+    }
 
     return {
       labels,
