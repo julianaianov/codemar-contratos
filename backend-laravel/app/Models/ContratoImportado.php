@@ -10,6 +10,8 @@ class ContratoImportado extends Model
 {
     use HasFactory;
 
+    protected $table = 'contratos_importados';
+
     protected $fillable = [
         'file_import_id',
         'numero_contrato',

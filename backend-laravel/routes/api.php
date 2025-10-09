@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\FileImportController;
+use App\Http\Controllers\ContratoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,4 +28,14 @@ Route::prefix('imports')->group(function () {
     Route::get('/{id}', [FileImportController::class, 'show']);
     Route::delete('/{id}', [FileImportController::class, 'destroy']);
     Route::get('/{id}/contratos', [FileImportController::class, 'contratos']);
+});
+
+// Rotas de contratos
+Route::prefix('contratos')->group(function () {
+    Route::get('/', [ContratoController::class, 'index']);
+    Route::post('/', [ContratoController::class, 'store']);
+    Route::get('/stats', [ContratoController::class, 'stats']);
+    Route::get('/{id}', [ContratoController::class, 'show']);
+    Route::put('/{id}', [ContratoController::class, 'update']);
+    Route::delete('/{id}', [ContratoController::class, 'destroy']);
 });

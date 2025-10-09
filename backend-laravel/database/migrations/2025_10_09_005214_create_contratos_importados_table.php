@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('contratos_importados', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('file_import_id')->constrained('file_imports')->cascadeOnDelete();
+            $table->foreignId('file_import_id')->nullable()->constrained('file_imports')->cascadeOnDelete();
             $table->string('numero_contrato')->nullable();
             $table->string('objeto')->nullable();
             $table->string('contratante')->nullable();
