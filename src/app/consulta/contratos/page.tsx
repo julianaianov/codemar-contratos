@@ -32,8 +32,9 @@ export default function ConsultaContratosPage() {
         params.append('status', filtros.status);
       }
 
-      // Buscar contratos da API de contratos importados (mesma da página de cadastros)
-      const response = await fetch(`/api/contratos?${params.toString()}`);
+      // Buscar contratos da API do Laravel
+      const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/contratos?${params.toString()}`);
       const data = await response.json();
       setContratos(data.data || []);
     } catch (error) {

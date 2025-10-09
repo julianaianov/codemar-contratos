@@ -94,6 +94,9 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
     }
 
     try {
+      console.log('API_URL:', API_URL);
+      console.log('Making request to:', `${API_URL}/api/imports`);
+      
       const response = await fetch(`${API_URL}/api/imports`, {
         method: 'POST',
         body: formData,
@@ -102,7 +105,21 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
         signal: AbortSignal.timeout(300000), // 5 minutos timeout
       });
 
-      const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('Parsed JSON:', data);
+      } catch (parseError) {
+        console.error('JSON Parse Error:', parseError);
+        console.error('Response was not JSON:', responseText);
+        throw new Error(`Resposta do servidor não é JSON válido: ${parseError instanceof Error ? parseError.message : 'Erro desconhecido'}. Resposta: ${responseText.substring(0, 200)}...`);
+      }
 
       if (data.success) {
         setResult({

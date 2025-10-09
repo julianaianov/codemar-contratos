@@ -6,7 +6,7 @@ import {
   ArrowLeftIcon, 
   Cog6ToothIcon,
   ServerIcon,
-  DatabaseIcon,
+  CircleStackIcon,
   ShieldCheckIcon,
   DocumentTextIcon,
   CheckCircleIcon,
@@ -147,7 +147,7 @@ export default function AdminConfigPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                <DatabaseIcon className="h-8 w-8 text-blue-600 mr-4" />
+                <CircleStackIcon className="h-8 w-8 text-blue-600 mr-4" />
                 <div>
                   <div className="text-sm font-medium text-gray-600 dark:text-gray-400">Banco de Dados</div>
                   <div className="flex items-center gap-2">

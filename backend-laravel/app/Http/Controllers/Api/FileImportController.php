@@ -38,6 +38,7 @@ class FileImportController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'file' => 'required|file|mimes:xml,xlsx,xls,csv,pdf|max:20480', // Max 20MB (PDFs podem ser maiores)
+            'diretoria' => 'required|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -47,6 +48,7 @@ class FileImportController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
+
 
         try {
             $file = $request->file('file');
