@@ -418,10 +418,7 @@ export const ContratosDashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
           <MetricCard
             title="EMPENHADO"
-            value={new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            }).format(dadosFinanceiros.empenhado)}
+            value={dadosFinanceiros.empenhado}
             description="Valor total empenhado"
             icon={<BanknotesIcon className="w-6 h-6 text-blue-600" />}
             color="blue"
@@ -430,10 +427,7 @@ export const ContratosDashboard: React.FC = () => {
 
           <MetricCard
             title="LIQUIDADO"
-            value={new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            }).format(dadosFinanceiros.liquidado)}
+            value={dadosFinanceiros.liquidado}
             description={`${Math.round((dadosFinanceiros.liquidado / dadosFinanceiros.empenhado) * 100)}% do empenhado`}
             icon={<ArrowTrendingUpIcon className="w-6 h-6 text-green-600" />}
             color="green"
@@ -442,10 +436,7 @@ export const ContratosDashboard: React.FC = () => {
 
           <MetricCard
             title="PAGO"
-            value={new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            }).format(dadosFinanceiros.pago)}
+            value={dadosFinanceiros.pago}
             description={`${Math.round((dadosFinanceiros.pago / dadosFinanceiros.liquidado) * 100)}% do liquidado`}
             icon={<CurrencyDollarIcon className="w-6 h-6 text-emerald-600" />}
             color="emerald"
@@ -454,10 +445,7 @@ export const ContratosDashboard: React.FC = () => {
 
           <MetricCard
             title="SALDO"
-            value={new Intl.NumberFormat('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            }).format(dadosFinanceiros.saldo)}
+            value={dadosFinanceiros.saldo}
             description="Saldo disponível"
             icon={<BanknotesIcon className="w-6 h-6 text-orange-600" />}
             color="orange"
