@@ -48,6 +48,25 @@
   .chart-container {
     @apply w-full h-full min-h-[300px];
   }
+
+  /* Efeitos Neon para ícones dos Apps */
+  .app-icon-glow {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+  }
+
+  .app-icon-glow:hover {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 20px currentColor);
+    animation: pulse-glow 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6)) drop-shadow(0 0 20px currentColor);
+    }
+    50% {
+      filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 28px currentColor);
+    }
+  }
   
   .loading-skeleton {
     @apply animate-pulse bg-gray-200 rounded;
