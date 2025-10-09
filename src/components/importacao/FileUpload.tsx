@@ -5,7 +5,7 @@ import { ArrowUpTrayIcon, DocumentIcon, XMarkIcon, CheckCircleIcon, XCircleIcon 
 
 interface FileUploadProps {
   acceptedFormats: string;
-  fileType: 'xml' | 'excel' | 'csv';
+  fileType: 'xml' | 'excel' | 'csv' | 'pdf';
   onUploadSuccess?: (data: any) => void;
   disabled?: boolean;
   diretoria?: string;
@@ -43,14 +43,40 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
     setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
+      const selectedFile = e.dataTransfer.files[0];
+      
+      // Validar tamanho do arquivo (20MB = 20 * 1024 * 1024 bytes)
+      const maxSize = 20 * 1024 * 1024;
+      if (selectedFile.size > maxSize) {
+        setResult({
+          success: false,
+          message: 'Arquivo muito grande',
+          error: `Arquivo tem ${(selectedFile.size / (1024 * 1024)).toFixed(1)}MB. Tamanho máximo permitido: 20MB. Tente comprimir o PDF.`,
+        });
+        return;
+      }
+      
+      setFile(selectedFile);
       setResult(null);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      
+      // Validar tamanho do arquivo (20MB = 20 * 1024 * 1024 bytes)
+      const maxSize = 20 * 1024 * 1024;
+      if (selectedFile.size > maxSize) {
+        setResult({
+          success: false,
+          message: 'Arquivo muito grande',
+          error: `Arquivo tem ${(selectedFile.size / (1024 * 1024)).toFixed(1)}MB. Tamanho máximo permitido: 20MB. Tente comprimir o PDF.`,
+        });
+        return;
+      }
+      
+      setFile(selectedFile);
       setResult(null);
     }
   };
@@ -71,6 +97,9 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
       const response = await fetch(`${API_URL}/api/imports`, {
         method: 'POST',
         body: formData,
+        // Não definir Content-Type para FormData - o browser define automaticamente com boundary
+        // Adicionar timeout para uploads grandes
+        signal: AbortSignal.timeout(300000), // 5 minutos timeout
       });
 
       const data = await response.json();
@@ -86,17 +115,40 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
           onUploadSuccess(data.data);
         }
       } else {
+        // Mostrar erros de validação se houver
+        let errorMessage = data.message || 'Erro desconhecido';
+        if (data.errors) {
+          const errorDetails = Object.values(data.errors).flat().join(', ');
+          errorMessage = `${errorMessage}: ${errorDetails}`;
+        }
+        
+        console.error('Erro na resposta:', data);
         setResult({
           success: false,
           message: 'Erro ao processar arquivo',
-          error: data.message || 'Erro desconhecido',
+          error: errorMessage,
         });
       }
     } catch (error) {
+      console.error('Erro no upload:', error);
+      
+      let errorMessage = 'Erro de conexão';
+      if (error instanceof Error) {
+        if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
+          errorMessage = 'Upload demorou muito tempo. Arquivo pode ser muito grande. Tente comprimir o PDF.';
+        } else if (error.message.includes('413')) {
+          errorMessage = 'Arquivo muito grande. Tente comprimir o PDF para menos de 20MB.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Erro de rede. Verifique sua conexão e tente novamente.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       setResult({
         success: false,
-        message: 'Erro ao conectar com o servidor',
-        error: error instanceof Error ? error.message : 'Erro de conexão',
+        message: 'Erro ao fazer upload do arquivo',
+        error: errorMessage,
       });
     } finally {
       setUploading(false);

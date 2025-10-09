@@ -51,6 +51,14 @@ class FileImport extends Model
     }
 
     /**
+     * Alias para contratos importados (compatibilidade)
+     */
+    public function contratosImportados(): HasMany
+    {
+        return $this->hasMany(ContratoImportado::class);
+    }
+
+    /**
      * Verifica se a importação está completa
      */
     public function isCompleted(): bool

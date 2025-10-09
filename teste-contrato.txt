@@ -1,0 +1,14 @@
+CONTRATO DE PRESTAÇÃO DE SERVIÇOS
+
+Número do Contrato: 001/2025
+Objeto: Contratação de serviços de manutenção predial
+Contratante: Prefeitura Municipal de Teste
+Contratado: Empresa XYZ Ltda
+CNPJ: 12.345.678/0001-90
+Valor: R$ 50.000,00
+Data de Início: 01/01/2025
+Data de Término: 31/12/2025
+Modalidade: Pregão Eletrônico
+Tipo: Prestação de Serviços
+Secretaria: Presidência
+Fonte de Recurso: Recursos Próprios

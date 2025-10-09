@@ -14,3 +14,4 @@ Este é o endereço do backend Laravel que processa os uploads de arquivos.
 NEXT_PUBLIC_LARAVEL_API_URL=https://sua-api.com.br
 ```
 
+

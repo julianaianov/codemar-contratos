@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MagnifyingGlassIcon, EyeIcon, PencilIcon, TrashIcon, ViewColumnsIcon, Squares2X2Icon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, EyeIcon, PencilIcon, TrashIcon, ViewColumnsIcon, Squares2X2Icon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
 import { ContratoImportado } from '@/types/contratos';
 import { FilterPanel } from '@/components/contratos/FilterPanel';
 import { FiltrosContratos } from '@/types/contratos';
@@ -114,6 +114,18 @@ export default function ConsultaContratosPage() {
     setShowModal(true);
   };
 
+  const handleViewPdf = (contratoId: number) => {
+    const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
+    // Abre o PDF em uma nova aba
+    window.open(`${API_URL}/api/imports/${contratoId}/pdf/view`, '_blank');
+  };
+
+  const handleDownloadPdf = (contratoId: number) => {
+    const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
+    // Faz download do PDF
+    window.location.href = `${API_URL}/api/imports/${contratoId}/pdf/download`;
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -201,13 +213,23 @@ export default function ConsultaContratosPage() {
                   <button
                     onClick={() => handleViewContrato(contrato)}
                     className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
+                    title="Ver detalhes"
                   >
                     <EyeIcon className="h-4 w-4" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900 rounded-lg transition-colors">
+                  {(contrato as any).file_import_id && (
+                    <button
+                      onClick={() => handleViewPdf((contrato as any).file_import_id)}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors"
+                      title="Ver PDF original"
+                    >
+                      <DocumentArrowDownIcon className="h-4 w-4" />
+                    </button>
+                  )}
+                  <button className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900 rounded-lg transition-colors" title="Editar">
                     <PencilIcon className="h-4 w-4" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors">
+                  <button className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900 rounded-lg transition-colors" title="Deletar">
                     <TrashIcon className="h-4 w-4" />
                   </button>
                 </div>
@@ -344,13 +366,23 @@ export default function ConsultaContratosPage() {
                         <button
                           onClick={() => handleViewContrato(contrato)}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          title="Ver detalhes"
                         >
                           <EyeIcon className="h-4 w-4" />
                         </button>
-                        <button className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300">
+                        {(contrato as any).file_import_id && (
+                          <button
+                            onClick={() => handleViewPdf((contrato as any).file_import_id)}
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                            title="Ver PDF original"
+                          >
+                            <DocumentArrowDownIcon className="h-4 w-4" />
+                          </button>
+                        )}
+                        <button className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" title="Editar">
                           <PencilIcon className="h-4 w-4" />
                         </button>
-                        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Deletar">
                           <TrashIcon className="h-4 w-4" />
                         </button>
                       </div>

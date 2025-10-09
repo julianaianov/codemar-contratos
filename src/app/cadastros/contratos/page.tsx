@@ -469,6 +469,7 @@ export default function ContratosPage() {
               >
                 <option value="">Selecione uma diretoria</option>
                 <option value="Presidência">Presidência</option>
+                <option value="Diretoria de Administração">Diretoria de Administração</option>
                 <option value="Diretoria Jurídica">Diretoria Jurídica</option>
                 <option value="Diretoria de Assuntos Imobiliários">Diretoria de Assuntos Imobiliários</option>
                 <option value="Diretoria de Operações">Diretoria de Operações</option>

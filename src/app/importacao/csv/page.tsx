@@ -12,6 +12,7 @@ export default function ImportacaoCSVPage() {
 
   const diretorias = [
     'Presidência',
+    'Diretoria de Administração',
     'Diretoria Jurídica',
     'Diretoria de Assuntos Imobiliários',
     'Diretoria de Operações',

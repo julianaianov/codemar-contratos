@@ -37,7 +37,7 @@ class FileImportController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'file' => 'required|file|mimes:xml,xlsx,xls,csv|max:10240', // Max 10MB
+            'file' => 'required|file|mimes:xml,xlsx,xls,csv,pdf|max:20480', // Max 20MB (PDFs podem ser maiores)
         ]);
 
         if ($validator->fails()) {
@@ -149,6 +149,55 @@ class FileImportController extends Controller
     }
 
     /**
+     * Retorna TODOS os contratos importados (incluindo dados vazios)
+     */
+    public function todosContratos(): JsonResponse
+    {
+        try {
+            $contratos = \App\Models\ContratoImportado::with('fileImport')
+                ->latest()
+                ->get()
+                ->map(function ($contrato) {
+                    return [
+                        'id' => $contrato->id,
+                        'file_import_id' => $contrato->file_import_id,
+                        'arquivo_original' => $contrato->fileImport ? $contrato->fileImport->original_filename : 'N/A',
+                        'tipo_arquivo' => $contrato->fileImport ? $contrato->fileImport->file_type : 'N/A',
+                        'numero_contrato' => $contrato->numero_contrato,
+                        'objeto' => $contrato->objeto,
+                        'contratante' => $contrato->contratante,
+                        'contratado' => $contrato->contratado,
+                        'cnpj_contratado' => $contrato->cnpj_contratado,
+                        'valor' => $contrato->valor,
+                        'data_inicio' => $contrato->data_inicio,
+                        'data_fim' => $contrato->data_fim,
+                        'modalidade' => $contrato->modalidade,
+                        'status' => $contrato->status,
+                        'tipo_contrato' => $contrato->tipo_contrato,
+                        'secretaria' => $contrato->secretaria,
+                        'fonte_recurso' => $contrato->fonte_recurso,
+                        'pdf_path' => $contrato->pdf_path,
+                        'texto_extraido' => $contrato->dados_originais['texto_extraido_ocr'] ?? $contrato->dados_originais['texto_extraido'] ?? null,
+                        'metodo' => $contrato->dados_originais['metodo'] ?? 'texto',
+                        'created_at' => $contrato->created_at,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $contratos,
+                'total' => $contratos->count(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao buscar contratos',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Retorna estatísticas das importações
      */
     public function stats(): JsonResponse
@@ -166,5 +215,76 @@ class FileImportController extends Controller
             'success' => true,
             'data' => $stats,
         ]);
+    }
+
+    /**
+     * Download do arquivo PDF original
+     */
+    public function downloadPdf(int $importId): mixed
+    {
+        try {
+            $import = \App\Models\FileImport::findOrFail($importId);
+            
+            if ($import->file_type !== 'pdf') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Este arquivo não é um PDF',
+                ], 400);
+            }
+
+            $filePath = storage_path('app/' . $import->file_path);
+            
+            if (!file_exists($filePath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Arquivo não encontrado',
+                ], 404);
+            }
+
+            return response()->download($filePath, $import->original_filename);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao baixar arquivo',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Visualização do PDF no navegador
+     */
+    public function viewPdf(int $importId): mixed
+    {
+        try {
+            $import = \App\Models\FileImport::findOrFail($importId);
+            
+            if ($import->file_type !== 'pdf') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Este arquivo não é um PDF',
+                ], 400);
+            }
+
+            $filePath = storage_path('app/' . $import->file_path);
+            
+            if (!file_exists($filePath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Arquivo não encontrado',
+                ], 404);
+            }
+
+            return response()->file($filePath, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $import->original_filename . '"'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao visualizar arquivo',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -46,6 +46,7 @@ const navigation = [
   { name: 'Assinatura Eletrônica', href: '/assinatura-eletronica', icon: PencilSquareIcon },
   { name: 'Terceirização', href: '/tercerizacao', icon: UserGroupIcon },
   { name: 'Relatórios', href: '/relatorios', icon: DocumentChartBarIcon },
+  { name: 'Administração', href: '/admin', icon: ShieldCheckIcon },
 ];
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, collapsed = false }) => {
@@ -81,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, collapsed = f
       >
 
         {/* Conteúdo Principal */}
-        <div className="flex-1 overflow-y-auto py-4">
+        <div className="flex-1 py-4">
           <nav className={clsx('', collapsed ? 'px-2' : 'px-4')}>
             <div className="space-y-1">
               {navigation.map((item) => {

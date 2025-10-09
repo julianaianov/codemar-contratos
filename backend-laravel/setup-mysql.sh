@@ -100,3 +100,4 @@ echo "4. Para testar, use:"
 echo "   ${GREEN}curl -X POST http://localhost:8000/api/imports -F \"file=@storage/app/examples/contratos-exemplo.xml\"${NC}"
 echo ""
 
+

@@ -205,6 +205,7 @@ class ContratoController extends Controller
     {
         $diretorias = [
             'Presidência',
+            'Diretoria de Administração',
             'Diretoria Jurídica',
             'Diretoria de Assuntos Imobiliários',
             'Diretoria de Operações',

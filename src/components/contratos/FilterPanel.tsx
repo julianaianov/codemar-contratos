@@ -24,6 +24,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   const [contratoOptions, setContratoOptions] = useState<SelectOption[]>([]);
   const [diretoriaOptions] = useState<SelectOption[]>([
     { value: 'Presidência', label: 'Presidência' },
+    { value: 'Diretoria de Administração', label: 'Diretoria de Administração' },
     { value: 'Diretoria Jurídica', label: 'Diretoria Jurídica' },
     { value: 'Diretoria de Assuntos Imobiliários', label: 'Diretoria de Assuntos Imobiliários' },
     { value: 'Diretoria de Operações', label: 'Diretoria de Operações' },
