@@ -24,13 +24,15 @@ export default function DebugPage() {
         console.log('Parsed JSON:', json);
         setResult(JSON.stringify(json, null, 2));
       } catch (e) {
-        console.log('Not valid JSON:', e.message);
-        setResult(`Error parsing JSON: ${e.message}\n\nResponse: ${text}`);
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        console.log('Not valid JSON:', errorMessage);
+        setResult(`Error parsing JSON: ${errorMessage}\n\nResponse: ${text}`);
       }
       
     } catch (error) {
       console.error('Error:', error);
-      setResult(`Error: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setResult(`Error: ${errorMessage}`);
     }
   };
 

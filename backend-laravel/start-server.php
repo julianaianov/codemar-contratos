@@ -9,3 +9,4 @@ ini_set('memory_limit', '256M');
 // Executar o servidor Laravel
 passthru('php artisan serve --host=0.0.0.0 --port=8000');
 ?>
+
