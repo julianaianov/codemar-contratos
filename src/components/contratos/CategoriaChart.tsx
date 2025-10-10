@@ -88,7 +88,7 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
   // Sempre renderizar o gráfico; se não houver dados, usar dataset zerado
   const effectiveData: ContratoPorCategoria[] = (data && data.length > 0)
     ? data
-    : [{ categoria: 'Sem dados', quantidade: 0, valor_total: 0, percentual: 0 }];
+    : [{ categoria: 'Sem dados', quantidade: 0, valor_total: 0, percentual: 0, cor: '#e5e7eb' }];
 
   const chartColors = getColorsForChart('categorias');
   const pieColors = effectiveData.map((_, index) => chartColors[index % chartColors.length]);
