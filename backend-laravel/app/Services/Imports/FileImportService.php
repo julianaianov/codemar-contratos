@@ -37,12 +37,18 @@ class FileImportService
     /**
      * Processa o arquivo importado
      */
-    public function processFile(FileImport $fileImport): void
+    public function processFile(FileImport $fileImport, ?string $diretoria = null): void
     {
         try {
             $fileImport->markAsStarted();
 
             $processor = $this->getProcessor($fileImport->file_type);
+            
+            // Se for PDF e tiver diretoria, passa para o processador
+            if ($fileImport->file_type === 'pdf' && $diretoria && method_exists($processor, 'setDiretoria')) {
+                $processor->setDiretoria($diretoria);
+            }
+            
             $processor->process($fileImport);
 
             $fileImport->markAsCompleted();

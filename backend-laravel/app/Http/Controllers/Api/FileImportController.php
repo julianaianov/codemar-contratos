@@ -52,6 +52,7 @@ class FileImportController extends Controller
 
         try {
             $file = $request->file('file');
+            $diretoria = $request->input('diretoria');
             $userId = auth()->id(); // Se tiver autenticação
 
             // Faz upload do arquivo
@@ -59,7 +60,7 @@ class FileImportController extends Controller
 
             // Processa o arquivo de forma assíncrona (ou síncrona para teste)
             // Para produção, usar jobs: ProcessFileImportJob::dispatch($fileImport);
-            $this->importService->processFile($fileImport);
+            $this->importService->processFile($fileImport, $diretoria);
 
             // Buscar diretoria mais comum nos contratos importados
             $diretoriaMaisComum = $fileImport->contratosImportados()

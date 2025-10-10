@@ -10,7 +10,7 @@ use Spatie\PdfToImage\Pdf;
 class PdfOcrProcessor implements ProcessorInterface
 {
     /**
-     * Processa arquivo PDF escaneado usando OCR
+     * Processa arquivo PDF escaneado usando Python OCR
      */
     public function process(FileImport $fileImport): void
     {
@@ -21,32 +21,11 @@ class PdfOcrProcessor implements ProcessorInterface
         }
 
         try {
-            // Converte PDF para imagem
-            $pdf = new Pdf($filePath);
+            // Usa script Python para extração
+            $data = $this->extractWithPython($filePath);
             
-            // Pega a primeira página
-            $pdf->setPage(1);
-            
-            // Cria diretório temporário para imagens
-            $tempDir = storage_path('app/temp/ocr');
-            if (!is_dir($tempDir)) {
-                mkdir($tempDir, 0755, true);
-            }
-            
-            // Gera imagem da primeira página
-            $imagePath = $tempDir . '/page_' . $fileImport->id . '.png';
-            $pdf->saveImage($imagePath);
-            
-            // Executa OCR na imagem
-            $text = $this->performOcr($imagePath);
-            
-            // Remove arquivo temporário
-            if (file_exists($imagePath)) {
-                unlink($imagePath);
-            }
-            
-            if (empty($text)) {
-                throw new \Exception('Não foi possível extrair texto via OCR. A imagem pode estar muito escura ou com baixa qualidade.');
+            if (isset($data['error'])) {
+                throw new \Exception('Erro na extração Python: ' . $data['error']);
             }
 
             // Conta total de registros
@@ -55,11 +34,11 @@ class PdfOcrProcessor implements ProcessorInterface
             $failCount = 0;
 
             try {
-                $this->processContratoPdf($text, $fileImport);
+                $this->processContratoPdf($data, $fileImport);
                 $successCount++;
             } catch (\Exception $e) {
                 $failCount++;
-                \Log::error('Erro ao processar contrato PDF via OCR', [
+                \Log::error('Erro ao processar contrato PDF via Python', [
                     'file_import_id' => $fileImport->id,
                     'error' => $e->getMessage(),
                 ]);
@@ -76,6 +55,45 @@ class PdfOcrProcessor implements ProcessorInterface
         } catch (\Exception $e) {
             throw new \Exception('Erro ao processar PDF escaneado: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Extrai dados usando script Python
+     */
+    private function extractWithPython(string $filePath): array
+    {
+        $scriptPath = base_path('scripts/minimal_extractor.py');
+        $venvPath = base_path('venv/bin/python3');
+        
+        if (!file_exists($scriptPath)) {
+            throw new \Exception('Script Python não encontrado: ' . $scriptPath);
+        }
+        
+        if (!file_exists($venvPath)) {
+            throw new \Exception('Ambiente virtual Python não encontrado: ' . $venvPath);
+        }
+        
+        // Executa o script Python com timeout
+        $command = sprintf(
+            'timeout 30 %s %s "%s" 2>&1',
+            $venvPath,
+            $scriptPath,
+            $filePath
+        );
+        
+        $output = shell_exec($command);
+        
+        if (empty($output)) {
+            throw new \Exception('Script Python não retornou dados ou travou');
+        }
+        
+        $data = json_decode($output, true);
+        
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('Erro ao decodificar JSON do Python: ' . json_last_error_msg() . ' - Output: ' . $output);
+        }
+        
+        return $data;
     }
 
     /**
@@ -114,33 +132,32 @@ class PdfOcrProcessor implements ProcessorInterface
     }
 
     /**
-     * Processa um contrato extraído via OCR
+     * Processa um contrato extraído via Python
      */
-    private function processContratoPdf(string $text, FileImport $fileImport): void
+    private function processContratoPdf(array $data, FileImport $fileImport): void
     {
-        // Extrai dados do texto usando regex (mesma lógica do PdfProcessor)
-        $dados = $this->extractData($text);
-        
         ContratoImportado::create([
             'file_import_id' => $fileImport->id,
-            'numero_contrato' => $dados['numero_contrato'],
-            'objeto' => $dados['objeto'],
-            'contratante' => $dados['contratante'],
-            'contratado' => $dados['contratado'],
-            'cnpj_contratado' => $dados['cnpj_contratado'],
-            'valor' => $dados['valor'],
-            'data_inicio' => $dados['data_inicio'],
-            'data_fim' => $dados['data_fim'],
-            'modalidade' => $dados['modalidade'],
-            'status' => $dados['status'],
-            'tipo_contrato' => $dados['tipo_contrato'],
-            'secretaria' => $dados['secretaria'],
-            'fonte_recurso' => $dados['fonte_recurso'],
-            'observacoes' => $dados['observacoes'],
+            'numero_contrato' => $data['numero_contrato'] ?? null,
+            'objeto' => $data['objeto'] ?? null,
+            'contratante' => $data['contratante'] ?? null,
+            'contratado' => $data['contratado'] ?? null,
+            'cnpj_contratado' => $data['cnpj_contratado'] ?? null,
+            'valor' => $data['valor'] ?? null,
+            'data_inicio' => $data['data_inicio'] ?? null,
+            'data_fim' => $data['data_fim'] ?? null,
+            'modalidade' => $data['modalidade'] ?? null,
+            'status' => $data['status'] ?? 'vigente',
+            'tipo_contrato' => $data['tipo_contrato'] ?? null,
+            'secretaria' => $data['secretaria'] ?? 'Diretoria de Administração',
+            'fonte_recurso' => $data['fonte_recurso'] ?? null,
+            'observacoes' => $data['observacoes'] ?? null,
             'pdf_path' => $fileImport->file_path,
             'dados_originais' => [
-                'texto_extraido_ocr' => substr($text, 0, 5000), // Primeiros 5000 chars
-                'metodo' => 'OCR'
+                'texto_extraido' => $data['texto_extraido'] ?? '',
+                'metodo' => $data['metodo'] ?? 'Python',
+                'previsao_legal' => $data['previsao_legal'] ?? null,
+                'data_final_documento' => $data['data_final_documento'] ?? null,
             ],
         ]);
     }
@@ -167,6 +184,8 @@ class PdfOcrProcessor implements ProcessorInterface
             'tipo_contrato' => $this->extractTipoContrato($text),
             'secretaria' => $this->extractSecretaria($text),
             'fonte_recurso' => $this->extractFonteRecurso($text),
+            'previsao_legal' => $this->extractPrevisaoLegal($text),
+            'data_final_documento' => $this->extractDataFinalDocumento($text),
             'observacoes' => null,
         ];
     }
@@ -191,9 +210,10 @@ class PdfOcrProcessor implements ProcessorInterface
     private function extractNumeroContrato(string $text): ?string
     {
         $patterns = [
-            '/n[úu]mero\s*(?:do\s*)?contrato[:\s]+([^\n]{1,50})/i',
-            '/contrato\s*n[°º]?\s*[:\s]*([0-9\/\-\.]+)/i',
             '/n[°º]\s*([0-9\/\-\.]+)/i',
+            '/contrato\s*n[°º]?\s*[:\s]*([0-9\/\-\.]+)/i',
+            '/n[úu]mero\s*(?:do\s*)?contrato[:\s]+([^\n]{1,50})/i',
+            '/termo\s*de\s*contrato\s*n[°º]?\s*([0-9\/\-\.]+)/i',
         ];
 
         foreach ($patterns as $pattern) {
@@ -211,13 +231,20 @@ class PdfOcrProcessor implements ProcessorInterface
     private function extractObjeto(string $text): ?string
     {
         $patterns = [
-            '/objeto[:\s]+([^\n]{10,500})/i',
-            '/objeto\s*do\s*contrato[:\s]+([^\n]{10,500})/i',
+            '/objeto[:\s]+([^\n]{10,800})/i',
+            '/objeto\s*do\s*contrato[:\s]+([^\n]{10,800})/i',
+            '/1[°º]\s*uso\s*da\s*ata[^\n]{10,800}/i',
+            '/contrata[çc][ãa]o\s*de\s*empresa[^\n]{10,800}/i',
         ];
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                return trim($matches[1]);
+                $objeto = trim($matches[0] ?? $matches[1]);
+                // Limita o tamanho do objeto
+                if (strlen($objeto) > 500) {
+                    $objeto = substr($objeto, 0, 500) . '...';
+                }
+                return $objeto;
             }
         }
 
@@ -231,17 +258,24 @@ class PdfOcrProcessor implements ProcessorInterface
     {
         $patterns = [
             '/contratante[:\s]+([^\n]{5,200})/i',
+            '/companhia\s*de\s*desenvolvimento\s*de\s*maric[áa][^\n]{5,100}/i',
+            '/codemar[^\n]{5,100}/i',
             '/munic[íi]pio\s*de\s*([^\n]{5,100})/i',
             '/prefeitura\s*municipal\s*de\s*([^\n]{5,100})/i',
         ];
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                return trim($matches[1]);
+                $contratante = trim($matches[0] ?? $matches[1]);
+                // Limita o tamanho
+                if (strlen($contratante) > 200) {
+                    $contratante = substr($contratante, 0, 200);
+                }
+                return $contratante;
             }
         }
 
-        return 'Prefeitura Municipal';
+        return 'Companhia de Desenvolvimento de Maricá - CODEMAR';
     }
 
     /**
@@ -251,13 +285,18 @@ class PdfOcrProcessor implements ProcessorInterface
     {
         $patterns = [
             '/contratad[ao][:\s]+([^\n]{5,200})/i',
+            '/destaq\s*com[ée]rcio\s*e\s*servi[çc]os[^\n]{5,100}/i',
             '/empresa[:\s]+([^\n]{5,200})/i',
         ];
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                $contratado = trim($matches[1]);
+                $contratado = trim($matches[0] ?? $matches[1]);
                 $contratado = preg_replace('/\s*-?\s*cnpj.*$/i', '', $contratado);
+                // Limita o tamanho
+                if (strlen($contratado) > 200) {
+                    $contratado = substr($contratado, 0, 200);
+                }
                 return trim($contratado);
             }
         }
@@ -296,6 +335,7 @@ class PdfOcrProcessor implements ProcessorInterface
         $patterns = [
             '/valor\s*(?:global|total)?[:\s]*r\$?\s*([\d\.,]+)/i',
             '/valor\s*do\s*contrato[:\s]*r\$?\s*([\d\.,]+)/i',
+            '/d[áa]-se\s*a\s*este\s*contrato\s*o\s*valor\s*total\s*de\s*r\$\s*([\d\.,]+)/i',
             '/r\$\s*([\d\.,]+)/i',
         ];
 
@@ -309,14 +349,16 @@ class PdfOcrProcessor implements ProcessorInterface
     }
 
     /**
-     * Extrai data de início
+     * Extrai data de início (CONTRADATA)
      */
     private function extractDataInicio(string $text): ?string
     {
         $patterns = [
+            '/data\s*do\s*in[íi]cio[:\s]*([\d\/\-\.]+)/i',
             '/data\s*(?:de\s*)?in[íi]cio[:\s]*([\d\/\-\.]+)/i',
             '/in[íi]cio[:\s]*([\d\/\-\.]+)/i',
             '/vig[êe]ncia[:\s]*(?:de\s*)?([\d\/\-\.]+)/i',
+            '/contrdata[:\s]*([\d\/\-\.]+)/i',
         ];
 
         foreach ($patterns as $pattern) {
@@ -338,6 +380,26 @@ class PdfOcrProcessor implements ProcessorInterface
             '/data\s*(?:de\s*)?fim[:\s]*([\d\/\-\.]+)/i',
             '/t[ée]rmino[:\s]*([\d\/\-\.]+)/i',
             '/at[ée][:\s]*([\d\/\-\.]+)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return $this->parseDate($matches[1]);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai data final do documento (data das assinaturas)
+     */
+    private function extractDataFinalDocumento(string $text): ?string
+    {
+        $patterns = [
+            '/maric[áa],\s*([\d\s]+de\s+[a-zç]+de\s+[\d]+)/i',
+            '/([\d]+\s+de\s+[a-zç]+de\s+[\d]+)/i',
+            '/data[:\s]*([\d\/\-\.]+)/i',
         ];
 
         foreach ($patterns as $pattern) {
@@ -435,6 +497,32 @@ class PdfOcrProcessor implements ProcessorInterface
     }
 
     /**
+     * Extrai previsão legal
+     */
+    private function extractPrevisaoLegal(string $text): ?string
+    {
+        $patterns = [
+            '/previs[ãa]o\s*legal[:\s]*([^\n]{10,200})/i',
+            '/lei\s*n[°º]?\s*13\.303[^\n]{10,200}/i',
+            '/procedimento\s*licitat[óo]rio[^\n]{10,200}/i',
+            '/processo\s*administrativo[^\n]{10,200}/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                $previsao = trim($matches[0] ?? $matches[1]);
+                // Limita o tamanho
+                if (strlen($previsao) > 200) {
+                    $previsao = substr($previsao, 0, 200) . '...';
+                }
+                return $previsao;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Converte string para decimal
      */
     private function parseDecimal(?string $value): ?float
@@ -467,6 +555,21 @@ class PdfOcrProcessor implements ProcessorInterface
         $value = trim($value);
 
         try {
+            // Mapeia meses em português
+            $meses = [
+                'janeiro' => '01', 'fevereiro' => '02', 'março' => '03', 'abril' => '04',
+                'maio' => '05', 'junho' => '06', 'julho' => '07', 'agosto' => '08',
+                'setembro' => '09', 'outubro' => '10', 'novembro' => '11', 'dezembro' => '12'
+            ];
+
+            // Converte datas em português (ex: "24 de outubro de 2023")
+            foreach ($meses as $mes => $numero) {
+                if (preg_match('/(\d+)\s+de\s+' . $mes . '\s+de\s+(\d{4})/i', $value, $matches)) {
+                    return sprintf('%s-%s-%02d', $matches[2], $numero, (int)$matches[1]);
+                }
+            }
+
+            // Tenta formatos padrão
             $formats = ['d/m/Y', 'd-m-Y', 'd.m.Y', 'Y-m-d', 'Y/m/d'];
             
             foreach ($formats as $format) {
