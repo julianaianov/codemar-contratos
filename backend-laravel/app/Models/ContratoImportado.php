@@ -29,6 +29,7 @@ class ContratoImportado extends Model
         'fonte_recurso',
         'observacoes',
         'dados_originais',
+        'pdf_path',
         'processado',
         'erro_processamento',
     ];

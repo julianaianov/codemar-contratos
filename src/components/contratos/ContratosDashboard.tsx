@@ -24,10 +24,14 @@ import {
   ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline';
 
-export const ContratosDashboard: React.FC = () => {
+interface ContratosDashboardProps {
+  initialFilter?: FiltrosContratos;
+}
+
+export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialFilter = {} }) => {
   const { theme } = useTheme();
   const router = useRouter();
-  const [filters, setFilters] = useState<FiltrosContratos>({});
+  const [filters, setFilters] = useState<FiltrosContratos>(initialFilter);
   const [dashboardData, setDashboardData] = useState<DashboardContratos | null>(null);
   const [metricas, setMetricas] = useState<MetricasContratos | null>(null);
   const [loading, setLoading] = useState(true);

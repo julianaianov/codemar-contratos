@@ -5,8 +5,10 @@ import { ArrowUpTrayIcon, DocumentIcon, XMarkIcon, CheckCircleIcon, XCircleIcon 
 
 interface FileUploadProps {
   acceptedFormats: string;
-  fileType: 'xml' | 'excel' | 'csv';
+  fileType: 'xml' | 'excel' | 'csv' | 'pdf';
   onUploadSuccess?: (data: any) => void;
+  disabled?: boolean;
+  diretoria?: string;
 }
 
 interface UploadResult {
@@ -16,7 +18,7 @@ interface UploadResult {
   error?: string;
 }
 
-export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess }: FileUploadProps) {
+export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess, disabled = false, diretoria }: FileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<UploadResult | null>(null);
@@ -41,14 +43,40 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
     setDragActive(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
+      const selectedFile = e.dataTransfer.files[0];
+      
+      // Validar tamanho do arquivo (20MB = 20 * 1024 * 1024 bytes)
+      const maxSize = 20 * 1024 * 1024;
+      if (selectedFile.size > maxSize) {
+        setResult({
+          success: false,
+          message: 'Arquivo muito grande',
+          error: `Arquivo tem ${(selectedFile.size / (1024 * 1024)).toFixed(1)}MB. Tamanho máximo permitido: 20MB. Tente comprimir o PDF.`,
+        });
+        return;
+      }
+      
+      setFile(selectedFile);
       setResult(null);
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      
+      // Validar tamanho do arquivo (20MB = 20 * 1024 * 1024 bytes)
+      const maxSize = 20 * 1024 * 1024;
+      if (selectedFile.size > maxSize) {
+        setResult({
+          success: false,
+          message: 'Arquivo muito grande',
+          error: `Arquivo tem ${(selectedFile.size / (1024 * 1024)).toFixed(1)}MB. Tamanho máximo permitido: 20MB. Tente comprimir o PDF.`,
+        });
+        return;
+      }
+      
+      setFile(selectedFile);
       setResult(null);
     }
   };
@@ -61,14 +89,37 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
 
     const formData = new FormData();
     formData.append('file', file);
+    if (diretoria) {
+      formData.append('diretoria', diretoria);
+    }
 
     try {
+      console.log('API_URL:', API_URL);
+      console.log('Making request to:', `${API_URL}/api/imports`);
+      
       const response = await fetch(`${API_URL}/api/imports`, {
         method: 'POST',
         body: formData,
+        // Não definir Content-Type para FormData - o browser define automaticamente com boundary
+        // Adicionar timeout para uploads grandes
+        signal: AbortSignal.timeout(300000), // 5 minutos timeout
       });
 
-      const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      
+      const responseText = await response.text();
+      console.log('Response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+        console.log('Parsed JSON:', data);
+      } catch (parseError) {
+        console.error('JSON Parse Error:', parseError);
+        console.error('Response was not JSON:', responseText);
+        throw new Error(`Resposta do servidor não é JSON válido: ${parseError instanceof Error ? parseError.message : 'Erro desconhecido'}. Resposta: ${responseText.substring(0, 200)}...`);
+      }
 
       if (data.success) {
         setResult({
@@ -81,17 +132,40 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
           onUploadSuccess(data.data);
         }
       } else {
+        // Mostrar erros de validação se houver
+        let errorMessage = data.message || 'Erro desconhecido';
+        if (data.errors) {
+          const errorDetails = Object.values(data.errors).flat().join(', ');
+          errorMessage = `${errorMessage}: ${errorDetails}`;
+        }
+        
+        console.error('Erro na resposta:', data);
         setResult({
           success: false,
           message: 'Erro ao processar arquivo',
-          error: data.message || 'Erro desconhecido',
+          error: errorMessage,
         });
       }
     } catch (error) {
+      console.error('Erro no upload:', error);
+      
+      let errorMessage = 'Erro de conexão';
+      if (error instanceof Error) {
+        if (error.name === 'TimeoutError' || error.message.includes('timeout')) {
+          errorMessage = 'Upload demorou muito tempo. Arquivo pode ser muito grande. Tente comprimir o PDF.';
+        } else if (error.message.includes('413')) {
+          errorMessage = 'Arquivo muito grande. Tente comprimir o PDF para menos de 20MB.';
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Erro de rede. Verifique sua conexão e tente novamente.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       setResult({
         success: false,
-        message: 'Erro ao conectar com o servidor',
-        error: error instanceof Error ? error.message : 'Erro de conexão',
+        message: 'Erro ao fazer upload do arquivo',
+        error: errorMessage,
       });
     } finally {
       setUploading(false);
@@ -119,14 +193,16 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
       {/* Área de Drop */}
       <div
         className={`relative border-2 border-dashed rounded-lg p-8 transition-all duration-200 ${
-          dragActive
+          disabled
+            ? 'border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 opacity-50'
+            : dragActive
             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
             : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800'
         } ${file ? 'bg-green-50 dark:bg-green-900/20 border-green-500' : ''}`}
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
+        onDragEnter={disabled ? undefined : handleDrag}
+        onDragLeave={disabled ? undefined : handleDrag}
+        onDragOver={disabled ? undefined : handleDrag}
+        onDrop={disabled ? undefined : handleDrop}
       >
         <input
           ref={fileInputRef}
@@ -140,7 +216,7 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
         {!file ? (
           <label
             htmlFor="file-upload"
-            className="cursor-pointer flex flex-col items-center justify-center"
+            className={`flex flex-col items-center justify-center ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
           >
             <ArrowUpTrayIcon className="h-12 w-12 text-gray-400 mb-4" />
             <p className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -181,9 +257,9 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess 
       {file && !result && (
         <button
           onClick={handleUpload}
-          disabled={uploading}
+          disabled={uploading || disabled}
           className={`mt-4 w-full py-3 px-6 rounded-lg font-medium text-white transition-all duration-200 ${
-            uploading
+            uploading || disabled
               ? 'bg-gray-400 cursor-not-allowed'
               : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'
           }`}

@@ -63,6 +63,7 @@ class FileImportService
             'xml' => 'xml',
             'xlsx', 'xls' => 'excel',
             'csv' => 'csv',
+            'pdf' => 'pdf',
             default => throw new \InvalidArgumentException('Tipo de arquivo não suportado: ' . $extension),
         };
     }
@@ -76,6 +77,7 @@ class FileImportService
             'xml' => new XmlProcessor(),
             'excel' => new ExcelProcessor(),
             'csv' => new CsvProcessor(),
+            'pdf' => new PdfProcessor(),
             default => throw new \InvalidArgumentException('Processador não encontrado para: ' . $fileType),
         };
     }

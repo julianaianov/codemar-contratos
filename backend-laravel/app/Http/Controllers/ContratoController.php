@@ -28,6 +28,10 @@ class ContratoController extends Controller
             $query->where('contratado', 'like', '%' . $request->contratado . '%');
         }
 
+        if ($request->has('diretoria')) {
+            $query->where('secretaria', $request->diretoria);
+        }
+
         if ($request->has('data_inicio')) {
             $query->whereDate('data_inicio', '>=', $request->data_inicio);
         }
@@ -168,22 +172,50 @@ class ContratoController extends Controller
     /**
      * Estatísticas dos contratos
      */
-    public function stats()
+    public function stats(Request $request)
     {
-        $total = ContratoImportado::count();
-        $vigentes = ContratoImportado::where('status', 'vigente')->count();
-        $encerrados = ContratoImportado::where('status', 'encerrado')->count();
-        $valorTotal = ContratoImportado::sum('valor');
-        $valorVigentes = ContratoImportado::where('status', 'vigente')->sum('valor');
+        $query = ContratoImportado::query();
+        
+        // Filtrar por diretoria se fornecido
+        if ($request->has('diretoria')) {
+            $query->where('secretaria', $request->diretoria);
+        }
+
+        $total = $query->count();
+        $vigentes = (clone $query)->where('status', 'vigente')->count();
+        $encerrados = (clone $query)->where('status', 'encerrado')->count();
+        $valorTotal = (clone $query)->sum('valor');
+        $valorVigentes = (clone $query)->where('status', 'vigente')->sum('valor');
 
         return response()->json([
             'total' => $total,
             'vigentes' => $vigentes,
             'encerrados' => $encerrados,
-            'suspensos' => ContratoImportado::where('status', 'suspenso')->count(),
-            'rescindidos' => ContratoImportado::where('status', 'rescindido')->count(),
+            'suspensos' => (clone $query)->where('status', 'suspenso')->count(),
+            'rescindidos' => (clone $query)->where('status', 'rescindido')->count(),
             'valor_total' => $valorTotal,
             'valor_vigentes' => $valorVigentes,
+        ]);
+    }
+
+    /**
+     * Lista todas as diretorias disponíveis
+     */
+    public function diretorias()
+    {
+        $diretorias = [
+            'Presidência',
+            'Diretoria de Administração',
+            'Diretoria Jurídica',
+            'Diretoria de Assuntos Imobiliários',
+            'Diretoria de Operações',
+            'Diretoria de Tecnologia da Informação e Inovação',
+            'Diretoria de Governança em Licitações e Contratações'
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $diretorias,
         ]);
     }
 }

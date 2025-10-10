@@ -28,6 +28,14 @@ export default function ImportacaoPage() {
       color: 'bg-purple-500',
     },
     {
+      title: 'Importar PDF',
+      description: 'Importe contratos em PDF com extração automática de dados',
+      icon: DocumentTextIcon,
+      href: '/importacao/pdf',
+      color: 'bg-red-500',
+      badge: 'Novo',
+    },
+    {
       title: 'Ver Importações',
       description: 'Visualize o histórico e status de todas as importações realizadas',
       icon: ClipboardDocumentListIcon,
@@ -53,8 +61,13 @@ export default function ImportacaoPage() {
           <Link
             key={option.href}
             href={option.href}
-            className="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700"
+            className="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700 relative"
           >
+            {option.badge && (
+              <span className="absolute top-3 right-3 px-2 py-1 text-xs font-semibold text-white bg-red-500 rounded-full">
+                {option.badge}
+              </span>
+            )}
             <div className="flex items-center gap-4 mb-4">
               <div className={`p-3 rounded-lg ${option.color}`}>
                 <option.icon className="h-8 w-8 text-white" />
