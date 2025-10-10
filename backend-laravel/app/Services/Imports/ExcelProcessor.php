@@ -10,6 +10,12 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class ExcelProcessor implements ProcessorInterface
 {
+    private ?string $diretoria = null;
+
+    public function setDiretoria(string $diretoria): void
+    {
+        $this->diretoria = $diretoria;
+    }
     /**
      * Processa arquivo Excel
      */
@@ -89,7 +95,7 @@ class ExcelProcessor implements ProcessorInterface
             'modalidade' => $this->getValue($data, ['modalidade']),
             'status' => $this->getValue($data, ['status', 'situacao']),
             'tipo_contrato' => $this->getValue($data, ['tipo', 'tipo_contrato']),
-            'secretaria' => $this->getValue($data, ['secretaria', 'unidade']),
+            'secretaria' => $this->getValue($data, ['diretoria', 'secretaria', 'unidade']) ?: $this->diretoria,
             'fonte_recurso' => $this->getValue($data, ['fonte_recurso', 'fonte']),
             'observacoes' => $this->getValue($data, ['observacoes', 'obs']),
             'dados_originais' => $data,

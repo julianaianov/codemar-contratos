@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { BarChart } from '@/components/charts/BarChart';
-import { CronogramaContrato } from '@/types/contratos';
+import { CronogramaContrato, FiltrosContratos } from '@/types/contratos';
 import { useChartStyle } from '@/components/layout/ChartStyleProvider';
 
 interface CronogramaChartProps {
   anoSelecionado?: string | number;
+  filters?: FiltrosContratos;
 }
 
-export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado }) => {
+export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado, filters }) => {
   const { getColorsForChart, gradient, neon } = useChartStyle();
   const [data, setData] = useState<CronogramaContrato[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,17 @@ export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/contratos/cronograma');
+        const params = new URLSearchParams();
+        if (filters?.diretoria) {
+          params.append('diretoria', String(filters.diretoria));
+        } else {
+          const savedFilters = sessionStorage.getItem('contratos:filters');
+          if (savedFilters) {
+            const parsed = JSON.parse(savedFilters);
+            if (parsed.diretoria) params.append('diretoria', parsed.diretoria);
+          }
+        }
+        const response = await fetch(`/api/contratos/cronograma?${params.toString()}`);
         const result = await response.json();
         
         if (result.success) {
@@ -64,7 +75,7 @@ export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado
     };
 
     fetchData();
-  }, []);
+  }, [filters?.diretoria]);
 
   if (loading) {
     return (

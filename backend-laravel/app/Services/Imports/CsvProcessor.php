@@ -8,6 +8,12 @@ use Illuminate\Support\Facades\Storage;
 
 class CsvProcessor implements ProcessorInterface
 {
+    private ?string $diretoria = null;
+
+    public function setDiretoria(string $diretoria): void
+    {
+        $this->diretoria = $diretoria;
+    }
     /**
      * Processa arquivo CSV
      */
@@ -122,7 +128,8 @@ class CsvProcessor implements ProcessorInterface
             'modalidade' => $this->getValue($data, ['modalidade']),
             'status' => $this->getValue($data, ['status', 'situacao', 'situação']),
             'tipo_contrato' => $this->getValue($data, ['tipo', 'tipo_contrato', 'tipo contrato']),
-            'secretaria' => $this->getValue($data, ['secretaria', 'unidade']),
+            // usa diretoria do upload quando não houver coluna mapeada
+            'secretaria' => $this->getValue($data, ['diretoria', 'secretaria', 'unidade']) ?: $this->diretoria,
             'fonte_recurso' => $this->getValue($data, ['fonte_recurso', 'fonte', 'fonte recurso']),
             'observacoes' => $this->getValue($data, ['observacoes', 'observações', 'obs']),
             'dados_originais' => $data,

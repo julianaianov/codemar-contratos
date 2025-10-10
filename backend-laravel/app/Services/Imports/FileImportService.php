@@ -3,6 +3,7 @@
 namespace App\Services\Imports;
 
 use App\Models\FileImport;
+use App\Models\ContratoImportado;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -44,12 +45,19 @@ class FileImportService
 
             $processor = $this->getProcessor($fileImport->file_type);
             
-            // Se for PDF e tiver diretoria, passa para o processador
-            if ($fileImport->file_type === 'pdf' && $diretoria && method_exists($processor, 'setDiretoria')) {
+            // Passa diretoria para o processador (quando suportado)
+            if ($diretoria && method_exists($processor, 'setDiretoria')) {
                 $processor->setDiretoria($diretoria);
             }
             
             $processor->process($fileImport);
+
+            // Garantir que todos os contratos desta importação tenham a diretoria definida
+            if ($diretoria) {
+                ContratoImportado::where('file_import_id', $fileImport->id)
+                    ->whereNull('secretaria')
+                    ->update(['secretaria' => $diretoria]);
+            }
 
             $fileImport->markAsCompleted();
         } catch (\Exception $e) {

@@ -65,6 +65,15 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
 
   // Carregar dados do dashboard
   useEffect(() => {
+    // Persistir filtros iniciais (inclui diretoria quando vindo pela rota da diretoria)
+    try {
+      const current = sessionStorage.getItem('contratos:filters');
+      const desired = JSON.stringify(initialFilter);
+      if (current !== desired) {
+        sessionStorage.setItem('contratos:filters', desired);
+      }
+    } catch {}
+
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
@@ -115,6 +124,10 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
 
   const handleFiltersChange = (newFilters: FiltrosContratos) => {
     setFilters(newFilters);
+    // Persistir filtros para os gráficos filhos (categoria, por ano, cronograma)
+    try {
+      sessionStorage.setItem('contratos:filters', JSON.stringify(newFilters));
+    } catch {}
   };
 
   const handleFilter = () => {
@@ -301,7 +314,7 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <CategoriaChart />
+            <CategoriaChart filters={filters} />
           </CardContent>
         </Card>
 
@@ -314,7 +327,7 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ContratosPorAnoChart />
+            <ContratosPorAnoChart filters={filters} />
           </CardContent>
         </Card>
       </div>
@@ -330,7 +343,7 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <CronogramaChart anoSelecionado={anoSelecionadoDashboard} />
+          <CronogramaChart anoSelecionado={anoSelecionadoDashboard} filters={filters} />
         </CardContent>
       </Card>
 

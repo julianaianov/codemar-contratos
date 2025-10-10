@@ -4,8 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { PieChart } from '@/components/charts/PieChart';
 import { ContratoPorCategoria } from '@/types/contratos';
 import { useChartStyle } from '@/components/layout/ChartStyleProvider';
+import { FiltrosContratos } from '@/types/contratos';
 
-export const CategoriaChart: React.FC = () => {
+interface Props { filters?: FiltrosContratos }
+
+export const CategoriaChart: React.FC<Props> = ({ filters }) => {
   const { getColorsForChart } = useChartStyle();
   const [data, setData] = useState<ContratoPorCategoria[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +43,17 @@ export const CategoriaChart: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/contratos/categorias');
+        const params = new URLSearchParams();
+        if (filters?.diretoria) {
+          params.append('diretoria', String(filters.diretoria));
+        } else {
+          const savedFilters = sessionStorage.getItem('contratos:filters');
+          if (savedFilters) {
+            const parsed = JSON.parse(savedFilters);
+            if (parsed.diretoria) params.append('diretoria', parsed.diretoria);
+          }
+        }
+        const response = await fetch(`/api/contratos/categorias?${params.toString()}`);
         const result = await response.json();
         
         if (result.success) {
@@ -62,7 +75,7 @@ export const CategoriaChart: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [filters?.diretoria]);
 
   if (loading) {
     return (

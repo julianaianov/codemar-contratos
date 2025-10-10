@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${API_URL}/api/contratos/por-ano`);
+    const { searchParams } = new URL(request.url);
+    const url = new URL(`${API_URL}/api/contratos/por-ano`);
+    searchParams.forEach((value, key) => url.searchParams.append(key, value));
+
+    const response = await fetch(url.toString());
     const data = await response.json();
 
     if (!response.ok) {

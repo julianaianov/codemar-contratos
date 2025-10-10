@@ -8,6 +8,12 @@ use Illuminate\Support\Facades\Storage;
 
 class XmlProcessor implements ProcessorInterface
 {
+    private ?string $diretoria = null;
+
+    public function setDiretoria(string $diretoria): void
+    {
+        $this->diretoria = $diretoria;
+    }
     /**
      * Processa arquivo XML
      */
@@ -75,7 +81,7 @@ class XmlProcessor implements ProcessorInterface
             'modalidade' => (string) ($xml->modalidade ?? null),
             'status' => (string) ($xml->status ?? null),
             'tipo_contrato' => (string) ($xml->tipo ?? null),
-            'secretaria' => (string) ($xml->secretaria ?? null),
+            'secretaria' => (string) ($xml->diretoria ?? $xml->secretaria ?? $this->diretoria ?? null),
             'fonte_recurso' => (string) ($xml->fonte_recurso ?? null),
             'observacoes' => (string) ($xml->observacoes ?? null),
             'dados_originais' => json_decode(json_encode($xml), true),
