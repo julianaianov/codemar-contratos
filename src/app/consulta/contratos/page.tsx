@@ -39,28 +39,7 @@ export default function ConsultaContratosPage() {
       setContratos(data.data || []);
     } catch (error) {
       console.error('Erro ao carregar contratos:', error);
-      // Em caso de erro, mostrar dados mock para demonstração
-      setContratos([
-        {
-          id: 1,
-          numero_contrato: '001/2025',
-          objeto: 'Contratação de serviços de manutenção predial',
-          contratante: 'Prefeitura Municipal',
-          contratado: 'Empresa XYZ Ltda',
-          cnpj_contratado: '12.345.678/0001-90',
-          valor_global: 50000,
-          data_inicio: '2024-12-31',
-          data_fim: '2025-12-30',
-          modalidade: 'Pregão Eletrônico',
-          status: 'vigente',
-          tipo_contrato: 'Prestação de Serviços',
-          secretaria: 'Presidência',
-          fonte_recurso: 'Recursos Próprios',
-          observacoes: 'Contrato para manutenção predial',
-          created_at: '2025-01-01T00:00:00Z',
-          updated_at: '2025-01-01T00:00:00Z'
-        }
-      ]);
+      setContratos([]);
     } finally {
       setLoading(false);
     }
@@ -263,7 +242,7 @@ export default function ConsultaContratosPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Valor</p>
                     <p className="text-sm text-gray-900 dark:text-white">
-                      {formatarValor(contrato.valor_global)}
+                      {formatarValor(contrato.valor)}
                     </p>
                   </div>
                 </div>
@@ -354,7 +333,7 @@ export default function ConsultaContratosPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 dark:text-white">
-                        {formatarValor(contrato.valor_global)}
+                        {formatarValor(contrato.valor)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -459,7 +438,7 @@ export default function ConsultaContratosPage() {
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Valor Global</label>
-                  <p className="text-sm text-gray-900 dark:text-white font-semibold">{formatarValor(contratoSelecionado.valor_global)}</p>
+                  <p className="text-sm text-gray-900 dark:text-white font-semibold">{formatarValor(contratoSelecionado.valor)}</p>
                 </div>
               </div>
             </div>

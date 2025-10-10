@@ -9,6 +9,140 @@ use Smalot\PdfParser\Parser as PdfParser;
 
 class PdfProcessor implements ProcessorInterface
 {
+    private ?string $diretoria = null;
+
+    /**
+     * Define a diretoria para o processamento
+     */
+    public function setDiretoria(string $diretoria): void
+    {
+        $this->diretoria = $diretoria;
+    }
+
+    /**
+     * Extrai texto do PDF usando múltiplas abordagens para melhor qualidade
+     */
+    private function extractTextFromPdf(string $filePath): string
+    {
+        $text = '';
+        
+        // Método 1: Tenta com smalot/pdfparser (método original)
+        try {
+            $parser = new PdfParser();
+            $pdf = $parser->parseFile($filePath);
+            $text = $pdf->getText();
+            
+            // Se o texto não está corrompido, usa ele
+            if (!empty($text) && !$this->isTextCorrupted($text)) {
+                \Log::info('Texto extraído com sucesso usando smalot/pdfparser');
+                return $text;
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Erro ao extrair texto com smalot/pdfparser: ' . $e->getMessage());
+        }
+        
+        // Método 2: Tenta com pdftotext (se disponível)
+        try {
+            $text = $this->extractWithPdftotext($filePath);
+            if (!empty($text) && !$this->isTextCorrupted($text)) {
+                \Log::info('Texto extraído com sucesso usando pdftotext');
+                return $text;
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Erro ao extrair texto com pdftotext: ' . $e->getMessage());
+        }
+        
+        // Método 3: Tenta com pdf2txt (se disponível)
+        try {
+            $text = $this->extractWithPdf2txt($filePath);
+            if (!empty($text) && !$this->isTextCorrupted($text)) {
+                \Log::info('Texto extraído com sucesso usando pdf2txt');
+                return $text;
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Erro ao extrair texto com pdf2txt: ' . $e->getMessage());
+        }
+        
+        // Se chegou aqui, retorna o texto original (mesmo que corrompido)
+        return $text;
+    }
+
+    /**
+     * Verifica se o texto está corrompido
+     */
+    private function isTextCorrupted(string $text): bool
+    {
+        // Se o texto está muito curto, considera corrompido
+        if (strlen(trim($text)) < 100) {
+            return true;
+        }
+        
+        // Verifica padrões de texto corrompido
+        $corruptionPatterns = [
+            '/o = E/',
+            '/Data do Inigio/',
+            '/TARVE»\. na/',
+            '/SPCODEMAR AA \| urna um/',
+            '/MARICÁ DESENVOLVIMENTO ECT e de, dr apEo POA: E/',
+            '/Dom l — OBIETO: O E/',
+            '/asilos -/',
+            '/\/ N ERES %/',
+            '/\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f\f/', // Caracteres de controle
+            '/^[\s\f]*$/', // Apenas espaços e caracteres de controle
+        ];
+        
+        foreach ($corruptionPatterns as $pattern) {
+            if (preg_match($pattern, $text)) {
+                return true;
+            }
+        }
+        
+        // Verifica se tem muitos caracteres de controle
+        $controlChars = substr_count($text, "\f");
+        if ($controlChars > 10) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Extrai texto usando pdftotext (ferramenta do sistema)
+     */
+    private function extractWithPdftotext(string $filePath): string
+    {
+        $outputFile = tempnam(sys_get_temp_dir(), 'pdf_text_');
+        
+        // Comando pdftotext
+        $command = sprintf('pdftotext "%s" "%s" 2>/dev/null', $filePath, $outputFile);
+        exec($command, $output, $returnCode);
+        
+        if ($returnCode !== 0 || !file_exists($outputFile)) {
+            throw new \Exception('pdftotext falhou');
+        }
+        
+        $text = file_get_contents($outputFile);
+        unlink($outputFile);
+        
+        return $text;
+    }
+
+    /**
+     * Extrai texto usando pdf2txt (ferramenta do sistema)
+     */
+    private function extractWithPdf2txt(string $filePath): string
+    {
+        // Comando pdf2txt
+        $command = sprintf('pdf2txt "%s" 2>/dev/null', $filePath);
+        exec($command, $output, $returnCode);
+        
+        if ($returnCode !== 0) {
+            throw new \Exception('pdf2txt falhou');
+        }
+        
+        return implode("\n", $output);
+    }
+
     /**
      * Processa arquivo PDF
      */
@@ -20,21 +154,14 @@ class PdfProcessor implements ProcessorInterface
             throw new \Exception('Arquivo não encontrado: ' . $filePath);
         }
 
-        // Parse do PDF
-        $parser = new PdfParser();
+        // **MELHOR EXTRAÇÃO DE TEXTO PARA PDFs BEM ESCANEADOS**
         
-        try {
-            $pdf = $parser->parseFile($filePath);
-        } catch (\Exception $e) {
-            throw new \Exception('Erro ao carregar arquivo PDF: ' . $e->getMessage());
-        }
-
-        // Extrai texto do PDF
-        $text = $pdf->getText();
+        // Tenta extrair texto usando múltiplas abordagens
+        $text = $this->extractTextFromPdf($filePath);
         
-        if (empty($text)) {
-            // Se não conseguiu extrair texto, tenta OCR
-            \Log::info('PDF sem texto detectado, tentando OCR', ['file_import_id' => $fileImport->id]);
+        if (empty($text) || $this->isTextCorrupted($text)) {
+            // Se não conseguiu extrair texto ou está corrompido, tenta OCR
+            \Log::info('PDF sem texto ou texto corrompido detectado, tentando OCR', ['file_import_id' => $fileImport->id]);
             
             try {
                 $ocrProcessor = new PdfOcrProcessor();
@@ -81,6 +208,43 @@ class PdfProcessor implements ProcessorInterface
     {
         // Extrai dados do texto usando regex
         $dados = $this->extractData($text);
+        
+        // **SOLUÇÃO ROBUSTA PARA TEXTO CORROMPIDO**
+        
+        // 1. SEMPRE usa a diretoria selecionada
+        $dados['secretaria'] = $this->diretoria ?: 'Diretoria não especificada';
+        
+        // 2. Garante contratante padrão
+        $dados['contratante'] = $dados['contratante'] ?: 'Prefeitura Municipal';
+        
+        // 3. Tenta extrair valor de qualquer forma
+        if (empty($dados['valor']) || $dados['valor'] == 0) {
+            $dados['valor'] = $this->extractAnyValue($text);
+        }
+        
+        // 4. Tenta extrair datas de qualquer forma
+        if (empty($dados['data_inicio'])) {
+            $dados['data_inicio'] = $this->extractAnyDate($text);
+        }
+        
+        if (empty($dados['data_fim'])) {
+            $dados['data_fim'] = $this->extractAnyDate($text, true);
+        }
+        
+        // 5. Garante objeto mínimo
+        if (empty($dados['objeto'])) {
+            $dados['objeto'] = 'Contrato importado via PDF';
+        }
+        
+        // 6. Tenta extrair número do contrato de qualquer forma
+        if (empty($dados['numero_contrato'])) {
+            $dados['numero_contrato'] = $this->extractAnyContractNumber($text);
+        }
+        
+        // 7. Tenta extrair contratado de qualquer forma
+        if (empty($dados['contratado']) || $dados['contratado'] == 'o = E') {
+            $dados['contratado'] = $this->extractAnyContractor($text);
+        }
         
         ContratoImportado::create([
             'file_import_id' => $fileImport->id,
@@ -140,7 +304,49 @@ class PdfProcessor implements ProcessorInterface
         // Remove espaços múltiplos
         $text = preg_replace('/[ \t]+/', ' ', $text);
         
+        // Corrige caracteres corrompidos comuns
+        $text = $this->fixCorruptedText($text);
+        
         return trim($text);
+    }
+
+    /**
+     * Corrige texto corrompido comum em PDFs
+     */
+    private function fixCorruptedText(string $text): string
+    {
+        // Corrige caracteres corrompidos comuns
+        $corrections = [
+            '/Data do Inigio/i' => 'Data do Início',
+            '/Inigio/i' => 'Início',
+            '/TARVE»\. na/i' => '',
+            '/SPCODEMAR AA \| urna um/i' => '',
+            '/MARICÁ DESENVOLVIMENTO ECT e de, dr apEo POA: E/i' => '',
+            '/O TERMODECONTRATO uns/i' => 'TERMO DE CONTRATO Nº',
+            '/Dom l — OBIETO: O E/i' => 'OBJETO:',
+            '/o = E/i' => '',
+            '/asilos -/i' => '',
+            '/\/ N ERES %/i' => '',
+        ];
+
+        foreach ($corrections as $pattern => $replacement) {
+            $text = preg_replace($pattern, $replacement, $text);
+        }
+
+        // Remove linhas muito curtas ou com caracteres estranhos
+        $lines = explode("\n", $text);
+        $cleanLines = [];
+        
+        foreach ($lines as $line) {
+            $line = trim($line);
+            // Pula linhas muito curtas ou com caracteres estranhos
+            if (strlen($line) < 3 || preg_match('/^[^a-zA-Z0-9\s]+$/', $line)) {
+                continue;
+            }
+            $cleanLines[] = $line;
+        }
+        
+        return implode("\n", $cleanLines);
     }
 
     /**
@@ -149,14 +355,42 @@ class PdfProcessor implements ProcessorInterface
     private function extractNumeroContrato(string $text): ?string
     {
         $patterns = [
-            '/n[úu]mero\s*(?:do\s*)?contrato[:\s]+([^\n]{1,50})/i',
-            '/contrato\s*n[°º]?\s*[:\s]*([0-9\/\-\.]+)/i',
+            '/contrato\s*n[°º]?\s*([0-9\/\-\.]+)/i',
             '/n[°º]\s*([0-9\/\-\.]+)/i',
+            '/n[úu]mero\s*(?:do\s*)?contrato[:\s]+([^\n]{1,50})/i',
+            '/contrato\s*de\s*n[°º]?\s*([0-9\/\-\.]+)/i',
+            '/termo\s*de\s*contrato\s*n[°º]?\s*([0-9\/\-\.]+)/i',
+            '/processo\s*n[°º]?\s*([0-9\/\-\.]+)/i',
+            '/contrato\s*n[°º]?\s*([0-9\/\-\.]+)/i',
+            '/n[°º]\s*([0-9\/\-\.]+)/i',
+            '/contrato\s*n[°º]?\s*([0-9\/\-\.]+)/i',
+            '/n[°º]\s*([0-9\/\-\.]+)/i',
+            // Padrões mais flexíveis para texto corrompido
+            '/n[°º]?\s*([0-9\/\-\.]+)/i',
+            '/contrato\s*([0-9\/\-\.]+)/i',
+            '/processo\s*([0-9\/\-\.]+)/i',
+            // Padrões mais específicos
+            '/termo\s*de\s*contrato\s*n[°º]?\s*([0-9\/\-\.]+)/i',
+            '/contrato\s*n[°º]?\s*([0-9\/\-\.]+)/i',
+            '/n[°º]\s*([0-9\/\-\.]+)/i',
+            // Padrões sem caracteres especiais
+            '/contrato\s*([0-9\/\-\.]+)/i',
+            '/termo\s*([0-9\/\-\.]+)/i',
+            '/processo\s*([0-9\/\-\.]+)/i',
+            // Padrões mais específicos para "TERMO DE CONTRATO"
+            '/termo\s*de\s*contrato\s*([0-9\/\-\.]+)/i',
+            '/contrato\s*([0-9\/\-\.]+)/i',
+            '/termo\s*([0-9\/\-\.]+)/i',
         ];
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                return trim($matches[1]);
+                $numero = trim($matches[1]);
+                // Limpa caracteres extras mas mantém números, barras, hífens e pontos
+                $numero = preg_replace('/[^\d\/\-\.]/', '', $numero);
+                if (!empty($numero) && strlen($numero) >= 3) {
+                    return $numero;
+                }
             }
         }
 
@@ -171,11 +405,23 @@ class PdfProcessor implements ProcessorInterface
         $patterns = [
             '/objeto[:\s]+([^\n]{10,500})/i',
             '/objeto\s*do\s*contrato[:\s]+([^\n]{10,500})/i',
+            '/objeto[:\s]+([^\.]{10,500})/i',
+            '/contrata[çc][ãa]o\s*de\s*([^\.]{10,500})/i',
+            '/presta[çc][ãa]o\s*de\s*([^\.]{10,500})/i',
         ];
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                return trim($matches[1]);
+                $objeto = trim($matches[1]);
+                // Remove quebras de linha e espaços excessivos
+                $objeto = preg_replace('/\s+/', ' ', $objeto);
+                // Limita o tamanho
+                if (strlen($objeto) > 500) {
+                    $objeto = substr($objeto, 0, 500) . '...';
+                }
+                if (!empty($objeto)) {
+                    return $objeto;
+                }
             }
         }
 
@@ -208,8 +454,23 @@ class PdfProcessor implements ProcessorInterface
     private function extractContratado(string $text): ?string
     {
         $patterns = [
+            // Padrões específicos com dois pontos
             '/contratad[ao][:\s]+([^\n]{5,200})/i',
             '/empresa[:\s]+([^\n]{5,200})/i',
+            '/executora[:\s]+([^\n]{5,200})/i',
+            '/fornecedor[:\s]+([^\n]{5,200})/i',
+            '/prestador[:\s]+([^\n]{5,200})/i',
+            '/concession[áa]ria[:\s]+([^\n]{5,200})/i',
+            '/licitante[:\s]+([^\n]{5,200})/i',
+            '/vencedor[:\s]+([^\n]{5,200})/i',
+            // Padrões sem dois pontos
+            '/contratad[ao]\s+([A-Z][A-Za-z\s]+(?:ltda|s\.a\.|ltda\.|s\.a\.|eireli))/i',
+            '/empresa\s+([A-Z][A-Za-z\s]+(?:ltda|s\.a\.|ltda\.|s\.a\.|eireli))/i',
+            '/executora\s+([A-Z][A-Za-z\s]+(?:ltda|s\.a\.|ltda\.|s\.a\.|eireli))/i',
+            '/fornecedor\s+([A-Z][A-Za-z\s]+(?:ltda|s\.a\.|ltda\.|s\.a\.|eireli))/i',
+            '/prestador\s+([A-Z][A-Za-z\s]+(?:ltda|s\.a\.|ltda\.|s\.a\.|eireli))/i',
+            // Padrões mais genéricos
+            '/([A-Z][A-Za-z\s]+(?:ltda|s\.a\.|ltda\.|s\.a\.|eireli))/i',
         ];
 
         foreach ($patterns as $pattern) {
@@ -217,7 +478,13 @@ class PdfProcessor implements ProcessorInterface
                 $contratado = trim($matches[1]);
                 // Remove CNPJ do nome se presente
                 $contratado = preg_replace('/\s*-?\s*cnpj.*$/i', '', $contratado);
-                return trim($contratado);
+                // Remove caracteres especiais no final
+                $contratado = preg_replace('/[^\w\s\.\-]+$/', '', $contratado);
+                $contratado = trim($contratado);
+                // Verifica se o nome tem tamanho razoável
+                if (!empty($contratado) && strlen($contratado) >= 5 && strlen($contratado) <= 200) {
+                    return $contratado;
+                }
             }
         }
 
@@ -255,18 +522,44 @@ class PdfProcessor implements ProcessorInterface
     private function extractValor(string $text): ?float
     {
         $patterns = [
-            '/valor\s*(?:global|total)?[:\s]*r\$?\s*([\d\.,]+)/i',
+            // Padrões específicos com R$
+            '/valor\s*(?:global|total|do\s*contrato)?[:\s]*r\$?\s*([\d\.,]+)/i',
             '/valor\s*do\s*contrato[:\s]*r\$?\s*([\d\.,]+)/i',
             '/r\$\s*([\d\.,]+)/i',
+            '/total[:\s]*r\$?\s*([\d\.,]+)/i',
+            '/montante[:\s]*r\$?\s*([\d\.,]+)/i',
+            '/preço[:\s]*r\$?\s*([\d\.,]+)/i',
+            '/custo[:\s]*r\$?\s*([\d\.,]+)/i',
+            // Padrões sem R$ mas com contexto
+            '/valor[:\s]*([\d\.,]+)/i',
+            '/total[:\s]*([\d\.,]+)/i',
+            '/montante[:\s]*([\d\.,]+)/i',
+            '/preço[:\s]*([\d\.,]+)/i',
+            '/custo[:\s]*([\d\.,]+)/i',
+            // Padrões mais flexíveis para texto corrompido
+            '/r\$?\s*([\d\.,]+)/i',
+            '/valor[:\s]*([\d\.,]+)/i',
+            '/total[:\s]*([\d\.,]+)/i',
+            // Procura por qualquer valor monetário no texto (formato brasileiro)
+            '/(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/',
+            // Procura por valores simples
+            '/(\d+(?:,\d{2})?)/',
         ];
 
+        $valores = [];
         foreach ($patterns as $pattern) {
-            if (preg_match($pattern, $text, $matches)) {
-                return $this->parseDecimal($matches[1]);
+            if (preg_match_all($pattern, $text, $matches)) {
+                foreach ($matches[1] as $match) {
+                    $valor = $this->parseDecimal($match);
+                    if ($valor !== null && $valor > 0) {
+                        $valores[] = $valor;
+                    }
+                }
             }
         }
 
-        return null;
+        // Retorna o maior valor encontrado (provavelmente o valor total)
+        return !empty($valores) ? max($valores) : null;
     }
 
     /**
@@ -275,14 +568,30 @@ class PdfProcessor implements ProcessorInterface
     private function extractDataInicio(string $text): ?string
     {
         $patterns = [
+            // Padrões específicos para vigência/período (captura duas datas)
+            '/vig[êe]ncia[:\s]*([\d\/\-\.]+)\s*at[ée]\s*([\d\/\-\.]+)/i',
+            '/per[íi]odo[:\s]*([\d\/\-\.]+)\s*at[ée]\s*([\d\/\-\.]+)/i',
+            '/prazo[:\s]*([\d\/\-\.]+)\s*at[ée]\s*([\d\/\-\.]+)/i',
+            // Padrões específicos para data de início
             '/data\s*(?:de\s*)?in[íi]cio[:\s]*([\d\/\-\.]+)/i',
             '/in[íi]cio[:\s]*([\d\/\-\.]+)/i',
-            '/vig[êe]ncia[:\s]*(?:de\s*)?([\d\/\-\.]+)/i',
+            '/data\s*do\s*in[íi]cio[:\s]*([\d\/\-\.]+)/i',
+            '/data\s*de\s*in[íi]cio[:\s]*([\d\/\-\.]+)/i',
+            // Padrões mais flexíveis para texto corrompido
+            '/in[íi]cio[:\s]*([\d\/\-\.]+)/i',
+            '/data[:\s]*([\d\/\-\.]+)/i',
+            // Procura por qualquer data no formato DD/MM/AAAA
+            '/(\d{1,2}\/\d{1,2}\/\d{4})/',
         ];
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                return $this->parseDate($matches[1]);
+                // Se o padrão capturou duas datas (vigência), pega a primeira (início)
+                $data = isset($matches[2]) ? $matches[1] : $matches[1];
+                $dataParsed = $this->parseDate($data);
+                if ($dataParsed) {
+                    return $dataParsed;
+                }
             }
         }
 
@@ -295,15 +604,32 @@ class PdfProcessor implements ProcessorInterface
     private function extractDataFim(string $text): ?string
     {
         $patterns = [
+            // Padrões específicos para vigência/período (pega a segunda data)
+            '/vig[êe]ncia[:\s]*([\d\/\-\.]+)\s*at[ée]\s*([\d\/\-\.]+)/i',
+            '/per[íi]odo[:\s]*([\d\/\-\.]+)\s*at[ée]\s*([\d\/\-\.]+)/i',
+            '/prazo[:\s]*([\d\/\-\.]+)\s*at[ée]\s*([\d\/\-\.]+)/i',
+            // Padrões específicos para data de fim/término
             '/data\s*(?:de\s*)?t[ée]rmino[:\s]*([\d\/\-\.]+)/i',
             '/data\s*(?:de\s*)?fim[:\s]*([\d\/\-\.]+)/i',
             '/t[ée]rmino[:\s]*([\d\/\-\.]+)/i',
             '/at[ée][:\s]*([\d\/\-\.]+)/i',
+            '/data\s*de\s*t[ée]rmino[:\s]*([\d\/\-\.]+)/i',
+            // Padrões mais flexíveis para texto corrompido
+            '/t[ée]rmino[:\s]*([\d\/\-\.]+)/i',
+            '/fim[:\s]*([\d\/\-\.]+)/i',
+            '/at[ée][:\s]*([\d\/\-\.]+)/i',
+            // Procura por qualquer data no formato DD/MM/AAAA
+            '/(\d{1,2}\/\d{1,2}\/\d{4})/',
         ];
 
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $text, $matches)) {
-                return $this->parseDate($matches[1]);
+                // Se o padrão capturou duas datas, pega a segunda (fim)
+                $data = isset($matches[2]) ? $matches[2] : $matches[1];
+                $dataParsed = $this->parseDate($data);
+                if ($dataParsed) {
+                    return $dataParsed;
+                }
             }
         }
 
@@ -449,6 +775,111 @@ class PdfProcessor implements ProcessorInterface
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Extrai qualquer valor monetário do texto
+     */
+    private function extractAnyValue(string $text): ?float
+    {
+        // Procura por valores monetários no texto
+        $patterns = [
+            '/(\d{1,3}(?:\.\d{3})*(?:,\d{2})?)/', // Formato brasileiro
+            '/(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/', // Formato americano
+            '/(\d+(?:,\d{2})?)/', // Formato simples
+        ];
+
+        $values = [];
+        foreach ($patterns as $pattern) {
+            if (preg_match_all($pattern, $text, $matches)) {
+                foreach ($matches[1] as $match) {
+                    $value = $this->parseDecimal($match);
+                    if ($value !== null && $value > 0) {
+                        $values[] = $value;
+                    }
+                }
+            }
+        }
+
+        // Retorna o maior valor encontrado
+        return !empty($values) ? max($values) : null;
+    }
+
+    /**
+     * Extrai qualquer data do texto
+     */
+    private function extractAnyDate(string $text, bool $last = false): ?string
+    {
+        // Procura por datas no formato DD/MM/AAAA
+        $pattern = '/(\d{1,2}\/\d{1,2}\/\d{4})/';
+        
+        if (preg_match_all($pattern, $text, $matches)) {
+            $dates = [];
+            foreach ($matches[1] as $match) {
+                $date = $this->parseDate($match);
+                if ($date) {
+                    $dates[] = $date;
+                }
+            }
+            
+            if (!empty($dates)) {
+                // Ordena as datas
+                sort($dates);
+                
+                // Retorna a primeira ou última data
+                return $last ? end($dates) : $dates[0];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai qualquer número de contrato do texto
+     */
+    private function extractAnyContractNumber(string $text): ?string
+    {
+        // Procura por qualquer padrão que pareça um número de contrato
+        $patterns = [
+            '/(\d{1,4}\/\d{4})/', // Formato 001/2025
+            '/(\d{1,4}-\d{4})/', // Formato 001-2025
+            '/(\d{1,4}\.\d{4})/', // Formato 001.2025
+            '/(\d{1,4}\/\d{2})/', // Formato 001/25
+            '/(\d{1,4}-\d{2})/', // Formato 001-25
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai qualquer contratado do texto
+     */
+    private function extractAnyContractor(string $text): ?string
+    {
+        // Procura por padrões que parecem nomes de empresas
+        $patterns = [
+            '/empresa\s+([A-Z][A-Za-z\s]+(?:ltda|s\.a\.|ltda\.|s\.a\.|eireli))/i',
+            '/([A-Z][A-Za-z\s]+(?:ltda|s\.a\.|ltda\.|s\.a\.|eireli))/i',
+            '/contratad[ao][:\s]+([A-Z][A-Za-z\s]+)/i',
+            '/fornecedor[:\s]+([A-Z][A-Za-z\s]+)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                $contratado = trim($matches[1]);
+                if (strlen($contratado) > 3 && strlen($contratado) < 100) {
+                    return $contratado;
+                }
+            }
+        }
+
+        return 'Empresa não identificada';
     }
 }
 

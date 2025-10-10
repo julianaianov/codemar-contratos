@@ -109,7 +109,7 @@ export interface ContratoImportado {
   contratante?: string;
   contratado?: string;
   cnpj_contratado?: string;
-  valor_global?: number;
+  valor?: number;
   data_inicio?: string;
   data_fim?: string;
   modalidade?: string;

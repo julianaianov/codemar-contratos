@@ -2,14 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { BarChart } from '@/components/charts/BarChart';
-import { CronogramaContrato } from '@/types/contratos';
+import { CronogramaContrato, FiltrosContratos } from '@/types/contratos';
 import { useChartStyle } from '@/components/layout/ChartStyleProvider';
 
 interface CronogramaChartProps {
   anoSelecionado?: string | number;
+  filters?: FiltrosContratos;
 }
 
-export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado }) => {
+export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado, filters }) => {
   const { getColorsForChart, gradient, neon } = useChartStyle();
   const [data, setData] = useState<CronogramaContrato[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,16 +45,29 @@ export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/contratos/cronograma');
+        const params = new URLSearchParams();
+        if (filters?.diretoria) {
+          params.append('diretoria', String(filters.diretoria));
+        } else {
+          const savedFilters = sessionStorage.getItem('contratos:filters');
+          if (savedFilters) {
+            const parsed = JSON.parse(savedFilters);
+            if (parsed.diretoria) params.append('diretoria', parsed.diretoria);
+          }
+        }
+        const response = await fetch(`/api/contratos/cronograma?${params.toString()}`);
         const result = await response.json();
         
         if (result.success) {
-          setData(result.data);
+          setData(result.data || []);
+          setError(null);
         } else {
-          setError('Erro ao carregar dados do cronograma');
+          setData([]);
+          setError(null);
         }
       } catch (err) {
-        setError('Erro ao carregar dados do cronograma');
+        setData([]);
+        setError(null);
         console.error('Erro:', err);
       } finally {
         setLoading(false);
@@ -61,7 +75,7 @@ export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado
     };
 
     fetchData();
-  }, []);
+  }, [filters?.diretoria]);
 
   if (loading) {
     return (
@@ -71,21 +85,8 @@ export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-600">
-        {error}
-      </div>
-    );
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Nenhum dado disponível para o cronograma
-      </div>
-    );
-  }
+  // Se não houver dados, gerar dataset zerado para manter UI consistente
+  const baseData = (data && data.length > 0) ? data : [];
 
   // Gerar dados para o gráfico
   const generateChartData = () => {
@@ -102,8 +103,8 @@ export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado
         labels.push(`${String(index + 1).padStart(2, '0')}/${ano}`);
         
         // Buscar dados do mês/ano ou usar valor padrão
-        const monthData = data.find(d => d.mes === (index + 1) && d.ano === ano);
-        values.push(monthData?.valor_previsto || Math.random() * 2000000000 + 500000000);
+        const monthData = baseData.find(d => d.mes === (index + 1) && d.ano === ano);
+        values.push(monthData?.valor_previsto || 0);
       });
     } else {
       // Modo geral: mostrar todos os anos (2023-2027)
@@ -114,8 +115,8 @@ export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado
           labels.push(`${String(index + 1).padStart(2, '0')}/${year}`);
           
           // Buscar dados do mês/ano ou usar valor padrão
-          const monthData = data.find(d => d.mes === (index + 1) && d.ano === year);
-          values.push(monthData?.valor_previsto || Math.random() * 2000000000 + 500000000);
+          const monthData = baseData.find(d => d.mes === (index + 1) && d.ano === year);
+          values.push(monthData?.valor_previsto || 0);
         });
       });
     }

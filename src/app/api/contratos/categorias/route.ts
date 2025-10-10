@@ -1,66 +1,27 @@
-import { NextResponse } from 'next/server';
-import { ContratoPorCategoria } from '@/types/contratos';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Simulação de dados - em produção, conectar com Laravel/MySQL
-const mockCategoriasData: ContratoPorCategoria[] = [
-  {
-    categoria: 'Tecnologia da Informação',
-    quantidade: 1250,
-    valor_total: 3500000000.00,
-    percentual: 30.8,
-    cor: '#3B82F6'
-  },
-  {
-    categoria: 'Serviços de Consultoria',
-    quantidade: 890,
-    valor_total: 2800000000.00,
-    percentual: 24.6,
-    cor: '#10B981'
-  },
-  {
-    categoria: 'Obras e Construção',
-    quantidade: 650,
-    valor_total: 2200000000.00,
-    percentual: 19.4,
-    cor: '#F59E0B'
-  },
-  {
-    categoria: 'Equipamentos',
-    quantidade: 780,
-    valor_total: 1800000000.00,
-    percentual: 15.8,
-    cor: '#EF4444'
-  },
-  {
-    categoria: 'Serviços de Limpeza',
-    quantidade: 400,
-    valor_total: 1066407449.88,
-    percentual: 9.4,
-    cor: '#8B5CF6'
-  }
-];
+const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Em produção, fazer requisição para Laravel API
-    // const response = await fetch(`${process.env.LARAVEL_API_URL}/api/contratos/categorias`, {
-    //   headers: {
-    //     'Authorization': `Bearer ${process.env.LARAVEL_API_TOKEN}`
-    //   }
-    // });
-    // const data = await response.json();
+    const { searchParams } = new URL(request.url);
+    const url = new URL(`${API_URL}/api/contratos/categorias`);
+    searchParams.forEach((value, key) => url.searchParams.append(key, value));
 
-    // Simular delay de rede
-    await new Promise(resolve => setTimeout(resolve, 200));
+    const response = await fetch(url.toString());
+    const data = await response.json();
 
-    return NextResponse.json({
-      success: true,
-      data: mockCategoriasData,
-      message: 'Dados das categorias carregados com sucesso'
-    });
+    if (!response.ok) {
+      return NextResponse.json({
+        success: false,
+        message: data?.message || 'Erro ao carregar categorias',
+        error: data?.error || undefined
+      }, { status: response.status });
+    }
 
+    return NextResponse.json(data);
   } catch (error) {
-    console.error('Erro ao carregar categorias:', error);
+    console.error('Erro ao proxy categorias de contratos:', error);
     return NextResponse.json({
       success: false,
       message: 'Erro interno do servidor',

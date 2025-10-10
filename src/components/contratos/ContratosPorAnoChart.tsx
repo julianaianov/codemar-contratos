@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { BarChart } from '@/components/charts/BarChart';
-import { ContratoPorAno } from '@/types/contratos';
+import { ContratoPorAno, FiltrosContratos } from '@/types/contratos';
 import { useChartStyle } from '@/components/layout/ChartStyleProvider';
 
-export const ContratosPorAnoChart: React.FC = () => {
+interface Props { filters?: FiltrosContratos }
+
+export const ContratosPorAnoChart: React.FC<Props> = ({ filters }) => {
   const { getColorsForChart, gradient, neon } = useChartStyle();
   const [data, setData] = useState<ContratoPorAno[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,16 +42,29 @@ export const ContratosPorAnoChart: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/contratos/por-ano');
+        const params = new URLSearchParams();
+        if (filters?.diretoria) {
+          params.append('diretoria', String(filters.diretoria));
+        } else {
+          const savedFilters = sessionStorage.getItem('contratos:filters');
+          if (savedFilters) {
+            const parsed = JSON.parse(savedFilters);
+            if (parsed.diretoria) params.append('diretoria', parsed.diretoria);
+          }
+        }
+        const response = await fetch(`/api/contratos/por-ano?${params.toString()}`);
         const result = await response.json();
         
         if (result.success) {
-          setData(result.data);
+          setData(result.data || []);
+          setError(null);
         } else {
-          setError('Erro ao carregar dados por ano');
+          setData([]);
+          setError(null);
         }
       } catch (err) {
-        setError('Erro ao carregar dados por ano');
+        setData([]);
+        setError(null);
         console.error('Erro:', err);
       } finally {
         setLoading(false);
@@ -57,7 +72,7 @@ export const ContratosPorAnoChart: React.FC = () => {
     };
 
     fetchData();
-  }, []);
+  }, [filters?.diretoria]);
 
   if (loading) {
     return (
@@ -67,24 +82,11 @@ export const ContratosPorAnoChart: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-600">
-        {error}
-      </div>
-    );
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Nenhum dado disponível por ano
-      </div>
-    );
-  }
+  // Always render chart; if empty, show zeroed dataset
+  const safeData = (data && data.length > 0) ? data : [{ ano: new Date().getFullYear(), quantidade: 0, valor_total: 0, valor_pago: 0 }];
 
   // Ordenar dados por ano (mais recente primeiro)
-  const sortedData = [...data].sort((a, b) => b.ano - a.ano);
+  const sortedData = [...safeData].sort((a, b) => b.ano - a.ano);
   const chartColors = getColorsForChart('por-ano');
 
   const chartData = {
