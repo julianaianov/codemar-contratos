@@ -59,8 +59,18 @@ export default function ContratosPage() {
     return matchesSearch && matchesDiretoria && matchesStatus;
   });
 
-  const diretorias = [...new Set(contratos.map(c => c.diretoria).filter(Boolean))];
-  const statuses = [...new Set(contratos.map(c => c.status).filter(Boolean))];
+  // Construir listas únicas sem depender de recursos ES2015 de iteração
+  const diretorias = contratos.reduce<string[]>((acc, c) => {
+    const dir = (c as any).diretoria || (c as any).secretaria;
+    if (dir && !acc.includes(dir)) acc.push(dir);
+    return acc;
+  }, []);
+
+  const statuses = contratos.reduce<string[]>((acc, c) => {
+    const st = c.status as string | undefined;
+    if (st && !acc.includes(st)) acc.push(st);
+    return acc;
+  }, []);
 
   return (
     <div className="p-6">
