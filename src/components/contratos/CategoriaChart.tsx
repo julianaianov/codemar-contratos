@@ -44,12 +44,17 @@ export const CategoriaChart: React.FC = () => {
         const result = await response.json();
         
         if (result.success) {
-          setData(result.data);
+          setData(result.data || []);
+          setError(null);
         } else {
-          setError('Erro ao carregar dados das categorias');
+          // Em caso de falha, manter gráfico zerado
+          setData([]);
+          setError(null);
         }
       } catch (err) {
-        setError('Erro ao carregar dados das categorias');
+        // Não exibir erro: manter gráfico zerado
+        setData([]);
+        setError(null);
         console.error('Erro:', err);
       } finally {
         setLoading(false);
@@ -67,30 +72,19 @@ export const CategoriaChart: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-600">
-        {error}
-      </div>
-    );
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-500">
-        Nenhum dado disponível para as categorias
-      </div>
-    );
-  }
+  // Sempre renderizar o gráfico; se não houver dados, usar dataset zerado
+  const effectiveData: ContratoPorCategoria[] = (data && data.length > 0)
+    ? data
+    : [{ categoria: 'Sem dados', quantidade: 0, valor_total: 0, percentual: 0 }];
 
   const chartColors = getColorsForChart('categorias');
-  const pieColors = data.map((_, index) => chartColors[index % chartColors.length]);
+  const pieColors = effectiveData.map((_, index) => chartColors[index % chartColors.length]);
   
   const chartData = {
-    labels: data.map(item => item.categoria),
+    labels: effectiveData.map(item => item.categoria),
     datasets: [{
       label: 'Contratos por Categoria',
-      data: data.map(item => item.quantidade),
+      data: effectiveData.map(item => item.quantidade),
       backgroundColor: pieColors,
       borderColor: pieColors,
       borderWidth: 2,

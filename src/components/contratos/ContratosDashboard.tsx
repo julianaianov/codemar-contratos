@@ -42,25 +42,25 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
   const [anoSelecionadoFinanceiro, setAnoSelecionadoFinanceiro] = useState<number>(new Date().getFullYear());
   const [anosDisponiveis, setAnosDisponiveis] = useState<number[]>([2023, 2024, 2025]);
   const [dadosFinanceiros, setDadosFinanceiros] = useState({
-    empenhado: 15000000,
-    liquidado: 12500000,
-    pago: 10800000,
-    saldo: 4200000,
+    empenhado: 0,
+    liquidado: 0,
+    pago: 0,
+    saldo: 0,
   });
   
   // Estados para comparação de períodos
   const [comparacaoPeriodos, setComparacaoPeriodos] = useState({
     periodos: ['2023', '2024', '2025'],
-    empenhado: [10000000, 13000000, 15000000],
-    liquidado: [8500000, 11000000, 12500000],
-    pago: [7200000, 9500000, 10800000],
+    empenhado: [0, 0, 0],
+    liquidado: [0, 0, 0],
+    pago: [0, 0, 0],
   });
   
   // Estados para cronograma de pagamentos
   const [cronogramaPagamentos, setCronogramaPagamentos] = useState({
     meses: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
-    previsto: [1200000, 1300000, 1400000, 1500000, 1450000, 1350000, 1280000, 1320000, 1380000, 1420000, 1460000, 1500000],
-    realizado: [1150000, 1280000, 1350000, 1480000, 1400000, 1320000, 0, 0, 0, 0, 0, 0],
+    previsto: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    realizado: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   });
 
   // Carregar dados do dashboard
@@ -100,7 +100,10 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
         }
 
       } catch (err) {
-        setError('Erro ao carregar dados do dashboard');
+        // Não bloquear o dashboard: manter dados zerados
+        setDashboardData(null);
+        setMetricas(null);
+        setError(null);
         console.error('Erro ao carregar dados:', err);
       } finally {
         setLoading(false);
@@ -127,30 +130,15 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
       case 'vencendo-30':
         router.push('/consulta/contratos?filter=vencendo-30');
         break;
-      case 'vencendo-30-60':
-        router.push('/consulta/contratos?filter=vencendo-30-60');
-        break;
-      case 'vencendo-60-90':
-        router.push('/consulta/contratos?filter=vencendo-60-90');
-        break;
-      case 'vencendo-90-180':
-        router.push('/consulta/contratos?filter=vencendo-90-180');
-        break;
-      case 'vencendo-180':
-        router.push('/consulta/contratos?filter=vencendo-180');
+      case 'vencendo-30-90':
+        router.push('/consulta/contratos?filter=vencendo-30-90');
         break;
       default:
         break;
     }
   };
 
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-600">Erro ao carregar dados do dashboard de contratos</p>
-      </div>
-    );
-  }
+  // Nunca abortar a renderização por erro; manter cards e gráficos zerados
 
   if (loading) {
     return (
@@ -242,8 +230,8 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
         loading={loading}
       />
 
-      {/* Cards de Métricas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 md:gap-6 mb-8">
+      {/* Cards de Métricas (somente vencimentos: -30 e 30-90) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-4 md:gap-6 mb-8">
         {/* Total de Contratos */}
         <MetricCard
           title="TOTAL CONTRATOS"
@@ -268,52 +256,16 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
           onClick={() => handleCardClick('vencendo-30')}
         />
 
-        {/* Vencem em 30-60 dias */}
+        {/* Vencem em 30-90 dias (30-60 + 60-90) */}
         <MetricCard
-          title="VENCEM (30 A 60 DIAS)"
-          value={dashboardData?.contratos_vencendo_30_60_dias || 0}
-          description={`${Math.round(((dashboardData?.contratos_vencendo_30_60_dias || 0) / (dashboardData?.total_contratos || 1)) * 100)}% à vencer (30 a 60 Dias)`}
-          icon={<ClockIcon className="w-6 h-6 text-orange-600" />}
-          color="orange"
-          loading={loading}
-          clickable={true}
-          onClick={() => handleCardClick('vencendo-30-60')}
-        />
-
-        {/* Vencem em 60-90 dias */}
-        <MetricCard
-          title="VENCEM (60 A 90 DIAS)"
-          value={dashboardData?.contratos_vencendo_60_90_dias || 0}
-          description={`${Math.round(((dashboardData?.contratos_vencendo_60_90_dias || 0) / (dashboardData?.total_contratos || 1)) * 100)}% à vencer (60 a 90 Dias)`}
+          title="VENCEM (30 A 90 DIAS)"
+          value={(dashboardData?.contratos_vencendo_30_60_dias || 0) + (dashboardData?.contratos_vencendo_60_90_dias || 0)}
+          description={`${Math.round((((dashboardData?.contratos_vencendo_30_60_dias || 0) + (dashboardData?.contratos_vencendo_60_90_dias || 0)) / (dashboardData?.total_contratos || 1)) * 100)}% à vencer (30 a 90 Dias)`}
           icon={<ClockIcon className="w-6 h-6 text-yellow-600" />}
           color="yellow"
           loading={loading}
           clickable={true}
-          onClick={() => handleCardClick('vencendo-60-90')}
-        />
-
-        {/* Vencem em 90-180 dias */}
-        <MetricCard
-          title="VENCEM (90 A 180 DIAS)"
-          value={dashboardData?.contratos_vencendo_90_180_dias || 0}
-          description={`${Math.round(((dashboardData?.contratos_vencendo_90_180_dias || 0) / (dashboardData?.total_contratos || 1)) * 100)}% à vencer (90 a 180 Dias)`}
-          icon={<ClockIcon className="w-6 h-6 text-blue-600" />}
-          color="blue"
-          loading={loading}
-          clickable={true}
-          onClick={() => handleCardClick('vencendo-90-180')}
-        />
-
-        {/* Vencem em +180 dias */}
-        <MetricCard
-          title="VENCEM (+ 180 DIAS)"
-          value={dashboardData?.contratos_vencendo_mais_180_dias || 0}
-          description={`${Math.round(((dashboardData?.contratos_vencendo_mais_180_dias || 0) / (dashboardData?.total_contratos || 1)) * 100)}% à vencer (+ 180 Dias)`}
-          icon={<ClockIcon className="w-6 h-6 text-indigo-600" />}
-          color="indigo"
-          loading={loading}
-          clickable={true}
-          onClick={() => handleCardClick('vencendo-180')}
+          onClick={() => handleCardClick('vencendo-30-90')}
         />
       </div>
 
@@ -432,7 +384,7 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
           <MetricCard
             title="LIQUIDADO"
             value={dadosFinanceiros.liquidado}
-            description={`${Math.round((dadosFinanceiros.liquidado / dadosFinanceiros.empenhado) * 100)}% do empenhado`}
+            description={`${Number.isFinite((dadosFinanceiros.liquidado / (dadosFinanceiros.empenhado || 1)) * 100) ? Math.round((dadosFinanceiros.liquidado / (dadosFinanceiros.empenhado || 1)) * 100) : 0}% do empenhado`}
             icon={<ArrowTrendingUpIcon className="w-6 h-6 text-green-600" />}
             color="green"
             loading={false}
@@ -441,7 +393,7 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
           <MetricCard
             title="PAGO"
             value={dadosFinanceiros.pago}
-            description={`${Math.round((dadosFinanceiros.pago / dadosFinanceiros.liquidado) * 100)}% do liquidado`}
+            description={`${Number.isFinite((dadosFinanceiros.pago / (dadosFinanceiros.liquidado || 1)) * 100) ? Math.round((dadosFinanceiros.pago / (dadosFinanceiros.liquidado || 1)) * 100) : 0}% do liquidado`}
             icon={<CurrencyDollarIcon className="w-6 h-6 text-emerald-600" />}
             color="emerald"
             loading={false}

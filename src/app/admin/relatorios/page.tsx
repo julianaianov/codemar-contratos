@@ -44,51 +44,32 @@ export default function AdminReportsPage() {
   const fetchReports = async () => {
     try {
       setLoading(true);
-      // Mock data por enquanto
-      const mockReports: ImportReport[] = [
-        {
-          id: 1,
-          original_filename: 'contratos_jan_2025.xml',
-          file_type: 'xml',
-          status: 'completed',
-          total_records: 25,
-          successful_records: 23,
-          failed_records: 2,
-          created_at: '2025-01-08T10:30:00Z'
-        },
-        {
-          id: 2,
-          original_filename: 'contrato_escaneado.pdf',
-          file_type: 'pdf',
-          status: 'completed',
-          total_records: 1,
-          successful_records: 1,
-          failed_records: 0,
-          created_at: '2025-01-09T14:15:00Z'
-        },
-        {
-          id: 3,
-          original_filename: 'planilha_contratos.xlsx',
-          file_type: 'excel',
-          status: 'completed',
-          total_records: 50,
-          successful_records: 48,
-          failed_records: 2,
-          created_at: '2025-01-07T09:20:00Z'
+      const url = new URL(`${API_URL}/api/imports`);
+      if (dateFrom) url.searchParams.append('date_from', dateFrom);
+      if (dateTo) url.searchParams.append('date_to', dateTo);
+      if (fileTypeFilter !== 'all') url.searchParams.append('file_type', fileTypeFilter);
+
+      const response = await fetch(url.toString());
+      const data = await response.json();
+
+      if (data.success) {
+        const list: ImportReport[] = data.data?.data || data.data || [];
+        setReports(list);
+
+        const counts: Record<string, number> = {};
+        for (const item of list) {
+          counts[item.file_type] = (counts[item.file_type] || 0) + 1;
         }
-      ];
-
-      const mockStatsByType: StatsByType[] = [
-        { file_type: 'xml', total: 15 },
-        { file_type: 'pdf', total: 8 },
-        { file_type: 'excel', total: 12 },
-        { file_type: 'csv', total: 5 }
-      ];
-
-      setReports(mockReports);
-      setStatsByType(mockStatsByType);
+        const stats: StatsByType[] = Object.entries(counts).map(([file_type, total]) => ({ file_type, total }));
+        setStatsByType(stats);
+      } else {
+        setReports([]);
+        setStatsByType([]);
+      }
     } catch (error) {
       console.error('Erro ao carregar relatórios:', error);
+      setReports([]);
+      setStatsByType([]);
     } finally {
       setLoading(false);
     }

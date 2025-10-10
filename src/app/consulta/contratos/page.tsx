@@ -39,28 +39,7 @@ export default function ConsultaContratosPage() {
       setContratos(data.data || []);
     } catch (error) {
       console.error('Erro ao carregar contratos:', error);
-      // Em caso de erro, mostrar dados mock para demonstração
-      setContratos([
-        {
-          id: 1,
-          numero_contrato: '001/2025',
-          objeto: 'Contratação de serviços de manutenção predial',
-          contratante: 'Prefeitura Municipal',
-          contratado: 'Empresa XYZ Ltda',
-          cnpj_contratado: '12.345.678/0001-90',
-          valor: 50000,
-          data_inicio: '2024-12-31',
-          data_fim: '2025-12-30',
-          modalidade: 'Pregão Eletrônico',
-          status: 'vigente',
-          tipo_contrato: 'Prestação de Serviços',
-          secretaria: 'Presidência',
-          fonte_recurso: 'Recursos Próprios',
-          observacoes: 'Contrato para manutenção predial',
-          created_at: '2025-01-01T00:00:00Z',
-          updated_at: '2025-01-01T00:00:00Z'
-        }
-      ]);
+      setContratos([]);
     } finally {
       setLoading(false);
     }
