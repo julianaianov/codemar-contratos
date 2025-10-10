@@ -38,7 +38,7 @@ class FileImportController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'file' => 'required|file|mimes:xml,xlsx,xls,csv,pdf|max:20480', // Max 20MB (PDFs podem ser maiores)
-            'diretoria' => 'required|string|max:255',
+            'diretoria' => 'nullable|string|max:255', // Opcional - só obrigatório para PDFs
         ]);
 
         if ($validator->fails()) {
@@ -49,35 +49,49 @@ class FileImportController extends Controller
             ], 422);
         }
 
-
         try {
             $file = $request->file('file');
             $diretoria = $request->input('diretoria');
             $userId = auth()->id(); // Se tiver autenticação
 
+            // Determina o tipo de arquivo
+            $fileType = $file->getClientOriginalExtension();
+            
+            // Para arquivos Excel, não exige diretoria (vem do arquivo)
+            // Para PDFs, exige diretoria
+            if (in_array($fileType, ['pdf']) && empty($diretoria)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Para arquivos PDF, a diretoria é obrigatória',
+                    'errors' => ['diretoria' => ['A diretoria é obrigatória para arquivos PDF']],
+                ], 422);
+            }
+
             // Faz upload do arquivo
             $fileImport = $this->importService->uploadFile($file, $userId);
 
-            // Processa o arquivo de forma assíncrona (ou síncrona para teste)
-            // Para produção, usar jobs: ProcessFileImportJob::dispatch($fileImport);
+            // Processa o arquivo
             $this->importService->processFile($fileImport, $diretoria);
 
-            // Buscar diretoria mais comum nos contratos importados
-            $diretoriaMaisComum = $fileImport->contratosImportados()
-                ->whereNotNull('secretaria')
-                ->select('secretaria', \DB::raw('count(*) as total'))
-                ->groupBy('secretaria')
+            // Buscar diretorias encontradas nos contratos importados
+            $diretoriasEncontradas = $fileImport->contratosImportados()
+                ->whereNotNull('diretoria')
+                ->select('diretoria', \DB::raw('count(*) as total'))
+                ->groupBy('diretoria')
                 ->orderByDesc('total')
-                ->first();
+                ->get();
 
             $response = [
                 'success' => true,
                 'message' => 'Arquivo importado com sucesso',
                 'data' => $fileImport->fresh(),
+                'diretorias_encontradas' => $diretoriasEncontradas->pluck('diretoria')->toArray(),
+                'total_diretorias' => $diretoriasEncontradas->count(),
             ];
 
-            if ($diretoriaMaisComum) {
-                $response['diretoria'] = $diretoriaMaisComum->secretaria;
+            // Para compatibilidade, mantém a diretoria mais comum
+            if ($diretoriasEncontradas->isNotEmpty()) {
+                $response['diretoria_principal'] = $diretoriasEncontradas->first()->diretoria;
             }
 
             return response()->json($response, 201);
@@ -166,15 +180,32 @@ class FileImportController extends Controller
                         'file_import_id' => $contrato->file_import_id,
                         'arquivo_original' => $contrato->fileImport ? $contrato->fileImport->original_filename : 'N/A',
                         'tipo_arquivo' => $contrato->fileImport ? $contrato->fileImport->file_type : 'N/A',
+                        // Novos campos específicos
+                        'ano_numero' => $contrato->ano_numero,
                         'numero_contrato' => $contrato->numero_contrato,
+                        'ano' => $contrato->ano,
+                        'pa' => $contrato->pa,
+                        'diretoria' => $contrato->diretoria,
+                        'modalidade' => $contrato->modalidade,
+                        'nome_empresa' => $contrato->nome_empresa,
+                        'cnpj_empresa' => $contrato->cnpj_empresa,
                         'objeto' => $contrato->objeto,
+                        'data_assinatura' => $contrato->data_assinatura,
+                        'prazo' => $contrato->prazo,
+                        'unidade_prazo' => $contrato->unidade_prazo,
+                        'valor_contrato' => $contrato->valor_contrato,
+                        'vencimento' => $contrato->vencimento,
+                        'gestor_contrato' => $contrato->gestor_contrato,
+                        'fiscal_tecnico' => $contrato->fiscal_tecnico,
+                        'fiscal_administrativo' => $contrato->fiscal_administrativo,
+                        'suplente' => $contrato->suplente,
+                        // Campos legados para compatibilidade
                         'contratante' => $contrato->contratante,
                         'contratado' => $contrato->contratado,
                         'cnpj_contratado' => $contrato->cnpj_contratado,
                         'valor' => $contrato->valor,
                         'data_inicio' => $contrato->data_inicio,
                         'data_fim' => $contrato->data_fim,
-                        'modalidade' => $contrato->modalidade,
                         'status' => $contrato->status,
                         'tipo_contrato' => $contrato->tipo_contrato,
                         'secretaria' => $contrato->secretaria,

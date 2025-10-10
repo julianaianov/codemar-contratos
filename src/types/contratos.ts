@@ -104,15 +104,32 @@ export interface FiltrosContratos {
 
 export interface ContratoImportado {
   id: number;
-  numero_contrato?: string;
-  objeto?: string;
+  // Novos campos específicos
+  ano_numero?: string;           // ano-nº
+  numero_contrato?: string;      // contrato
+  ano?: number;                  // ano
+  pa?: string;                   // P.A
+  diretoria?: string;            // DIRETORIA REQUISITANTE
+  modalidade?: string;           // MODALIDADE
+  nome_empresa?: string;         // NOME DA EMPRESA
+  cnpj_empresa?: string;         // CNPJ DA EMPRESA
+  objeto?: string;               // OBJETO
+  data_assinatura?: string;      // DATA DA ASSINATURA
+  prazo?: number;                // PRAZO
+  unidade_prazo?: string;        // UNID. PRAZO
+  valor_contrato?: number;       // VALOR DO CONTRATO
+  vencimento?: string;           // VENCIMENTO
+  gestor_contrato?: string;      // GESTOR DO CONTRATO
+  fiscal_tecnico?: string;       // FISCAL TÉCNICO
+  fiscal_administrativo?: string; // FISCAL ADMINISTRATIVO
+  suplente?: string;             // SUPLENTE
+  // Campos legados para compatibilidade
   contratante?: string;
   contratado?: string;
   cnpj_contratado?: string;
   valor?: number;
   data_inicio?: string;
   data_fim?: string;
-  modalidade?: string;
   status?: string;
   tipo_contrato?: string;
   secretaria?: string;

@@ -89,7 +89,10 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
 
     const formData = new FormData();
     formData.append('file', file);
-    if (diretoria) {
+    
+    // Para arquivos Excel, não envia diretoria (vem do arquivo)
+    // Para outros tipos (PDF, XML, CSV), envia diretoria se fornecida
+    if (diretoria && fileType !== 'excel') {
       formData.append('diretoria', diretoria);
     }
 
