@@ -8,6 +8,7 @@ interface CardProps {
   shadow?: 'sm' | 'md' | 'lg' | 'xl';
   rounded?: 'sm' | 'md' | 'lg' | 'xl';
   hover?: boolean;
+  onClick?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
@@ -17,6 +18,7 @@ export const Card: React.FC<CardProps> = ({
   shadow = 'md',
   rounded = 'lg',
   hover = false,
+  onClick,
 }) => {
   const paddingClasses = {
     sm: 'p-4',
@@ -48,6 +50,9 @@ export const Card: React.FC<CardProps> = ({
         hover && 'hover:shadow-lg transition-shadow duration-200',
         className
       )}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
     >
       {children}
     </div>

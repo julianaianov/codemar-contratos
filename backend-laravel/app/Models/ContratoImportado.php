@@ -14,15 +14,31 @@ class ContratoImportado extends Model
 
     protected $fillable = [
         'file_import_id',
-        'numero_contrato',
-        'objeto',
+        'ano_numero',           // ano-nº
+        'numero_contrato',      // contrato
+        'ano',                  // ano
+        'pa',                   // P.A
+        'diretoria',            // DIRETORIA REQUISITANTE
+        'modalidade',           // MODALIDADE
+        'nome_empresa',         // NOME DA EMPRESA
+        'cnpj_empresa',         // CNPJ DA EMPRESA
+        'objeto',               // OBJETO
+        'data_assinatura',      // DATA DA ASSINATURA
+        'prazo',                // PRAZO
+        'unidade_prazo',        // UNID. PRAZO
+        'valor_contrato',       // VALOR DO CONTRATO
+        'vencimento',           // VENCIMENTO
+        'gestor_contrato',      // GESTOR DO CONTRATO
+        'fiscal_tecnico',       // FISCAL TÉCNICO
+        'fiscal_administrativo', // FISCAL ADMINISTRATIVO
+        'suplente',             // SUPLENTE
+        // Campos legados para compatibilidade
         'contratante',
         'contratado',
         'cnpj_contratado',
         'valor',
         'data_inicio',
         'data_fim',
-        'modalidade',
         'status',
         'tipo_contrato',
         'secretaria',
@@ -37,9 +53,14 @@ class ContratoImportado extends Model
     protected $casts = [
         'dados_originais' => 'array',
         'valor' => 'decimal:2',
+        'valor_contrato' => 'decimal:2',
         'data_inicio' => 'date',
         'data_fim' => 'date',
+        'data_assinatura' => 'date',
+        'vencimento' => 'date',
         'processado' => 'boolean',
+        'prazo' => 'integer',
+        'ano' => 'integer',
     ];
 
     /**

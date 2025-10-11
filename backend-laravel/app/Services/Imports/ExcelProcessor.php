@@ -40,8 +40,23 @@ class ExcelProcessor implements ProcessorInterface
 
         // Primeira linha contém cabeçalhos
         $headers = array_shift($rows);
-        $headers = array_map('strtolower', $headers);
-        $headers = array_map('trim', $headers);
+        // Normaliza cabeçalhos: sem acentos/pontuação e minúsculo
+        $normalizedHeaders = [];
+        foreach ($headers as $idx => $h) {
+            $nk = $this->normalizeKey($h);
+            // Evita headers vazios/duplicados
+            if ($nk === '') {
+                $nk = 'col_' . $idx;
+            }
+            // Garante unicidade mínima
+            $suffix = 1;
+            $base = $nk;
+            while (isset($normalizedHeaders[$nk])) {
+                $nk = $base . '_' . $suffix++;
+            }
+            $normalizedHeaders[$nk] = $nk;
+        }
+        $headers = array_values($normalizedHeaders);
 
         $totalRecords = count($rows);
         $successCount = 0;
@@ -55,7 +70,13 @@ class ExcelProcessor implements ProcessorInterface
                     continue;
                 }
 
-                $data = array_combine($headers, $row);
+                // Normaliza valores para array associativo com cabeçalhos normalizados
+                // Se quantidade divergir, faz trim/resize seguro
+                $rowValues = $row;
+                if (count($rowValues) !== count($headers)) {
+                    $rowValues = array_pad(array_slice($rowValues, 0, count($headers)), count($headers), null);
+                }
+                $data = array_combine($headers, $rowValues);
                 $this->processContratoExcel($data, $fileImport);
                 $successCount++;
             } catch (\Exception $e) {
@@ -82,20 +103,64 @@ class ExcelProcessor implements ProcessorInterface
      */
     private function processContratoExcel(array $data, FileImport $fileImport): void
     {
+        // Extrai dados específicos dos novos campos (ordem de prioridade: nomes exatos primeiro)
+        $anoNumero = $this->getValue($data, ['ano-nº', 'ano_numero', 'ano_numero_contrato','ano numero','ano-n']);
+        $numeroContrato = $this->getValue($data, ['contrato', 'numero', 'numero_contrato', 'nº contrato']);
+        $ano = $this->parseAno($this->getValue($data, ['ano', 'ano_contrato']));
+        $pa = $this->getValue($data, ['P.A', 'pa', 'p.a', 'processo_administrativo', 'processo']);
+        // Para Excel, usa DIRETORIA REQUISITANTE como diretoria principal
+        $diretoria = $this->getValue($data, ['DIRETORIA REQUISITANTE', 'diretoria_requisitante', 'DIRETORIA', 'diretoria', 'secretaria', 'unidade']);
+        if (empty($diretoria)) {
+            $diretoria = $this->diretoria ?: 'Diretoria não especificada';
+        }
+        $modalidade = $this->getValue($data, ['MODALIDADE', 'modalidade', 'modalidade_licitacao']);
+        $nomeEmpresa = $this->getValue($data, ['NOME DA EMPRESA', 'nome_empresa', 'empresa', 'contratado', 'fornecedor', 'razao_social']);
+        $cnpjEmpresa = $this->getValue($data, ['CNPJ DA EMPRESA', 'cnpj_empresa', 'cnpj', 'cnpj_contratado']);
+        $objeto = $this->getValue($data, ['OBJETO', 'objeto', 'descricao', 'descrição', 'objeto_contrato']);
+        $dataAssinatura = $this->parseDate($this->getValue($data, ['DATA DA ASSINATURA', 'data_assinatura', 'assinatura', 'data_contrato']));
+        $prazo = $this->parseInteger($this->getValue($data, ['PRAZO', 'prazo', 'prazo_contrato', 'duracao']));
+        $unidadePrazo = $this->getValue($data, ['UNID. PRAZO', 'unidade_prazo', 'unid_prazo', 'unidade', 'periodo']);
+        $valorContrato = $this->parseDecimal($this->getValue($data, ['VALOR DO CONTRATO', 'valor_contrato', 'valor', 'valor_total']));
+        $vencimento = $this->parseDate($this->getValue($data, ['VENCIMENTO', 'vencimento', 'data_vencimento', 'data_fim', 'vigencia_fim']));
+        
+        // Novos campos específicos
+        $gestorContrato = $this->getValue($data, ['GESTOR DO CONTRATO', 'gestor_contrato', 'gestor', 'responsavel']);
+        $fiscalTecnico = $this->getValue($data, ['FISCAL TÉCNICO', 'fiscal_tecnico', 'fiscal_tecnico', 'fiscal_tecnico']);
+        $fiscalAdministrativo = $this->getValue($data, ['FISCAL ADMINISTRATIVO', 'fiscal_administrativo', 'fiscal_admin', 'fiscal_administrativo']);
+        $suplente = $this->getValue($data, ['SUPLENTE', 'suplente', 'substituto']);
+        $status = $this->getValue($data, ['STATUS', 'status', 'situacao', 'situação']);
+
         ContratoImportado::create([
             'file_import_id' => $fileImport->id,
-            'numero_contrato' => $this->getValue($data, ['numero', 'numero_contrato', 'nº contrato']),
-            'objeto' => $this->getValue($data, ['objeto', 'descricao']),
-            'contratante' => $this->getValue($data, ['contratante', 'orgao']),
-            'contratado' => $this->getValue($data, ['contratado', 'fornecedor', 'empresa']),
-            'cnpj_contratado' => $this->getValue($data, ['cnpj', 'cnpj_contratado']),
-            'valor' => $this->parseDecimal($this->getValue($data, ['valor', 'valor_contrato'])),
-            'data_inicio' => $this->parseDate($this->getValue($data, ['data_inicio', 'inicio', 'vigencia_inicio'])),
-            'data_fim' => $this->parseDate($this->getValue($data, ['data_fim', 'fim', 'vigencia_fim'])),
-            'modalidade' => $this->getValue($data, ['modalidade']),
-            'status' => $this->getValue($data, ['status', 'situacao']),
+            // Novos campos específicos
+            'ano_numero' => $anoNumero,
+            'numero_contrato' => $numeroContrato,
+            'ano' => $ano,
+            'pa' => $pa,
+            'diretoria' => $diretoria,
+            'modalidade' => $modalidade,
+            'nome_empresa' => $nomeEmpresa,
+            'cnpj_empresa' => $cnpjEmpresa,
+            'objeto' => $objeto,
+            'data_assinatura' => $dataAssinatura,
+            'prazo' => $prazo,
+            'unidade_prazo' => $unidadePrazo,
+            'valor_contrato' => $valorContrato,
+            'vencimento' => $vencimento,
+            'gestor_contrato' => $gestorContrato,
+            'fiscal_tecnico' => $fiscalTecnico,
+            'fiscal_administrativo' => $fiscalAdministrativo,
+            'suplente' => $suplente,
+            // Campos legados para compatibilidade
+            'contratante' => $this->getValue($data, ['contratante', 'orgao', 'prefeitura']), // Mantém lógica original
+            'contratado' => $nomeEmpresa, // CONTRATADO = NOME DA EMPRESA
+            'cnpj_contratado' => $cnpjEmpresa, // CNPJ = CNPJ DA EMPRESA
+            'valor' => $valorContrato, // VALOR = VALOR DO CONTRATO
+            'data_inicio' => $dataAssinatura,
+            'data_fim' => $vencimento,
+            'status' => $status ?: 'vigente', // Para Excel, usa STATUS da planilha
             'tipo_contrato' => $this->getValue($data, ['tipo', 'tipo_contrato']),
-            'secretaria' => $this->getValue($data, ['diretoria', 'secretaria', 'unidade']) ?: $this->diretoria,
+            'secretaria' => $diretoria, // SECRETARIA = DIRETORIA REQUISITANTE
             'fonte_recurso' => $this->getValue($data, ['fonte_recurso', 'fonte']),
             'observacoes' => $this->getValue($data, ['observacoes', 'obs']),
             'dados_originais' => $data,
@@ -107,9 +172,11 @@ class ExcelProcessor implements ProcessorInterface
      */
     private function getValue(array $data, array $possibleKeys): ?string
     {
+        // Chaves já estão normalizadas; normaliza também as buscas
         foreach ($possibleKeys as $key) {
-            if (isset($data[$key]) && !empty($data[$key])) {
-                return trim($data[$key]);
+            $nk = $this->normalizeKey($key);
+            if (isset($data[$nk]) && $data[$nk] !== '') {
+                return is_string($data[$nk]) ? trim($data[$nk]) : $data[$nk];
             }
         }
         return null;
@@ -160,6 +227,50 @@ class ExcelProcessor implements ProcessorInterface
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Converte valor para inteiro
+     */
+    private function parseInteger($value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        // Remove caracteres não numéricos
+        $value = preg_replace('/[^\d]/', '', $value);
+        
+        return !empty($value) ? (int) $value : null;
+    }
+
+    /**
+     * Converte valor para ano
+     */
+    private function parseAno($value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $ano = $this->parseInteger($value);
+        
+        // Valida se é um ano válido
+        if ($ano && $ano >= 2000 && $ano <= 2030) {
+            return $ano;
+        }
+
+        return null;
+    }
+
+    private function normalizeKey($key): string
+    {
+        if ($key === null) return '';
+        $key = (string) $key;
+        $key = \Illuminate\Support\Str::ascii(\Illuminate\Support\Str::lower(trim($key)));
+        $key = str_replace(['.', ',', ';', ':', '\\', '/', '-', '–', '—', '_'], ' ', $key);
+        $key = preg_replace('/\s+/', ' ', $key);
+        return $key;
     }
 }
 

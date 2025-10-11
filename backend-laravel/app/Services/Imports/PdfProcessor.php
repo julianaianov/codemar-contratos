@@ -248,15 +248,28 @@ class PdfProcessor implements ProcessorInterface
         
         ContratoImportado::create([
             'file_import_id' => $fileImport->id,
+            // Novos campos específicos
+            'ano_numero' => $dados['ano_numero'],
             'numero_contrato' => $dados['numero_contrato'],
+            'ano' => $dados['ano'],
+            'pa' => $dados['pa'],
+            'diretoria' => $dados['diretoria'],
+            'modalidade' => $dados['modalidade'],
+            'nome_empresa' => $dados['nome_empresa'],
+            'cnpj_empresa' => $dados['cnpj_empresa'],
             'objeto' => $dados['objeto'],
+            'data_assinatura' => $dados['data_assinatura'],
+            'prazo' => $dados['prazo'],
+            'unidade_prazo' => $dados['unidade_prazo'],
+            'valor_contrato' => $dados['valor_contrato'],
+            'vencimento' => $dados['vencimento'],
+            // Campos legados para compatibilidade
             'contratante' => $dados['contratante'],
             'contratado' => $dados['contratado'],
             'cnpj_contratado' => $dados['cnpj_contratado'],
             'valor' => $dados['valor'],
             'data_inicio' => $dados['data_inicio'],
             'data_fim' => $dados['data_fim'],
-            'modalidade' => $dados['modalidade'],
             'status' => $dados['status'],
             'tipo_contrato' => $dados['tipo_contrato'],
             'secretaria' => $dados['secretaria'],
@@ -276,15 +289,28 @@ class PdfProcessor implements ProcessorInterface
         $text = $this->normalizeText($text);
         
         return [
+            // Novos campos específicos
+            'ano_numero' => $this->extractAnoNumero($text),
             'numero_contrato' => $this->extractNumeroContrato($text),
+            'ano' => $this->extractAno($text),
+            'pa' => $this->extractPA($text),
+            'diretoria' => $this->extractDiretoria($text),
+            'modalidade' => $this->extractModalidade($text),
+            'nome_empresa' => $this->extractNomeEmpresa($text),
+            'cnpj_empresa' => $this->extractCNPJ($text),
             'objeto' => $this->extractObjeto($text),
+            'data_assinatura' => $this->extractDataAssinatura($text),
+            'prazo' => $this->extractPrazo($text),
+            'unidade_prazo' => $this->extractUnidadePrazo($text),
+            'valor_contrato' => $this->extractValor($text),
+            'vencimento' => $this->extractVencimento($text),
+            // Campos legados para compatibilidade
             'contratante' => $this->extractContratante($text),
             'contratado' => $this->extractContratado($text),
             'cnpj_contratado' => $this->extractCNPJ($text),
             'valor' => $this->extractValor($text),
             'data_inicio' => $this->extractDataInicio($text),
             'data_fim' => $this->extractDataFim($text),
-            'modalidade' => $this->extractModalidade($text),
             'status' => 'vigente', // Status padrão
             'tipo_contrato' => $this->extractTipoContrato($text),
             'secretaria' => $this->extractSecretaria($text),
@@ -880,6 +906,217 @@ class PdfProcessor implements ProcessorInterface
         }
 
         return 'Empresa não identificada';
+    }
+
+    /**
+     * Extrai ano-número (formato: 2025/001)
+     */
+    private function extractAnoNumero(string $text): ?string
+    {
+        $patterns = [
+            '/(\d{4}\/\d{1,4})/', // Formato 2025/001
+            '/(\d{4}-\d{1,4})/', // Formato 2025-001
+            '/(\d{4}\.\d{1,4})/', // Formato 2025.001
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai ano do contrato
+     */
+    private function extractAno(string $text): ?int
+    {
+        $patterns = [
+            '/(\d{4})/', // Qualquer ano de 4 dígitos
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match_all($pattern, $text, $matches)) {
+                foreach ($matches[1] as $match) {
+                    $ano = (int) $match;
+                    // Considera anos válidos entre 2000 e 2030
+                    if ($ano >= 2000 && $ano <= 2030) {
+                        return $ano;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai P.A (Processo Administrativo)
+     */
+    private function extractPA(string $text): ?string
+    {
+        $patterns = [
+            '/p\.a\.?\s*[:\s]*([^\n]{5,50})/i',
+            '/processo\s*administrativo[:\s]*([^\n]{5,50})/i',
+            '/pa[:\s]*([^\n]{5,50})/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return trim($matches[1]);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai diretoria
+     */
+    private function extractDiretoria(string $text): ?string
+    {
+        $patterns = [
+            '/diretoria[:\s]*([^\n]{5,100})/i',
+            '/secretaria[:\s]*([^\n]{5,100})/i',
+            '/departamento[:\s]*([^\n]{5,100})/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return trim($matches[1]);
+            }
+        }
+
+        return $this->diretoria; // Usa a diretoria definida no processamento
+    }
+
+    /**
+     * Extrai nome da empresa
+     */
+    private function extractNomeEmpresa(string $text): ?string
+    {
+        // Reutiliza o método de extração de contratado
+        return $this->extractContratado($text);
+    }
+
+    /**
+     * Extrai data de assinatura
+     */
+    private function extractDataAssinatura(string $text): ?string
+    {
+        $patterns = [
+            '/data\s*(?:de\s*)?assinatura[:\s]*([\d\/\-\.]+)/i',
+            '/assinatura[:\s]*([\d\/\-\.]+)/i',
+            '/assinado\s*em[:\s]*([\d\/\-\.]+)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                $data = $this->parseDate($matches[1]);
+                if ($data) {
+                    return $data;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai prazo
+     */
+    private function extractPrazo(string $text): ?int
+    {
+        $patterns = [
+            '/prazo[:\s]*(\d+)/i',
+            '/vig[êe]ncia[:\s]*(\d+)/i',
+            '/duração[:\s]*(\d+)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                return (int) $matches[1];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai unidade do prazo
+     */
+    private function extractUnidadePrazo(string $text): ?string
+    {
+        $patterns = [
+            '/prazo[:\s]*\d+\s*(dias?|meses?|anos?)/i',
+            '/vig[êe]ncia[:\s]*\d+\s*(dias?|meses?|anos?)/i',
+            '/duração[:\s]*\d+\s*(dias?|meses?|anos?)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                $unidade = strtolower(trim($matches[1]));
+                // Normaliza as unidades
+                if (strpos($unidade, 'dia') !== false) return 'dias';
+                if (strpos($unidade, 'mes') !== false) return 'meses';
+                if (strpos($unidade, 'ano') !== false) return 'anos';
+                return $unidade;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extrai vencimento
+     */
+    private function extractVencimento(string $text): ?string
+    {
+        $patterns = [
+            '/vencimento[:\s]*([\d\/\-\.]+)/i',
+            '/data\s*(?:de\s*)?vencimento[:\s]*([\d\/\-\.]+)/i',
+            '/expira[:\s]*([\d\/\-\.]+)/i',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $text, $matches)) {
+                $data = $this->parseDate($matches[1]);
+                if ($data) {
+                    return $data;
+                }
+            }
+        }
+
+        // Se não encontrou vencimento específico, tenta calcular baseado na data de assinatura e prazo
+        $dataAssinatura = $this->extractDataAssinatura($text);
+        $prazo = $this->extractPrazo($text);
+        $unidadePrazo = $this->extractUnidadePrazo($text);
+
+        if ($dataAssinatura && $prazo && $unidadePrazo) {
+            try {
+                $data = \Carbon\Carbon::parse($dataAssinatura);
+                
+                switch ($unidadePrazo) {
+                    case 'dias':
+                        $data->addDays($prazo);
+                        break;
+                    case 'meses':
+                        $data->addMonths($prazo);
+                        break;
+                    case 'anos':
+                        $data->addYears($prazo);
+                        break;
+                }
+                
+                return $data->format('Y-m-d');
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+
+        return null;
     }
 }
 

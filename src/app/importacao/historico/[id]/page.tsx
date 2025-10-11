@@ -11,10 +11,14 @@ interface ContratoImportado {
   numero_contrato: string;
   objeto: string;
   contratado: string;
+  cnpj_contratado: string;
   valor: string;
+  valor_contrato: string;
   data_inicio: string;
   data_fim: string;
   status: string;
+  secretaria: string;
+  diretoria: string;
   processado: boolean;
   pdf_path?: string;
   dados_originais?: any;
@@ -65,15 +69,16 @@ export default function DetalhesImportacaoPage() {
   const exportToCSV = () => {
     if (!importData?.contratos) return;
 
-    const headers = ['Número', 'Objeto', 'Contratado', 'Valor', 'Data Início', 'Data Fim', 'Status'];
+    const headers = ['Número', 'Objeto', 'Contratado', 'Valor', 'Data Início', 'Data Fim', 'Status', 'Diretoria'];
     const rows = importData.contratos.map((c) => [
       c.numero_contrato,
       c.objeto,
       c.contratado,
-      c.valor,
+      c.valor || c.valor_contrato,
       c.data_inicio,
       c.data_fim,
       c.status,
+      c.secretaria || c.diretoria,
     ]);
 
     const csvContent = [
@@ -244,6 +249,9 @@ export default function DetalhesImportacaoPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Vigência
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Diretoria
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -267,8 +275,8 @@ export default function DetalhesImportacaoPage() {
                       {contrato.contratado || '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
-                      {contrato.valor
-                        ? `R$ ${parseFloat(contrato.valor).toLocaleString('pt-BR', {
+                      {(contrato.valor || contrato.valor_contrato)
+                        ? `R$ ${parseFloat(contrato.valor || contrato.valor_contrato).toLocaleString('pt-BR', {
                             minimumFractionDigits: 2,
                           })}`
                         : '-'}
@@ -280,11 +288,14 @@ export default function DetalhesImportacaoPage() {
                           ).toLocaleDateString('pt-BR')}`
                         : '-'}
                     </td>
+                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                      {contrato.secretaria || contrato.diretoria || '-'}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                     Nenhum contrato encontrado nesta importação
                   </td>
                 </tr>

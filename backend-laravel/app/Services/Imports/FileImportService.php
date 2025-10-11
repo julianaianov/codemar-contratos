@@ -45,18 +45,26 @@ class FileImportService
 
             $processor = $this->getProcessor($fileImport->file_type);
             
-            // Passa diretoria para o processador (quando suportado)
+            // Para PDFs, sempre passa a diretoria (obrigatória)
+            // Para Excel, só passa se não houver diretoria no arquivo
             if ($diretoria && method_exists($processor, 'setDiretoria')) {
-                $processor->setDiretoria($diretoria);
+                if ($fileImport->file_type === 'pdf') {
+                    // PDF sempre usa diretoria externa
+                    $processor->setDiretoria($diretoria);
+                } else {
+                    // Excel usa diretoria externa apenas como fallback
+                    $processor->setDiretoria($diretoria);
+                }
             }
             
             $processor->process($fileImport);
 
-            // Garantir que todos os contratos desta importação tenham a diretoria definida
-            if ($diretoria) {
+            // Para PDFs, garante que todos os contratos tenham a diretoria definida
+            // Para Excel, não força - deixa como está no arquivo
+            if ($diretoria && $fileImport->file_type === 'pdf') {
                 ContratoImportado::where('file_import_id', $fileImport->id)
-                    ->whereNull('secretaria')
-                    ->update(['secretaria' => $diretoria]);
+                    ->whereNull('diretoria')
+                    ->update(['diretoria' => $diretoria]);
             }
 
             $fileImport->markAsCompleted();

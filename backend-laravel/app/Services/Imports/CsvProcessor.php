@@ -5,6 +5,7 @@ namespace App\Services\Imports;
 use App\Models\FileImport;
 use App\Models\ContratoImportado;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CsvProcessor implements ProcessorInterface
 {
@@ -117,21 +118,38 @@ class CsvProcessor implements ProcessorInterface
     {
         ContratoImportado::create([
             'file_import_id' => $fileImport->id,
-            'numero_contrato' => $this->getValue($data, ['numero', 'numero_contrato', 'nº contrato', 'numero contrato']),
-            'objeto' => $this->getValue($data, ['objeto', 'descricao', 'descrição']),
-            'contratante' => $this->getValue($data, ['contratante', 'orgao', 'órgão']),
-            'contratado' => $this->getValue($data, ['contratado', 'fornecedor', 'empresa']),
-            'cnpj_contratado' => $this->getValue($data, ['cnpj', 'cnpj_contratado', 'cnpj contratado']),
-            'valor' => $this->parseDecimal($this->getValue($data, ['valor', 'valor_contrato', 'valor contrato'])),
-            'data_inicio' => $this->parseDate($this->getValue($data, ['data_inicio', 'inicio', 'vigencia_inicio', 'data inicio'])),
-            'data_fim' => $this->parseDate($this->getValue($data, ['data_fim', 'fim', 'vigencia_fim', 'data fim'])),
-            'modalidade' => $this->getValue($data, ['modalidade']),
-            'status' => $this->getValue($data, ['status', 'situacao', 'situação']),
+            // Campos estendidos / sinônimos
+            'ano_numero' => $this->getValue($data, ['ano-nº','ano_numero','ano_numero_contrato','ano-numero']),
+            'numero_contrato' => $this->getValue($data, ['contrato','numero','numero_contrato','nº contrato','numero contrato']),
+            'ano' => $this->parseInteger($this->getValue($data, ['ano','ano_contrato'])),
+            'pa' => $this->getValue($data, ['P.A','pa','p.a','processo_administrativo','processo']),
+            'diretoria' => $this->getValue($data, ['DIRETORIA REQUISITANTE','diretoria_requisitante','DIRETORIA','diretoria','secretaria','unidade']) ?: $this->diretoria,
+            'modalidade' => $this->getValue($data, ['MODALIDADE','modalidade','modalidade_licitacao']),
+            'nome_empresa' => $this->getValue($data, ['NOME DA EMPRESA','nome_empresa','empresa','contratado','fornecedor','razao_social']),
+            'cnpj_empresa' => $this->getValue($data, ['CNPJ DA EMPRESA','cnpj_empresa','cnpj','cnpj_contratado']),
+            'objeto' => $this->getValue($data, ['OBJETO','objeto','descricao','descrição','objeto_contrato']),
+            'data_assinatura' => $this->parseDate($this->getValue($data, ['DATA DA ASSINATURA','data_assinatura','assinatura','data_contrato'])),
+            'prazo' => $this->parseInteger($this->getValue($data, ['PRAZO','prazo','prazo_contrato','duracao'])),
+            'unidade_prazo' => $this->getValue($data, ['UNID. PRAZO','unidade_prazo','unid_prazo','unidade','periodo']),
+            'valor_contrato' => $this->parseDecimal($this->getValue($data, ['VALOR DO CONTRATO','valor_contrato','valor','valor_total'])),
+            'vencimento' => $this->parseDate($this->getValue($data, ['VENCIMENTO','vencimento','data_vencimento','data_fim','vigencia_fim'])),
+            'gestor_contrato' => $this->getValue($data, ['GESTOR DO CONTRATO','gestor_contrato','gestor','responsavel']),
+            'fiscal_tecnico' => $this->getValue($data, ['FISCAL TÉCNICO','fiscal_tecnico']),
+            'fiscal_administrativo' => $this->getValue($data, ['FISCAL ADMINISTRATIVO','fiscal_administrativo','fiscal_admin']),
+            'suplente' => $this->getValue($data, ['SUPLENTE','suplente','substituto']),
+            // Legados/compatibilidade
+            'contratante' => $this->getValue($data, ['contratante','orgao','órgão']),
+            'contratado' => $this->getValue($data, ['contratado','fornecedor','empresa','nome_empresa','razao_social']) ?: $this->getValue($data, ['nome_empresa']),
+            'cnpj_contratado' => $this->getValue($data, ['cnpj','cnpj_contratado','cnpj contratado','cnpj_empresa']),
+            'valor' => $this->parseDecimal($this->getValue($data, ['valor','valor_contrato','valor contrato','valor_total'])),
+            'data_inicio' => $this->parseDate($this->getValue($data, ['data_inicio','inicio','vigencia_inicio','data inicio','data_assinatura'])),
+            'data_fim' => $this->parseDate($this->getValue($data, ['data_fim','fim','vigencia_fim','data fim','vencimento'])),
+            'status' => $this->getValue($data, ['STATUS','status','situacao','situação']) ?: 'vigente',
             'tipo_contrato' => $this->getValue($data, ['tipo', 'tipo_contrato', 'tipo contrato']),
-            // usa diretoria do upload quando não houver coluna mapeada
-            'secretaria' => $this->getValue($data, ['diretoria', 'secretaria', 'unidade']) ?: $this->diretoria,
+            // SECRETARIA = DIRETORIA (mantém compatibilidade com consultas antigas)
+            'secretaria' => $this->getValue($data, ['DIRETORIA REQUISITANTE','diretoria_requisitante','DIRETORIA','diretoria','secretaria','unidade']) ?: $this->diretoria,
             'fonte_recurso' => $this->getValue($data, ['fonte_recurso', 'fonte', 'fonte recurso']),
-            'observacoes' => $this->getValue($data, ['observacoes', 'observações', 'obs']),
+            'observacoes' => $this->getValue($data, ['OBSERVAÇÕES','observacoes','observações','obs']),
             'dados_originais' => $data,
         ]);
     }
@@ -141,9 +159,15 @@ class CsvProcessor implements ProcessorInterface
      */
     private function getValue(array $data, array $possibleKeys): ?string
     {
+        // Normaliza cabeçalhos e chaves de busca para tolerar acentos, pontuação e variações
+        $normalized = [];
+        foreach ($data as $k => $v) {
+            $normalized[$this->normalizeKey($k)] = $v;
+        }
         foreach ($possibleKeys as $key) {
-            if (isset($data[$key]) && !empty($data[$key])) {
-                return trim($data[$key]);
+            $nk = $this->normalizeKey($key);
+            if (isset($normalized[$nk]) && $normalized[$nk] !== '') {
+                return is_string($normalized[$nk]) ? trim($normalized[$nk]) : $normalized[$nk];
             }
         }
         return null;
@@ -182,6 +206,29 @@ class CsvProcessor implements ProcessorInterface
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * Normaliza chave: minúsculas, sem acentos, remove pontuação e colapsa espaços
+     */
+    private function normalizeKey(string $key): string
+    {
+        $key = Str::ascii(Str::lower(trim($key)));
+        $key = str_replace(['.', ',', ';', ':', '\\', '/', '-', '–', '—', '_'], ' ', $key);
+        $key = preg_replace('/\s+/', ' ', $key);
+        return $key;
+    }
+
+    /**
+     * Converte valor para inteiro
+     */
+    private function parseInteger($value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+        $value = preg_replace('/[^\d]/', '', $value);
+        return $value !== '' ? (int)$value : null;
     }
 }
 
