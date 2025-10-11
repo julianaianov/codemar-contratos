@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MagnifyingGlassIcon, EyeIcon, PencilIcon, TrashIcon, ViewColumnsIcon, Squares2X2Icon, DocumentArrowDownIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, EyeIcon, PencilIcon, TrashIcon, ViewColumnsIcon, Squares2X2Icon, DocumentArrowDownIcon, DocumentIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { ContratoImportado } from '@/types/contratos';
 import { FilterPanel } from '@/components/contratos/FilterPanel';
 import { FiltrosContratos } from '@/types/contratos';
@@ -102,10 +102,10 @@ export default function ContratosPage() {
 
           {/* Filtros */}
           <FilterPanel
-            diretorias={diretorias}
-            statuses={statuses}
-            filtros={filtros}
-            onFiltrosChange={setFiltros}
+            filters={filtros}
+            onFiltersChange={setFiltros}
+            onFilter={carregarContratos}
+            loading={loading}
           />
 
           {/* Modo de Visualização */}
@@ -221,7 +221,7 @@ export default function ContratosPage() {
                             ? new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
                                 currency: 'BRL'
-                              }).format(contrato.valor || contrato.valor_contrato)
+                              }).format((contrato.valor ?? contrato.valor_contrato) ?? 0)
                             : 'N/A'
                           }
                         </p>
@@ -297,7 +297,7 @@ export default function ContratosPage() {
                             ? new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
                                 currency: 'BRL'
-                              }).format(contrato.valor || contrato.valor_contrato)
+                              }).format((contrato.valor ?? contrato.valor_contrato) ?? 0)
                             : 'N/A'
                           }
                         </div>
@@ -447,7 +447,7 @@ export default function ContratosPage() {
                         ? new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL'
-                          }).format(contratoSelecionado.valor || contratoSelecionado.valor_contrato)
+                          }).format((contratoSelecionado.valor ?? contratoSelecionado.valor_contrato) ?? 0)
                         : 'N/A'
                       }
                     </p>

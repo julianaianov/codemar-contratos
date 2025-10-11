@@ -40,8 +40,23 @@ class ExcelProcessor implements ProcessorInterface
 
         // Primeira linha contém cabeçalhos
         $headers = array_shift($rows);
-        $headers = array_map('strtolower', $headers);
-        $headers = array_map('trim', $headers);
+        // Normaliza cabeçalhos: sem acentos/pontuação e minúsculo
+        $normalizedHeaders = [];
+        foreach ($headers as $idx => $h) {
+            $nk = $this->normalizeKey($h);
+            // Evita headers vazios/duplicados
+            if ($nk === '') {
+                $nk = 'col_' . $idx;
+            }
+            // Garante unicidade mínima
+            $suffix = 1;
+            $base = $nk;
+            while (isset($normalizedHeaders[$nk])) {
+                $nk = $base . '_' . $suffix++;
+            }
+            $normalizedHeaders[$nk] = $nk;
+        }
+        $headers = array_values($normalizedHeaders);
 
         $totalRecords = count($rows);
         $successCount = 0;
@@ -55,7 +70,13 @@ class ExcelProcessor implements ProcessorInterface
                     continue;
                 }
 
-                $data = array_combine($headers, $row);
+                // Normaliza valores para array associativo com cabeçalhos normalizados
+                // Se quantidade divergir, faz trim/resize seguro
+                $rowValues = $row;
+                if (count($rowValues) !== count($headers)) {
+                    $rowValues = array_pad(array_slice($rowValues, 0, count($headers)), count($headers), null);
+                }
+                $data = array_combine($headers, $rowValues);
                 $this->processContratoExcel($data, $fileImport);
                 $successCount++;
             } catch (\Exception $e) {
@@ -83,7 +104,7 @@ class ExcelProcessor implements ProcessorInterface
     private function processContratoExcel(array $data, FileImport $fileImport): void
     {
         // Extrai dados específicos dos novos campos (ordem de prioridade: nomes exatos primeiro)
-        $anoNumero = $this->getValue($data, ['ano-nº', 'ano_numero', 'ano_numero_contrato']);
+        $anoNumero = $this->getValue($data, ['ano-nº', 'ano_numero', 'ano_numero_contrato','ano numero','ano-n']);
         $numeroContrato = $this->getValue($data, ['contrato', 'numero', 'numero_contrato', 'nº contrato']);
         $ano = $this->parseAno($this->getValue($data, ['ano', 'ano_contrato']));
         $pa = $this->getValue($data, ['P.A', 'pa', 'p.a', 'processo_administrativo', 'processo']);
@@ -151,9 +172,11 @@ class ExcelProcessor implements ProcessorInterface
      */
     private function getValue(array $data, array $possibleKeys): ?string
     {
+        // Chaves já estão normalizadas; normaliza também as buscas
         foreach ($possibleKeys as $key) {
-            if (isset($data[$key]) && !empty($data[$key])) {
-                return trim($data[$key]);
+            $nk = $this->normalizeKey($key);
+            if (isset($data[$nk]) && $data[$nk] !== '') {
+                return is_string($data[$nk]) ? trim($data[$nk]) : $data[$nk];
             }
         }
         return null;
@@ -238,6 +261,16 @@ class ExcelProcessor implements ProcessorInterface
         }
 
         return null;
+    }
+
+    private function normalizeKey($key): string
+    {
+        if ($key === null) return '';
+        $key = (string) $key;
+        $key = \Illuminate\Support\Str::ascii(\Illuminate\Support\Str::lower(trim($key)));
+        $key = str_replace(['.', ',', ';', ':', '\\', '/', '-', '–', '—', '_'], ' ', $key);
+        $key = preg_replace('/\s+/', ' ', $key);
+        return $key;
     }
 }
 

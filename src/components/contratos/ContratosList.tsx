@@ -21,11 +21,30 @@ export const ContratosList: React.FC<ContratosListProps> = ({
     status: '',
   });
 
-  // Extrai opções únicas para os filtros
-  const anos = [...new Set(contratos.map(c => c.ano).filter(Boolean))].sort((a, b) => b - a);
-  const diretorias = [...new Set(contratos.map(c => c.diretoria || c.secretaria).filter(Boolean))].sort();
-  const modalidades = [...new Set(contratos.map(c => c.modalidade).filter(Boolean))].sort();
-  const status = [...new Set(contratos.map(c => c.status).filter(Boolean))].sort();
+  // Extrai opções únicas para os filtros (sem depender de spread + Set)
+  const anos = contratos.reduce<number[]>((acc, c) => {
+    const v = c.ano as number | undefined;
+    if (typeof v === 'number' && !acc.includes(v)) acc.push(v);
+    return acc;
+  }, []).sort((a, b) => b - a);
+
+  const diretorias = contratos.reduce<string[]>((acc, c) => {
+    const v = (c.diretoria || c.secretaria) as string | undefined;
+    if (v && !acc.includes(v)) acc.push(v);
+    return acc;
+  }, []).sort();
+
+  const modalidades = contratos.reduce<string[]>((acc, c) => {
+    const v = c.modalidade as string | undefined;
+    if (v && !acc.includes(v)) acc.push(v);
+    return acc;
+  }, []).sort();
+
+  const status = contratos.reduce<string[]>((acc, c) => {
+    const v = c.status as string | undefined;
+    if (v && !acc.includes(v)) acc.push(v);
+    return acc;
+  }, []).sort();
 
   // Filtra contratos baseado nos filtros selecionados
   const contratosFiltrados = contratos.filter(contrato => {
