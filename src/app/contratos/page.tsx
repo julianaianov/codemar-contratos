@@ -351,10 +351,7 @@ export default function ContratosPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          onClick={() => {
-                            setContratoSelecionado(contrato);
-                            setShowModal(true);
-                          }}
+                          onClick={() => abrirDetalhe(contrato)}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                         >
                           <EyeIcon className="h-4 w-4" />
@@ -530,13 +527,13 @@ export default function ContratosPage() {
                       {detalhe.suplente || getValorCampo(undefined, ['suplente','substituto'], detalhe) || 'N/A'}
                     </p>
                   </div>
-                  {contratoSelecionado.observacoes && (
+                  {detalhe?.observacoes && (
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         Observações
                       </label>
                       <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                        {contratoSelecionado.observacoes}
+                        {detalhe.observacoes}
                       </p>
                     </div>
                   )}
