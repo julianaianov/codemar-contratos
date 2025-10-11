@@ -38,9 +38,8 @@ export default function ConsultaContratosPage() {
       params.append('per_page', '50');
       params.append('page', String(page));
 
-      // Buscar contratos da API do Laravel
-      const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${API_URL}/api/contratos?${params.toString()}`);
+      // Buscar contratos via rota proxy do Next para evitar CORS
+      const response = await fetch(`/api/contratos/contratos?${params.toString()}`);
       const data = await response.json();
       // Estrutura de paginação do Laravel Paginator
       setContratos(data.data || []);
@@ -81,6 +80,31 @@ export default function ConsultaContratosPage() {
     }).format(valor);
   };
 
+  const getValorCampo = (primary: any, keys: string[], contrato?: any): string | undefined => {
+    if (primary) return String(primary);
+    const obj = (contrato || contratoSelecionado) as any;
+    const orig = obj?.dados_originais || {};
+    const allKeys = Object.keys(orig);
+    if (allKeys.length === 0) return undefined;
+    const normalize = (s: string) => s
+      ?.toLowerCase()
+      // remove acentos/diacríticos
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      // unificar separadores
+      .replace(/[_\-.]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const map: Record<string, any> = {};
+    for (const k of allKeys) {
+      map[normalize(k)] = orig[k];
+    }
+    for (const k of keys) {
+      const nk = normalize(k);
+      if (map[nk]) return String(map[nk]);
+    }
+    return undefined;
+  };
+
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
       case 'vigente':
@@ -98,9 +122,22 @@ export default function ConsultaContratosPage() {
     }
   };
 
-  const handleViewContrato = (contrato: ContratoImportado) => {
-    setContratoSelecionado(contrato);
-    setShowModal(true);
+  const handleViewContrato = async (contrato: ContratoImportado) => {
+    try {
+      // Busca detalhes completos (inclui dados_originais) antes de abrir o modal
+      const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
+      const resp = await fetch(`${API_URL}/api/contratos/${contrato.id}`);
+      if (resp.ok) {
+        const full = await resp.json();
+        setContratoSelecionado(full);
+      } else {
+        setContratoSelecionado(contrato);
+      }
+    } catch (e) {
+      setContratoSelecionado(contrato);
+    } finally {
+      setShowModal(true);
+    }
   };
 
   const handleViewPdf = (contratoId: number) => {
@@ -209,10 +246,10 @@ export default function ConsultaContratosPage() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {contrato.numero_contrato || 'N/A'}
+                    {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
                   </h3>
-                  <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(contrato.status || '')}`}>
-                    {contrato.status || 'N/A'}
+                  <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor((contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || '') as string)}`}>
+                    {contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || 'N/A'}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -251,12 +288,24 @@ export default function ConsultaContratosPage() {
                 
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-medium text-gray-600 dark:text-gray-300">🗓️</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Ano</p>
+                    <p className="text-sm text-gray-900 dark:text-white">
+                      {contrato.ano ?? (getValorCampo(undefined, ['ano','ano contrato','ano_contrato'], contrato) as any) ?? 'N/A'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
                     <span className="text-xs font-medium text-gray-600 dark:text-gray-300">🏢</span>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Contratado</p>
                     <p className="text-sm text-gray-900 dark:text-white">
-                      {contrato.contratado || 'Não informado'}
+                      {contrato.contratado || getValorCampo(undefined, ['nome da empresa','nome_empresa','empresa','contratado','fornecedor','razao social','razão social'], contrato) || 'Não informado'}
                     </p>
                   </div>
                 </div>
@@ -339,7 +388,7 @@ export default function ConsultaContratosPage() {
                   <tr key={contrato.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {contrato.numero_contrato || 'N/A'}
+                        {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -354,7 +403,7 @@ export default function ConsultaContratosPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 dark:text-white">
-                        {contrato.secretaria || 'Não informado'}
+                        {contrato.secretaria || contrato.diretoria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], contrato) || 'Não informado'}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -363,8 +412,8 @@ export default function ConsultaContratosPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(contrato.status || '')}`}>
-                        {contrato.status || 'N/A'}
+                    <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor((contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || '') as string)}`}>
+                        {contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -435,6 +484,17 @@ export default function ConsultaContratosPage() {
                   </div>
                 </div>
                 
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Ano-Nº</label>
+                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.ano_numero || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Ano</label>
+                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.ano ?? 'N/A'}</p>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Objeto</label>
                   <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.objeto || 'Não informado'}</p>
@@ -447,7 +507,7 @@ export default function ConsultaContratosPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Diretoria</label>
-                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.secretaria || 'Não informado'}</p>
+                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.diretoria || contratoSelecionado.secretaria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade']) || 'Não informado'}</p>
                   </div>
                 </div>
                 
@@ -462,10 +522,50 @@ export default function ConsultaContratosPage() {
                   </div>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Valor Global</label>
-                  <p className="text-sm text-gray-900 dark:text-white font-semibold">{formatarValor(contratoSelecionado.valor)}</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Prazo</label>
+                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.prazo ? `${contratoSelecionado.prazo} ${contratoSelecionado.unidade_prazo || ''}` : 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Vencimento</label>
+                    <p className="text-sm text-gray-900 dark:text-white">{formatarData(contratoSelecionado.vencimento || contratoSelecionado.data_fim)}</p>
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Valor do Contrato</label>
+                    <p className="text-sm text-gray-900 dark:text-white font-semibold">{formatarValor(contratoSelecionado.valor_contrato ?? contratoSelecionado.valor)}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Gestor do Contrato</label>
+                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.gestor_contrato || getValorCampo(undefined, ['gestor do contrato','gestor_contrato','gestor','responsavel']) || 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Fiscal Técnico</label>
+                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.fiscal_tecnico || getValorCampo(undefined, ['fiscal tecnico','fiscal_técnico','fiscal_tecnico']) || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Fiscal Administrativo</label>
+                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.fiscal_administrativo || getValorCampo(undefined, ['fiscal administrativo','fiscal_administrativo','fiscal admin']) || 'N/A'}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Suplente</label>
+                  <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.suplente || getValorCampo(undefined, ['suplente','substituto']) || 'N/A'}</p>
+                </div>
+
+                {contratoSelecionado.observacoes && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Observações</label>
+                    <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.observacoes}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

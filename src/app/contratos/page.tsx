@@ -14,6 +14,7 @@ export default function ContratosPage() {
   const [filtros, setFiltros] = useState<FiltrosContratos>({});
   const [contratoSelecionado, setContratoSelecionado] = useState<ContratoImportado | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [detalhe, setDetalhe] = useState<ContratoImportado | null>(null);
 
   useEffect(() => {
     carregarContratos();
@@ -58,6 +59,46 @@ export default function ContratosPage() {
 
     return matchesSearch && matchesDiretoria && matchesStatus;
   });
+
+  const getValorCampo = (primary: any, keys: string[], contrato?: any): string | undefined => {
+    if (primary) return String(primary);
+    const obj = (contrato || detalhe) as any;
+    const orig = obj?.dados_originais || {};
+    const allKeys = Object.keys(orig);
+    if (allKeys.length === 0) return undefined;
+    const normalize = (s: string) => s
+      ?.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[_\-.]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const map: Record<string, any> = {};
+    for (const k of allKeys) {
+      map[normalize(k)] = orig[k];
+    }
+    for (const k of keys) {
+      const nk = normalize(k);
+      if (map[nk]) return String(map[nk]);
+    }
+    return undefined;
+  };
+
+  const abrirDetalhe = async (contrato: ContratoImportado) => {
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
+      const resp = await fetch(`${API_URL}/api/contratos/${contrato.id}`);
+      if (resp.ok) {
+        const full = await resp.json();
+        setDetalhe(full);
+      } else {
+        setDetalhe(contrato);
+      }
+    } catch (e) {
+      setDetalhe(contrato);
+    } finally {
+      setShowModal(true);
+    }
+  };
 
   // Construir listas únicas sem depender de recursos ES2015 de iteração
   const diretorias = contratos.reduce<string[]>((acc, c) => {
@@ -186,18 +227,18 @@ export default function ContratosPage() {
                     <div className="flex justify-between items-start mb-3">
                       <div>
                         <h3 className="font-semibold text-gray-900 dark:text-white">
-                          {contrato.numero_contrato || 'N/A'}
+                          {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
                         </h3>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {contrato.ano_numero || contrato.ano || 'N/A'}
+                          {contrato.ano_numero || contrato.ano || (getValorCampo(undefined, ['ano-nº','ano_numero','ano numero','ano-numero'], contrato) as any) || 'N/A'}
                         </p>
                       </div>
                       <span className={`px-2 py-1 text-xs rounded-full ${
-                        contrato.status === 'VIGENTE'
+                        (contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato)) === 'VIGENTE'
                           ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                           : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                       }`}>
-                        {contrato.status || 'N/A'}
+                        {contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || 'N/A'}
                       </span>
                     </div>
                     
@@ -205,13 +246,13 @@ export default function ContratosPage() {
                       <div>
                         <span className="font-medium text-gray-700 dark:text-gray-300">Empresa:</span>
                         <p className="text-gray-600 dark:text-gray-400 truncate">
-                          {contrato.contratado || contrato.nome_empresa || 'N/A'}
+                          {contrato.contratado || contrato.nome_empresa || getValorCampo(undefined, ['nome da empresa','nome_empresa','empresa','contratado','fornecedor','razao social','razão social'], contrato) || 'N/A'}
                         </p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700 dark:text-gray-300">Diretoria:</span>
                         <p className="text-gray-600 dark:text-gray-400">
-                          {contrato.diretoria || 'N/A'}
+                          {contrato.diretoria || (contrato as any).secretaria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], contrato) || 'N/A'}
                         </p>
                       </div>
                       <div>
@@ -230,10 +271,7 @@ export default function ContratosPage() {
                     
                     <div className="mt-4 flex justify-end space-x-2">
                       <button
-                        onClick={() => {
-                          setContratoSelecionado(contrato);
-                          setShowModal(true);
-                        }}
+                        onClick={() => abrirDetalhe(contrato)}
                         className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
                       >
                         <EyeIcon className="h-4 w-4" />
@@ -274,21 +312,21 @@ export default function ContratosPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {contrato.numero_contrato || 'N/A'}
+                            {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {contrato.ano_numero || contrato.ano || 'N/A'}
+                            {contrato.ano_numero || contrato.ano || (getValorCampo(undefined, ['ano-nº','ano_numero','ano numero','ano-numero'], contrato) as any) || 'N/A'}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white truncate max-w-xs">
-                          {contrato.contratado || contrato.nome_empresa || 'N/A'}
+                          {contrato.contratado || contrato.nome_empresa || getValorCampo(undefined, ['nome da empresa','nome_empresa','empresa','contratado','fornecedor','razao social','razão social'], contrato) || 'N/A'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900 dark:text-white">
-                          {contrato.diretoria || 'N/A'}
+                          {contrato.diretoria || (contrato as any).secretaria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], contrato) || 'N/A'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -304,11 +342,11 @@ export default function ContratosPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs rounded-full ${
-                          contrato.status === 'VIGENTE'
+                          (contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato)) === 'VIGENTE'
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                             : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                         }`}>
-                          {contrato.status || 'N/A'}
+                          {contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || 'N/A'}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -332,7 +370,7 @@ export default function ContratosPage() {
       )}
 
       {/* Modal de Detalhes */}
-      {showModal && contratoSelecionado && (
+      {showModal && detalhe && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white dark:bg-gray-800">
             <div className="mt-3">
@@ -355,7 +393,7 @@ export default function ContratosPage() {
                       Número do Contrato
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.numero_contrato || 'N/A'}
+                      {detalhe.numero_contrato || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -363,7 +401,7 @@ export default function ContratosPage() {
                       Ano-Número
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.ano_numero || 'N/A'}
+                      {detalhe.ano_numero || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -371,7 +409,7 @@ export default function ContratosPage() {
                       Ano
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.ano || 'N/A'}
+                      {detalhe.ano || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -379,7 +417,7 @@ export default function ContratosPage() {
                       P.A
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.pa || 'N/A'}
+                      {detalhe.pa || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -387,7 +425,7 @@ export default function ContratosPage() {
                       Diretoria
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.secretaria || contratoSelecionado.diretoria || 'N/A'}
+                      {detalhe.secretaria || detalhe.diretoria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], detalhe) || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -395,7 +433,7 @@ export default function ContratosPage() {
                       Modalidade
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.modalidade || 'N/A'}
+                      {detalhe.modalidade || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -403,7 +441,7 @@ export default function ContratosPage() {
                       Nome da Empresa
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.contratado || contratoSelecionado.nome_empresa || 'N/A'}
+                      {detalhe.contratado || detalhe.nome_empresa || getValorCampo(undefined, ['nome da empresa','nome_empresa','empresa','contratado','fornecedor','razao social','razão social'], detalhe) || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -411,7 +449,7 @@ export default function ContratosPage() {
                       CNPJ da Empresa
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.cnpj_contratado || contratoSelecionado.cnpj_empresa || 'N/A'}
+                      {detalhe.cnpj_contratado || detalhe.cnpj_empresa || 'N/A'}
                     </p>
                   </div>
                   <div className="md:col-span-2">
@@ -419,7 +457,7 @@ export default function ContratosPage() {
                       Objeto
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.objeto || 'N/A'}
+                      {detalhe.objeto || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -427,7 +465,7 @@ export default function ContratosPage() {
                       Data da Assinatura
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.data_assinatura || 'N/A'}
+                      {detalhe.data_assinatura || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -435,7 +473,7 @@ export default function ContratosPage() {
                       Prazo
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.prazo ? `${contratoSelecionado.prazo} ${contratoSelecionado.unidade_prazo || ''}` : 'N/A'}
+                      {detalhe.prazo ? `${detalhe.prazo} ${detalhe.unidade_prazo || ''}` : 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -443,11 +481,11 @@ export default function ContratosPage() {
                       Valor do Contrato
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {(contratoSelecionado.valor || contratoSelecionado.valor_contrato)
+                      {(detalhe.valor || detalhe.valor_contrato)
                         ? new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL'
-                          }).format((contratoSelecionado.valor ?? contratoSelecionado.valor_contrato) ?? 0)
+                          }).format((detalhe.valor ?? detalhe.valor_contrato) ?? 0)
                         : 'N/A'
                       }
                     </p>
@@ -457,7 +495,7 @@ export default function ContratosPage() {
                       Vencimento
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.vencimento || 'N/A'}
+                      {detalhe.vencimento || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -465,7 +503,7 @@ export default function ContratosPage() {
                       Gestor do Contrato
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.gestor_contrato || 'N/A'}
+                      {detalhe.gestor_contrato || getValorCampo(undefined, ['gestor do contrato','gestor_contrato','gestor','responsavel'], detalhe) || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -473,7 +511,7 @@ export default function ContratosPage() {
                       Fiscal Técnico
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.fiscal_tecnico || 'N/A'}
+                      {detalhe.fiscal_tecnico || getValorCampo(undefined, ['fiscal tecnico','fiscal_técnico','fiscal_tecnico'], detalhe) || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -481,7 +519,7 @@ export default function ContratosPage() {
                       Fiscal Administrativo
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.fiscal_administrativo || 'N/A'}
+                      {detalhe.fiscal_administrativo || getValorCampo(undefined, ['fiscal administrativo','fiscal_administrativo','fiscal admin'], detalhe) || 'N/A'}
                     </p>
                   </div>
                   <div>
@@ -489,7 +527,7 @@ export default function ContratosPage() {
                       Suplente
                     </label>
                     <p className="mt-1 text-sm text-gray-900 dark:text-white">
-                      {contratoSelecionado.suplente || 'N/A'}
+                      {detalhe.suplente || getValorCampo(undefined, ['suplente','substituto'], detalhe) || 'N/A'}
                     </p>
                   </div>
                   {contratoSelecionado.observacoes && (

@@ -169,6 +169,14 @@ class CsvProcessor implements ProcessorInterface
             if (isset($normalized[$nk]) && $normalized[$nk] !== '') {
                 return is_string($normalized[$nk]) ? trim($normalized[$nk]) : $normalized[$nk];
             }
+            // variantes com sufixo numérico e parênteses
+            foreach ($normalized as $dk => $val) {
+                if ($val === '' || $val === null) continue;
+                if (preg_match('/^'.preg_quote($nk, '/').'(\\s+|_)\\d+$/', $dk)
+                    || preg_match('/^'.preg_quote($nk, '/').'\\s*\\(/', $dk)) {
+                    return is_string($val) ? trim($val) : $val;
+                }
+            }
         }
         return null;
     }
@@ -221,7 +229,7 @@ class CsvProcessor implements ProcessorInterface
     private function normalizeKey(string $key): string
     {
         $key = Str::ascii(Str::lower(trim($key)));
-        $key = str_replace(['.', ',', ';', ':', '\\', '/', '-', '–', '—', '_'], ' ', $key);
+        $key = str_replace(['.', ',', ';', ':', '\\', '/', '-', '–', '—', '_', '(', ')', '[', ']', '{', '}'], ' ', $key);
         $key = preg_replace('/\s+/', ' ', $key);
         return $key;
     }
