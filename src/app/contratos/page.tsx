@@ -219,7 +219,7 @@ export default function ContratosPage() {
           {viewMode === 'cards' ? (
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {contratosFiltrados.map((contrato) => (
+                {contratosFiltrados.map((contrato, index) => (
                   <div
                     key={contrato.id}
                     className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -227,8 +227,11 @@ export default function ContratosPage() {
                     <div className="flex justify-between items-start mb-3">
                       <div>
                         <h3 className="font-semibold text-gray-900 dark:text-white">
-                          {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
+                          {index + 1}
                         </h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Contrato: {contrato.numero_contrato || getValorCampo(undefined, ['numero_contrato','nº contrato','numero contrato','contrato'], contrato) || 'N/A'}
+                        </p>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
                           {contrato.ano_numero || contrato.ano || (getValorCampo(undefined, ['ano-nº','ano_numero','ano numero','ano-numero'], contrato) as any) || 'N/A'}
                         </p>
@@ -312,7 +315,7 @@ export default function ContratosPage() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
-                            {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
+                            {contrato.numero_contrato || getValorCampo(undefined, ['numero_contrato','nº contrato','numero contrato','contrato'], contrato) || contrato.ano_numero || 'N/A'}
                           </div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">
                             {contrato.ano_numero || contrato.ano || (getValorCampo(undefined, ['ano-nº','ano_numero','ano numero','ano-numero'], contrato) as any) || 'N/A'}
