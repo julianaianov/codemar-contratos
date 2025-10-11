@@ -196,13 +196,30 @@ class ExcelProcessor implements ProcessorInterface
             return (float) $value;
         }
 
-        // Remove caracteres não numéricos exceto . e ,
-        $value = preg_replace('/[^\d,\.]/', '', $value);
-        
-        // Substitui vírgula por ponto
-        $value = str_replace(',', '.', $value);
-        
-        return (float) $value;
+        // Mantém apenas dígitos e separadores
+        $s = preg_replace('/[^\d,\.]/', '', (string) $value);
+
+        $lastDot = strrpos($s, '.');
+        $lastComma = strrpos($s, ',');
+
+        if ($lastDot !== false && $lastComma !== false) {
+            // Ambos presentes: decimal é o separador que aparece por último
+            if ($lastDot > $lastComma) {
+                // decimal '.' -> remove vírgulas (milhar)
+                $s = str_replace(',', '', $s);
+            } else {
+                // decimal ',' -> remove pontos (milhar) e troca vírgula por ponto
+                $s = str_replace('.', '', $s);
+                $s = str_replace(',', '.', $s);
+            }
+        } elseif ($lastComma !== false) {
+            // Apenas vírgula -> considera decimal e troca por ponto
+            $s = str_replace(',', '.', $s);
+        } else {
+            // Apenas ponto ou apenas dígitos -> já está OK
+        }
+
+        return is_numeric($s) ? (float) $s : null;
     }
 
     /**

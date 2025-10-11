@@ -13,11 +13,14 @@ export default function ConsultaContratosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filtros, setFiltros] = useState<FiltrosContratos>({});
   const [contratoSelecionado, setContratoSelecionado] = useState<ContratoImportado | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     carregarContratos();
-  }, [filtros]);
+  }, [filtros, page]);
 
   const carregarContratos = async () => {
     try {
@@ -31,12 +34,18 @@ export default function ConsultaContratosPage() {
       if (filtros.status) {
         params.append('status', filtros.status);
       }
+      // paginação
+      params.append('per_page', '50');
+      params.append('page', String(page));
 
       // Buscar contratos da API do Laravel
       const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
       const response = await fetch(`${API_URL}/api/contratos?${params.toString()}`);
       const data = await response.json();
+      // Estrutura de paginação do Laravel Paginator
       setContratos(data.data || []);
+      setTotalPages(data.last_page || 1);
+      setTotalItems(data.total || (data.data ? data.data.length : 0));
     } catch (error) {
       console.error('Erro ao carregar contratos:', error);
       setContratos([]);
@@ -171,8 +180,25 @@ export default function ConsultaContratosPage() {
       {/* Resultados */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          {loading ? 'Carregando...' : `Exibindo ${contratosFiltrados.length} de ${contratos.length} contratos`}
+          {loading ? 'Carregando...' : `Exibindo ${contratosFiltrados.length} de ${totalItems} contratos`}
         </p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page <= 1 || loading}
+            className={`px-3 py-1 rounded border text-sm ${page <= 1 || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+          >
+            Anterior
+          </button>
+          <span className="text-sm text-gray-600 dark:text-gray-400">Página {page} de {totalPages}</span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages || loading}
+            className={`px-3 py-1 rounded border text-sm ${page >= totalPages || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+          >
+            Próxima
+          </button>
+        </div>
       </div>
 
       {/* Visualização em Cards */}
