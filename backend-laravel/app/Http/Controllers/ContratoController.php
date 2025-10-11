@@ -16,27 +16,31 @@ class ContratoController extends Controller
         $query = ContratoImportado::query();
 
         // Filtros
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        if ($request->has('numero_contrato')) {
+        if ($request->filled('numero_contrato')) {
             $query->where('numero_contrato', 'like', '%' . $request->numero_contrato . '%');
         }
 
-        if ($request->has('contratado')) {
+        if ($request->filled('contratado')) {
             $query->where('contratado', 'like', '%' . $request->contratado . '%');
         }
 
-        if ($request->has('diretoria')) {
-            $query->where('secretaria', $request->diretoria);
+        $diretoria = trim((string) $request->get('diretoria', ''));
+        if ($diretoria !== '' && strtolower($diretoria) !== 'todas') {
+            $query->where(function($q) use ($diretoria) {
+                $q->where('diretoria', $diretoria)
+                  ->orWhere('secretaria', $diretoria);
+            });
         }
 
-        if ($request->has('data_inicio')) {
+        if ($request->filled('data_inicio')) {
             $query->whereDate('data_inicio', '>=', $request->data_inicio);
         }
 
-        if ($request->has('data_fim')) {
+        if ($request->filled('data_fim')) {
             $query->whereDate('data_fim', '<=', $request->data_fim);
         }
 
@@ -58,7 +62,51 @@ class ContratoController extends Controller
     public function show($id)
     {
         $contrato = ContratoImportado::findOrFail($id);
-        return response()->json($contrato);
+
+        $data = $contrato->toArray();
+        $orig = $contrato->dados_originais ?? [];
+        if (is_array($orig) && !empty($orig)) {
+            $normalized = [];
+            foreach ($orig as $k => $v) {
+                $nk = $this->normalizeKey($k);
+                $normalized[$nk] = $v;
+            }
+            $fallback = function(array $keys) use ($normalized) {
+                foreach ($keys as $k) {
+                    $base = $this->normalizeKey($k);
+                    // match exato
+                    if (isset($normalized[$base]) && $normalized[$base] !== '') {
+                        return is_string($normalized[$base]) ? trim($normalized[$base]) : $normalized[$base];
+                    }
+                    // procurar variantes com sufixo numérico e com parênteses (ex.: "fiscal tecnico 1", "fiscal tecnico (titular)")
+                    foreach ($normalized as $nk => $val) {
+                        if ($val === '' || $val === null) continue;
+                        if (preg_match('/^'.preg_quote($base, '/').'(\n+                            s+|_)\d+$/', $nk) || preg_match('/^'.preg_quote($base, '/').'\s*\(/', $nk)) {
+                            return is_string($val) ? trim($val) : $val;
+                        }
+                    }
+                }
+                return null;
+            };
+
+            // Fallbacks adicionais para campos que podem aparecer com variações
+            $data['numero_contrato'] = $data['numero_contrato'] ?? $fallback(['contrato','numero','numero_contrato','nº contrato','numero contrato']);
+            $data['ano_numero'] = $data['ano_numero'] ?? $fallback(['ano-nº','ano_numero','ano numero','ano-numero']);
+            $data['ano'] = $data['ano'] ?? $fallback(['ano','ano contrato','ano_contrato']);
+            $data['status'] = $data['status'] ?? $fallback(['status','situacao','situação']);
+            $data['diretoria'] = $data['diretoria'] ?? $fallback(['diretoria requisitante','diretoria','secretaria','unidade']);
+            $data['gestor_contrato'] = $data['gestor_contrato'] ?? $fallback(['gestor do contrato','gestor_contrato','gestor','responsavel','responsável']);
+            $data['fiscal_tecnico'] = $data['fiscal_tecnico'] ?? $fallback(['fiscal tecnico','fiscal tecnico','fiscal_tecnico','fiscal técnico']);
+            $data['fiscal_administrativo'] = $data['fiscal_administrativo'] ?? $fallback(['fiscal administrativo','fiscal administrativo','fiscal_administrativo','fiscal admin']);
+            $data['suplente'] = $data['suplente'] ?? $fallback(['suplente','substituto']);
+            $data['valor_contrato'] = $data['valor_contrato'] ?? $fallback(['valor do contrato','valor_contrato','valor_total','valor total','valor']);
+            $data['data_assinatura'] = $data['data_assinatura'] ?? $fallback(['data da assinatura','data_assinatura','assinatura','data contrato','data_contrato']);
+            $data['prazo'] = $data['prazo'] ?? $fallback(['prazo','prazo contrato','duracao','duração']);
+            $data['unidade_prazo'] = $data['unidade_prazo'] ?? $fallback(['unid. prazo','unidade_prazo','unid_prazo','unidade','periodo','período']);
+            $data['vencimento'] = $data['vencimento'] ?? $fallback(['vencimento','data_vencimento','data fim','data_fim','vigencia_fim']);
+        }
+
+        return response()->json($data);
     }
 
     /**
@@ -217,6 +265,13 @@ class ContratoController extends Controller
             'success' => true,
             'data' => $diretorias,
         ]);
+    }
+    
+    private function normalizeKey(string $key): string
+    {
+        $key = \Illuminate\Support\Str::ascii(\Illuminate\Support\Str::lower(trim($key)));
+        $key = str_replace(['.', ',', ';', ':', '\\', '/', '-', '–', '—', '_', '(', ')', '[', ']', '{', '}'], ' ', $key);
+        return preg_replace('/\s+/', ' ', $key);
     }
 }
 

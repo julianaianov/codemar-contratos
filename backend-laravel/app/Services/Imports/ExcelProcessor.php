@@ -178,6 +178,14 @@ class ExcelProcessor implements ProcessorInterface
             if (isset($data[$nk]) && $data[$nk] !== '') {
                 return is_string($data[$nk]) ? trim($data[$nk]) : $data[$nk];
             }
+            // procurar variantes com sufixo numérico e variantes com parênteses (e.g., "fiscal tecnico 1", "fiscal tecnico (titular)")
+            foreach ($data as $dk => $val) {
+                if ($val === '' || $val === null) continue;
+                if (preg_match('/^'.preg_quote($nk, '/').'(\s+|_)\d+$/', $dk)
+                    || preg_match('/^'.preg_quote($nk, '/').'\s*\(/', $dk)) {
+                    return is_string($val) ? trim($val) : $val;
+                }
+            }
         }
         return null;
     }
@@ -285,7 +293,7 @@ class ExcelProcessor implements ProcessorInterface
         if ($key === null) return '';
         $key = (string) $key;
         $key = \Illuminate\Support\Str::ascii(\Illuminate\Support\Str::lower(trim($key)));
-        $key = str_replace(['.', ',', ';', ':', '\\', '/', '-', '–', '—', '_'], ' ', $key);
+        $key = str_replace(['.', ',', ';', ':', '\\', '/', '-', '–', '—', '_', '(', ')', '[', ']', '{', '}'], ' ', $key);
         $key = preg_replace('/\s+/', ' ', $key);
         return $key;
     }
