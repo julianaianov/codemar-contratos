@@ -15,7 +15,12 @@ export interface ChartStyleContextValue {
   getColorsForChart: (key?: string) => string[];
 }
 
-const DEFAULT_COLORS = ['#00a3ff', '#0033ff', '#4f8cff', '#72b0ff', '#a3c8ff'];
+// Paleta ampla e vibrante para evitar repetição de cores entre muitas categorias
+const DEFAULT_COLORS = [
+  '#2563EB', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#F472B6', '#84CC16', '#F97316', '#14B8A6',
+  '#EAB308', '#22C55E', '#FB7185', '#6366F1', '#0EA5E9', '#A78BFA', '#34D399', '#D946EF', '#F43F5E', '#65A30D',
+  '#FBBF24', '#3B82F6', '#059669', '#F87171', '#C084FC', '#38BDF8', '#FCD34D', '#1D4ED8', '#DC2626', '#9333EA'
+];
 
 const ChartStyleContext = createContext<ChartStyleContextValue | undefined>(undefined);
 

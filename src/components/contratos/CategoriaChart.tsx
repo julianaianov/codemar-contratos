@@ -53,11 +53,33 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
             if (parsed.diretoria) params.append('diretoria', parsed.diretoria);
           }
         }
-        const response = await fetch(`/api/contratos/categorias?${params.toString()}`);
+        // Nova fonte: agregação por diretoria
+        const response = await fetch(`/api/contratos/diretorias?${params.toString()}`);
         const result = await response.json();
         
         if (result.success) {
-          setData(result.data || []);
+          // Função para deixar rótulos curtos e amigáveis (remover prefixos)
+          const shortLabel = (s: string) => {
+            const original = (s || '').toString().trim();
+            const upper = original.toUpperCase();
+            if (upper === 'OUTRAS DIRETORIAS') return 'Outras';
+            // remove prefixos comuns
+            const cleaned = original
+              .replace(/^\s*(DIRETORIA\s+DE\s+|DIRETORIA\s+|SECRETARIA\s+DE\s+|SECRETARIA\s+|DEPARTAMENTO\s+DE\s+)/i, '')
+              .trim();
+            // normaliza capitalização
+            return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+          };
+
+          // Adaptar para formato do pie: usar diretoria como categoria (sem o prefixo)
+          const adapted = (result.data || []).map((item: any) => ({
+            categoria: shortLabel(item.diretoria),
+            quantidade: item.quantidade,
+            valor_total: item.valor_total,
+            percentual: 0,
+            cor: '#60a5fa'
+          }));
+          setData(adapted);
           setError(null);
         } else {
           // Em caso de falha, manter gráfico zerado
@@ -90,14 +112,31 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
     ? data
     : [{ categoria: 'Sem dados', quantidade: 0, valor_total: 0, percentual: 0, cor: '#e5e7eb' }];
 
-  const chartColors = getColorsForChart('categorias');
-  const pieColors = effectiveData.map((_, index) => chartColors[index % chartColors.length]);
+  const baseColors = getColorsForChart('categorias');
+  // Colore cada diretoria de forma consistente: hash do nome -> índice
+  const indexFor = (label: string) => {
+    let h = 0;
+    for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) >>> 0;
+    return (h + 7) % baseColors.length; // pequeno deslocamento para dispersar
+  };
+  // Garante cores únicas no conjunto visível: se cor já usada, avança para próxima disponível
+  const used = new Set<number>();
+  const pieColors = effectiveData.map(item => {
+    let idx = indexFor(item.categoria);
+    let guard = 0;
+    while (used.has(idx) && guard < baseColors.length) {
+      idx = (idx + 1) % baseColors.length;
+      guard++;
+    }
+    used.add(idx);
+    return baseColors[idx];
+  });
   
   const chartData = {
     labels: effectiveData.map(item => item.categoria),
     datasets: [{
-      label: 'Contratos por Categoria',
-      data: effectiveData.map(item => item.quantidade),
+      label: 'Valor por Diretoria',
+      data: effectiveData.map(item => item.valor_total),
       backgroundColor: pieColors,
       borderColor: pieColors,
       borderWidth: 2,
@@ -110,6 +149,7 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
         data={chartData}
         height={chartHeight}
         showLegend={true}
+        colors={pieColors}
       />
     </div>
   );

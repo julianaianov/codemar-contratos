@@ -241,13 +241,16 @@ export default function ConsultaContratosPage() {
       {/* Visualização em Cards */}
       {viewMode === 'cards' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {contratosFiltrados.map((contrato) => (
+          {contratosFiltrados.map((contrato, index) => (
             <div key={contrato.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4 border-green-500 p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
+                    {(page - 1) * 50 + index + 1}
                   </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Contrato: {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
+                  </p>
                   <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor((contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || '') as string)}`}>
                     {contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || 'N/A'}
                   </span>
