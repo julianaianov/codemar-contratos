@@ -110,17 +110,22 @@ class XmlProcessor implements ProcessorInterface
      */
     private function parseDecimal(?string $value): ?float
     {
-        if (empty($value)) {
-            return null;
+        if ($value === null || $value === '') return null;
+        if (is_numeric($value)) return (float)$value;
+        $s = preg_replace('/[^\d,\.]/', '', (string)$value);
+        $lastDot = strrpos($s, '.');
+        $lastComma = strrpos($s, ',');
+        if ($lastDot !== false && $lastComma !== false) {
+            if ($lastDot > $lastComma) {
+                $s = str_replace(',', '', $s);
+            } else {
+                $s = str_replace('.', '', $s);
+                $s = str_replace(',', '.', $s);
+            }
+        } elseif ($lastComma !== false) {
+            $s = str_replace(',', '.', $s);
         }
-
-        // Remove caracteres não numéricos exceto . e ,
-        $value = preg_replace('/[^\d,\.]/', '', $value);
-        
-        // Substitui vírgula por ponto
-        $value = str_replace(',', '.', $value);
-        
-        return (float) $value;
+        return is_numeric($s) ? (float)$s : null;
     }
 
     /**
