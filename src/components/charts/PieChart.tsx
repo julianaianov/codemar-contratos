@@ -104,10 +104,25 @@ export const PieChart: React.FC<PieChartProps> = ({
           {showLegend && (
             <Legend
               verticalAlign="bottom"
-              height={36}
-              formatter={(value) => (
-                <span className="text-sm text-gray-700 dark:text-gray-200">{value}</span>
-              )}
+              align="center"
+              content={(props: any) => {
+                // Alinhar cores da legenda com as do gráfico
+                const payload = (props?.payload || []) as Array<{ value: string; color: string; dataKey?: string; payload?: any; }>; 
+                return (
+                  <div className="w-full px-2 py-1">
+                    <ul className="flex flex-wrap gap-x-6 gap-y-2">
+                      {payload.map((entry, idx) => (
+                        <li key={idx} className="flex items-center gap-2 min-w-0">
+                          <span className="inline-block w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: entry.color || colors[idx % colors.length] }} />
+                          <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-200 whitespace-normal break-words leading-snug" title={entry.value}>
+                            {entry.value}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              }}
             />
           )}
         </RechartsPieChart>
