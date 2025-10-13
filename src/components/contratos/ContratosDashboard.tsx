@@ -308,30 +308,30 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
       </div>
 
       {/* Segunda linha de cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 mb-8">
-        {/* Valor Contratado */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-              <CurrencyDollarIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+        {/* Valor Contratado - Menor */}
+        <Card className="lg:col-span-1">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-sm">
+              <CurrencyDollarIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               Valor Contratado
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+          <CardContent className="pt-0">
+            <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
               {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL',
               }).format((valorTotalDiretoria && valorTotalDiretoria > 0) ? valorTotalDiretoria : (dashboardData?.valor_total_contratado || 0))}
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-200 mt-2">
+            <p className="text-xs text-gray-600 dark:text-gray-200 mt-1">
               Valor total dos contratos ativos
             </p>
           </CardContent>
         </Card>
 
         {/* Categoria Contratos */}
-        <Card>
+        <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <ChartPieIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -344,15 +344,17 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
         </Card>
 
         {/* Por Ano */}
-        <Card>
-          <CardHeader>
+        <Card className="lg:col-span-2 flex flex-col">
+          <CardHeader className="flex-shrink-0">
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
               <ChartBarIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               Por Ano
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <ContratosPorAnoChart filters={filters} />
+          <CardContent className="flex-1 flex flex-col">
+            <div className="flex-1">
+              <ContratosPorAnoChart filters={filters} />
+            </div>
           </CardContent>
         </Card>
       </div>

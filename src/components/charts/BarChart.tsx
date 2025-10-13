@@ -23,6 +23,7 @@ interface BarChartProps {
   gradient?: boolean;
   neon?: boolean;
   chartKey?: string;
+  horizontal?: boolean;
 }
 
 export const BarChart: React.FC<BarChartProps> = ({
@@ -36,6 +37,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   gradient = true,
   neon = true,
   chartKey,
+  horizontal = false,
 }) => {
   const formatTooltipValue = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -66,11 +68,11 @@ export const BarChart: React.FC<BarChartProps> = ({
   }
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full h-full overflow-hidden ${className}`} style={{ height: `${height}px` }}>
       {title && (
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{title}</h3>
       )}
-      <ResponsiveContainer width="100%" height={height}>
+      <ResponsiveContainer width="100%" height="100%">
         <RechartsBarChart 
           data={data?.labels?.map((label, index) => ({
             name: label,
@@ -79,7 +81,9 @@ export const BarChart: React.FC<BarChartProps> = ({
               [dataset.label]: dataset.data[index],
             }), {}),
           })) || []} 
-          margin={{ top: 40, right: 30, left: 60, bottom: 80 }}
+          margin={horizontal ? { top: 10, right: 60, left: 10, bottom: 10 } : { top: 40, right: 30, left: 60, bottom: 80 }}
+          layout={horizontal ? "horizontal" : "vertical"}
+          barCategoryGap="20%"
         >
           {gradient && (
             <defs>
@@ -101,21 +105,43 @@ export const BarChart: React.FC<BarChartProps> = ({
             </defs>
           )}
           {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-gray-300 dark:text-gray-600" />}
-          <XAxis 
-            dataKey="name" 
-            stroke="currentColor"
-            className="text-gray-600 dark:text-gray-200"
-            fontSize={12}
-            angle={-45}
-            textAnchor="end"
-            height={80}
-          />
-          <YAxis 
-            tickFormatter={(value) => formatTooltipValue(value)}
-            stroke="currentColor"
-            className="text-gray-600 dark:text-gray-200"
-            fontSize={12}
-          />
+          {horizontal ? (
+            <>
+              <XAxis 
+                type="number"
+                tickFormatter={(value) => formatTooltipValue(value)}
+                stroke="currentColor"
+                className="text-gray-600 dark:text-gray-200"
+                fontSize={12}
+              />
+              <YAxis 
+                type="category"
+                dataKey="name" 
+                stroke="currentColor"
+                className="text-gray-600 dark:text-gray-200"
+                fontSize={11}
+                width={60}
+              />
+            </>
+          ) : (
+            <>
+              <XAxis 
+                dataKey="name" 
+                stroke="currentColor"
+                className="text-gray-600 dark:text-gray-200"
+                fontSize={12}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis 
+                tickFormatter={(value) => formatTooltipValue(value)}
+                stroke="currentColor"
+                className="text-gray-600 dark:text-gray-200"
+                fontSize={12}
+              />
+            </>
+          )}
           <Tooltip
             formatter={(value: number, name: string) => [formatTooltipValue(value), name]}
             contentStyle={{
@@ -131,7 +157,7 @@ export const BarChart: React.FC<BarChartProps> = ({
               key={dataset.label}
               dataKey={dataset.label}
               fill={gradient ? `url(#barGradient-${index})` : colors[index % colors.length]}
-              radius={[4, 4, 0, 0]}
+              radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]}
               filter={neon ? 'url(#barGlow)' : undefined}
             />
           ))}

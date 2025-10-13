@@ -1,28 +1,118 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
+// Cliente Supabase direto
+const supabaseUrl = 'https://syhnkxbeftosviscvmmd.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aG5reGJlZnRvc3Zpc2N2bW1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTM2NDcsImV4cCI6MjA3NTg4OTY0N30.ppUts-2J2FUqJOYz0VY1xwWXYG1CkylKIIJDGziYi4I';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const url = new URL(`${API_URL}/api/contratos`);
-    // encaminhar query params
-    searchParams.forEach((value, key) => url.searchParams.append(key, value));
+    
+    // Converter searchParams para objeto de filtros
+    const filters: any = {};
+    searchParams.forEach((value, key) => {
+      filters[key] = value;
+    });
 
-    const response = await fetch(url.toString());
-    const data = await response.json();
+    // Buscar contratos diretamente do Supabase
+    let query = supabase.from('contratos_importados').select('*', { count: 'exact' });
 
-    if (!response.ok) {
-      return NextResponse.json({
-        success: false,
-        message: data?.message || 'Erro ao carregar contratos',
-        error: data?.error || undefined
-      }, { status: response.status });
+    // Aplicar filtros
+    if (filters.status) {
+      query = query.eq('status', filters.status);
+    }
+    if (filters.numero_contrato) {
+      query = query.ilike('numero_contrato', `%${filters.numero_contrato}%`);
+    }
+    if (filters.contratado) {
+      query = query.ilike('contratado', `%${filters.contratado}%`);
+    }
+    if (filters.diretoria && filters.diretoria.toLowerCase() !== 'todas') {
+      query = query.or(`diretoria.eq.${filters.diretoria},secretaria.eq.${filters.diretoria}`);
     }
 
-    return NextResponse.json(data);
+    // Paginação
+    const page = parseInt(filters.page) || 1;
+    const perPage = parseInt(filters.per_page) || 15;
+    const from = (page - 1) * perPage;
+    const to = from + perPage - 1;
+    query = query.range(from, to);
+
+    // Ordenação
+    const orderBy = filters.order_by || 'created_at';
+    const ascending = (filters.order_direction || 'desc') === 'asc';
+    query = query.order(orderBy, { ascending });
+
+    const { data, count, error } = await query;
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        data: data || [],
+        count: count || 0,
+        page,
+        per_page: perPage,
+        total_pages: Math.ceil((count || 0) / perPage)
+      }
+    });
   } catch (error) {
-    console.error('Erro ao proxy contratos:', error);
+    console.error('Erro ao buscar contratos:', error);
+    return NextResponse.json({
+      success: false,
+      message: 'Erro interno do servidor',
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
+    }, { status: 500 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    
+    // Validação básica
+    if (!body.numero_contrato || !body.objeto || !body.contratante || !body.contratado || !body.valor || !body.data_inicio || !body.data_fim || !body.status) {
+      return NextResponse.json({
+        success: false,
+        message: 'Dados inválidos',
+        errors: { message: 'Campos obrigatórios faltando' }
+      }, { status: 400 });
+    }
+
+    if (new Date(body.data_fim) < new Date(body.data_inicio)) {
+      return NextResponse.json({
+        success: false,
+        message: 'Data fim deve ser após data início',
+        errors: { data_fim: 'Data fim deve ser após data início' }
+      }, { status: 400 });
+    }
+
+    // Inserir contrato no Supabase
+    const { data, error } = await supabase
+      .from('contratos_importados')
+      .insert({
+        ...body,
+        processado: true // Contratos manuais são considerados processados
+      })
+      .select()
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Contrato criado com sucesso!',
+      data
+    }, { status: 201 });
+  } catch (error) {
+    console.error('Erro ao criar contrato:', error);
     return NextResponse.json({
       success: false,
       message: 'Erro interno do servidor',

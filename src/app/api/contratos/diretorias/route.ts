@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
+// Cliente Supabase direto
+const supabaseUrl = 'https://syhnkxbeftosviscvmmd.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aG5reGJlZnRvc3Zpc2N2bW1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTM2NDcsImV4cCI6MjA3NTg4OTY0N30.ppUts-2J2FUqJOYz0VY1xwWXYG1CkylKIIJDGziYi4I';
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Retorna agregação de valores por diretoria
 export async function GET(request: NextRequest) {
@@ -8,90 +12,193 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const diretoria = searchParams.get('diretoria') || '';
 
-    // Buscar até 1000 contratos (ajuste se necessário para mais)
-    const url = new URL(`${API_URL}/api/contratos`);
-    if (diretoria && diretoria.toLowerCase() !== 'todas') {
-      url.searchParams.append('diretoria', diretoria);
-    }
-    url.searchParams.append('per_page', '1000');
-
-    const response = await fetch(url.toString());
-    const json = await response.json();
-
-    // Extrair lista independente do formato (paginado ou não)
-    const lista: any[] = json?.data?.data || json?.data || json || [];
-
-    // Normaliza label para evitar duplicidades por acento/caixa/pontuação
-    const normalize = (s: string) => (s || '')
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
-      .replace(/[\.;,:/\\_\-]+/g, ' ') // unifica separadores
-      .replace(/\s+/g, ' ') // colapsa espaços
-      .trim()
-      .toUpperCase();
-
-    // Canonicalização para um conjunto fixo de diretorias (evita duplicidades)
-    const canonicalList = [
+    // Definir diretorias principais
+    const diretoriasPrincipais = [
+      'OPERAÇÕES',
+      'MERCADO E PARCERIAS', 
+      'OBRAS E PROJETOS',
+      'COMUNICAÇÃO',
+      'ADMINISTRAÇÃO',
+      'ASSUNTOS IMOBILIÁRIOS',
       'PRESIDÊNCIA',
-      'DIRETORIA DE ADMINISTRAÇÃO',
-      'DIRETORIA JURÍDICA',
-      'DIRETORIA DE ASSUNTOS IMOBILIÁRIOS',
-      'DIRETORIA DE OPERAÇÕES',
-      'DIRETORIA DE TECNOLOGIA DA INFORMAÇÃO E INOVAÇÃO',
-      'DIRETORIA DE GOVERNANÇA EM LICITAÇÕES E CONTRATAÇÕES',
-      'OUTRAS DIRETORIAS'
+      'JURÍDICO',
+      'TECNOLOGIA DA INFORMAÇÃO E INOVAÇÃO'
     ];
 
-    const canonicalize = (raw: string): string => {
-      const n = normalize(raw);
-      if (n.includes('PRESID')) return 'PRESIDÊNCIA';
-      if (n.includes('ADMIN')) return 'ADMINISTRAÇÃO';
-      if (n.includes('JURID')) return 'JURÍDICA';
-      if (n.includes('IMOBILI')) return 'ASSUNTOS IMOBILIÁRIOS';
-      if (n.includes('OPERAC') || n.includes('OBRAS') || n.includes('SERVICO')) return 'OPERAÇÕES';
-      if (n.includes('TECNOLOG') || n.includes('INOVAC')) return 'TECNOLOGIA DA INFORMAÇÃO E INOVAÇÃO';
-      if (n.includes('LICIT') || n.includes('CONTRAT') || n.includes('GOVERNA')) return 'GOVERNANÇA EM LICITAÇÕES E CONTRATAÇÕES';
-      // Se o backend já veio em uma das formas canônicas, preserve
-      for (const c of canonicalList) {
-        if (n === normalize(c)) return c;
-      }
-      return 'OUTRAS DIRETORIAS';
-    };
+    // Buscar contratos do Supabase
+    const { data, error } = await supabase
+      .from('contratos_importados')
+      .select('diretoria, secretaria, valor, valor_contrato');
+    
+    if (error) {
+      throw error;
+    }
 
-    // Agregar por diretoria/secretaria usando a chave normalizada
+    // Agrupar por diretoria
     const map = new Map<string, { diretoria: string; quantidade: number; valor_total: number }>();
-    for (const c of lista) {
-      const rawDir: string = (c?.diretoria || c?.secretaria || 'Não informada') as string;
-      const key = canonicalize(rawDir);
-      const rawValor = (c?.valor ?? c?.valor_contrato ?? 0) as any;
-      let t = typeof rawValor === 'number' ? String(rawValor) : String(rawValor);
-      t = t.replace(/[^\d.,-]/g, '');
-      const lastDot = t.lastIndexOf('.');
-      const lastComma = t.lastIndexOf(',');
-      if (lastDot !== -1 && lastComma !== -1) {
-        if (lastDot > lastComma) t = t.replace(/,/g, '');
-        else t = t.replace(/\./g, '').replace(/,/g, '.');
-      } else if (lastComma !== -1) t = t.replace(/,/g, '.');
-      const n = Number(t);
-      const valor: number = isNaN(n) ? 0 : n;
-      const current = map.get(key) || { diretoria: key, quantidade: 0, valor_total: 0 };
-      current.quantidade += 1;
-      current.valor_total += valor;
-      map.set(key, current);
+    
+    (data || []).forEach(contrato => {
+      const dir = contrato.diretoria || contrato.secretaria || 'Não informada';
+      const valor = contrato.valor || contrato.valor_contrato || 0;
+      
+      if (map.has(dir)) {
+        const existing = map.get(dir)!;
+        existing.quantidade += 1;
+        existing.valor_total += valor;
+      } else {
+        map.set(dir, {
+          diretoria: dir,
+          quantidade: 1,
+          valor_total: valor
+        });
+      }
+    });
+
+    // Se foi filtrado por uma diretoria específica, retornar apenas essa diretoria
+    if (diretoria && diretoria.toLowerCase() !== 'todas') {
+      // Se for "OUTROS", calcular os contratos que não estão nas diretorias principais
+      if (diretoria === 'OUTROS') {
+        // Usar a mesma lógica de correspondência para calcular OUTROS
+        const usedDiretoriasOutros = new Set();
+        
+        diretoriasPrincipais.forEach(diretoria => {
+          // Buscar correspondência exata primeiro
+          let data = Array.from(map.values()).find(item => 
+            item.diretoria === diretoria && !usedDiretoriasOutros.has(item.diretoria)
+          );
+          
+          // Se não encontrar, buscar correspondência parcial
+          if (!data) {
+            data = Array.from(map.values()).find(item => {
+              if (usedDiretoriasOutros.has(item.diretoria)) return false;
+              
+              const itemDir = item.diretoria.toLowerCase();
+              const targetDir = diretoria.toLowerCase();
+              
+              if (targetDir === 'tecnologia da informação e inovação') {
+                return itemDir.includes('tecnologia da informação') || 
+                       itemDir.includes('inovação e tecnologia');
+              }
+              if (targetDir === 'administração') {
+                return itemDir === 'administração' || itemDir === 'adiministração';
+              }
+              
+              return itemDir.includes(targetDir) || targetDir.includes(itemDir);
+            });
+          }
+          
+          if (data) {
+            usedDiretoriasOutros.add(data.diretoria);
+          }
+        });
+        
+        const outrosQuantidade = Array.from(map.values()).reduce((sum, item) => {
+          return usedDiretoriasOutros.has(item.diretoria) ? sum : sum + item.quantidade;
+        }, 0);
+        
+        const outrosValor = Array.from(map.values()).reduce((sum, item) => {
+          return usedDiretoriasOutros.has(item.diretoria) ? sum : sum + item.valor_total;
+        }, 0);
+        
+        if (outrosQuantidade > 0) {
+          return NextResponse.json({ 
+            success: true, 
+            data: [{ 
+              diretoria: 'OUTROS', 
+              quantidade: outrosQuantidade, 
+              valor_total: outrosValor 
+            }] 
+          });
+        } else {
+          return NextResponse.json({ success: true, data: [] });
+        }
+      }
+      
+      // Buscar por correspondência direta ou parcial para outras diretorias
+      const matchingData = Array.from(map.values()).find(item => 
+        item.diretoria === diretoria ||
+        item.diretoria.toLowerCase() === diretoria.toLowerCase() ||
+        item.diretoria.toLowerCase().includes(diretoria.toLowerCase()) ||
+        diretoria.toLowerCase().includes(item.diretoria.toLowerCase())
+      );
+      
+      if (matchingData) {
+        return NextResponse.json({ success: true, data: [matchingData] });
+      }
+      return NextResponse.json({ success: true, data: [] });
     }
 
-    // Ordenar por valor desc
-    let data = Array.from(map.values()).sort((a, b) => b.valor_total - a.valor_total);
-    // Garante presença estável das diretorias canônicas que existirem no período
-    const set = new Set(data.map(d => d.diretoria));
-    for (const c of canonicalList) {
-      if (!set.has(c)) continue; // não força inclusão se não houver dados
+    // Retornar apenas as diretorias principais (as que estão no filtro)
+
+    // Primeiro, marcar quais diretorias já foram usadas
+    const usedDiretorias = new Set();
+    
+    const diretoriasData = diretoriasPrincipais
+      .map(diretoria => {
+        // Buscar correspondência exata primeiro
+        let data = Array.from(map.values()).find(item => 
+          item.diretoria === diretoria && !usedDiretorias.has(item.diretoria)
+        );
+        
+        // Se não encontrar, buscar correspondência parcial mais específica
+        if (!data) {
+          data = Array.from(map.values()).find(item => {
+            if (usedDiretorias.has(item.diretoria)) return false;
+            
+            const itemDir = item.diretoria.toLowerCase();
+            const targetDir = diretoria.toLowerCase();
+            
+            // Correspondências específicas baseadas no debug
+            if (targetDir === 'tecnologia da informação e inovação') {
+              return itemDir.includes('tecnologia da informação') || 
+                     itemDir.includes('inovação e tecnologia');
+            }
+            if (targetDir === 'administração') {
+              return itemDir === 'administração' || itemDir === 'adiministração';
+            }
+            
+            // Correspondência geral
+            return itemDir.includes(targetDir) || targetDir.includes(itemDir);
+          });
+        }
+        
+        // Marcar como usada se encontrou
+        if (data) {
+          usedDiretorias.add(data.diretoria);
+        }
+        
+        return data || { diretoria, quantidade: 0, valor_total: 0 };
+      })
+      .filter(item => item.quantidade > 0); // Apenas diretorias com contratos
+
+    // Calcular total das diretorias principais
+    const totalPrincipais = diretoriasData.reduce((sum, item) => sum + item.valor_total, 0);
+    const totalGeral = Array.from(map.values()).reduce((sum, item) => sum + item.valor_total, 0);
+    
+    // Calcular "OUTROS" de forma consistente (usando o Set de diretorias já usadas)
+    const outrosQuantidade = Array.from(map.values()).reduce((sum, item) => {
+      return usedDiretorias.has(item.diretoria) ? sum : sum + item.quantidade;
+    }, 0);
+    
+    const outrosValor = Array.from(map.values()).reduce((sum, item) => {
+      return usedDiretorias.has(item.diretoria) ? sum : sum + item.valor_total;
+    }, 0);
+    
+    // Se há contratos "OUTROS", adicionar categoria
+    if (outrosQuantidade > 0) {
+      diretoriasData.push({
+        diretoria: 'OUTROS',
+        quantidade: outrosQuantidade,
+        valor_total: outrosValor
+      });
     }
 
-    return NextResponse.json({ success: true, data });
+    // Ordenar por valor total
+    diretoriasData.sort((a, b) => b.valor_total - a.valor_total);
+
+    return NextResponse.json({ success: true, data: diretoriasData });
   } catch (error) {
     console.error('Erro ao agregar valores por diretoria:', error);
     return NextResponse.json({ success: false, message: 'Erro interno do servidor' }, { status: 500 });
   }
 }
-
-
