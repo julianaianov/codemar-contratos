@@ -14,11 +14,7 @@ export async function POST(request: NextRequest) {
       },
       body: JSON.stringify(filters)
     });
-    const data = await response.json();
-
-    if (response.ok && data?.success) {
-      return NextResponse.json(data);
-    }
+    const backend = await response.json();
 
     // Fallback: calcular métricas a partir da lista de contratos
     const url = new URL(`${API_URL}/api/contratos`);
@@ -27,7 +23,31 @@ export async function POST(request: NextRequest) {
 
     const contratosResp = await fetch(url.toString());
     const contratosJson = await contratosResp.json();
-    const lista: any[] = contratosJson?.data?.data || contratosJson?.data || contratosJson || [];
+    let lista: any[] = [];
+    if (Array.isArray(contratosJson)) lista = contratosJson as any[];
+    else if (Array.isArray(contratosJson?.data?.data)) lista = contratosJson.data.data as any[];
+    else if (Array.isArray(contratosJson?.data)) lista = contratosJson.data as any[];
+
+    const parseMoney = (value: any): number => {
+      if (value === null || value === undefined) return 0;
+      if (typeof value === 'number') return value;
+      const s = String(value);
+      // mantém apenas dígitos, ponto e vírgula
+      let t = s.replace(/[^\d.,-]/g, '');
+      const lastDot = t.lastIndexOf('.');
+      const lastComma = t.lastIndexOf(',');
+      if (lastDot !== -1 && lastComma !== -1) {
+        if (lastDot > lastComma) {
+          t = t.replace(/,/g, '');
+        } else {
+          t = t.replace(/\./g, '').replace(/,/g, '.');
+        }
+      } else if (lastComma !== -1) {
+        t = t.replace(/,/g, '.');
+      }
+      const n = Number(t);
+      return isNaN(n) ? 0 : n;
+    };
 
     const now = new Date();
     const toDate = (d: any) => (d ? new Date(d) : null);
@@ -40,7 +60,9 @@ export async function POST(request: NextRequest) {
 
     for (const c of lista) {
       total += 1;
-      valorTotal += Number(c?.valor || 0);
+      // Somar valor do contrato a partir de qualquer campo disponível (suporta formato pt-BR)
+      const rawValor = (c?.valor ?? c?.valor_contrato ?? 0) as any;
+      valorTotal += parseMoney(rawValor);
       const status = (c?.status || '').toLowerCase();
       if (status === 'vigente') {
         vigentes += 1;
@@ -72,6 +94,21 @@ export async function POST(request: NextRequest) {
       },
       message: 'Dashboard calculado via fallback'
     };
+    // Se o backend respondeu com sucesso, preferir dados dele, mas reforçar o valor_total_contratado
+    if (response.ok && backend?.success && backend?.data) {
+      const merged = { ...backend };
+      const bt = backend.data || {};
+      const val = Number(bt.valor_total_contratado);
+      if (!Number.isFinite(val) || val <= 0) {
+        merged.data.valor_total_contratado = valorTotal;
+        merged.message = 'Dashboard (valor_total_contratado) ajustado via fallback';
+      }
+      // também reforça total_contratos se backend não enviar
+      if (!Number.isFinite(Number(bt.total_contratos)) || Number(bt.total_contratos) <= 0) {
+        merged.data.total_contratos = total;
+      }
+      return NextResponse.json(merged);
+    }
     return NextResponse.json(fallback);
   } catch (error) {
     console.error('Erro ao proxy dashboard de contratos:', error);

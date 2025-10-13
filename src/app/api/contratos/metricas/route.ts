@@ -26,11 +26,33 @@ export async function POST(request: NextRequest) {
     url.searchParams.append('per_page', '1000');
     const contratosResp = await fetch(url.toString());
     const contratosJson = await contratosResp.json();
-    const lista: any[] = contratosJson?.data?.data || contratosJson?.data || contratosJson || [];
+    let lista: any[] = [];
+    if (Array.isArray(contratosJson)) lista = contratosJson as any[];
+    else if (Array.isArray(contratosJson?.data?.data)) lista = contratosJson.data.data as any[];
+    else if (Array.isArray(contratosJson?.data)) lista = contratosJson.data as any[];
 
     const total = lista.length;
     const ativos = lista.filter(c => String(c?.status || '').toLowerCase() === 'vigente').length;
-    const valor_contratado = lista.reduce((s, c) => s + Number(c?.valor || 0), 0);
+    const parseMoney = (value: any): number => {
+      if (value === null || value === undefined) return 0;
+      if (typeof value === 'number') return value;
+      let t = String(value).replace(/[^\d.,-]/g, '');
+      const lastDot = t.lastIndexOf('.');
+      const lastComma = t.lastIndexOf(',');
+      if (lastDot !== -1 && lastComma !== -1) {
+        if (lastDot > lastComma) {
+          t = t.replace(/,/g, '');
+        } else {
+          t = t.replace(/\./g, '').replace(/,/g, '.');
+        }
+      } else if (lastComma !== -1) {
+        t = t.replace(/,/g, '.');
+      }
+      const n = Number(t);
+      return isNaN(n) ? 0 : n;
+    };
+
+    const valor_contratado = lista.reduce((s, c) => s + parseMoney(c?.valor ?? c?.valor_contrato ?? 0), 0);
 
     const fallback = {
       success: true,

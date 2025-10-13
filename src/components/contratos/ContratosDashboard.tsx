@@ -47,6 +47,8 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
     pago: 0,
     saldo: 0,
   });
+  // Total calculado a partir da agregação por diretoria (fallback confiável)
+  const [valorTotalDiretoria, setValorTotalDiretoria] = useState<number>(0);
   
   // Estados para comparação de períodos
   const [comparacaoPeriodos, setComparacaoPeriodos] = useState({
@@ -121,6 +123,29 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
 
     fetchDashboardData();
   }, [filters, anoSelecionadoDashboard]);
+
+  // Buscar total por diretoria a partir da rota agregada (reflete filtro "Todas" ou uma diretoria específica)
+  useEffect(() => {
+    const fetchTotais = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (filters?.diretoria && String(filters.diretoria).toLowerCase() !== 'todas') {
+          params.append('diretoria', String(filters.diretoria));
+        }
+        const resp = await fetch(`/api/contratos/diretorias?${params.toString()}`);
+        const json = await resp.json();
+        if (json?.success && Array.isArray(json.data)) {
+          const total = json.data.reduce((s: number, d: any) => s + Number(d?.valor_total || 0), 0);
+          setValorTotalDiretoria(total);
+        } else {
+          setValorTotalDiretoria(0);
+        }
+      } catch {
+        setValorTotalDiretoria(0);
+      }
+    };
+    fetchTotais();
+  }, [filters?.diretoria]);
 
   const handleFiltersChange = (newFilters: FiltrosContratos) => {
     setFilters(newFilters);
@@ -297,7 +322,7 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
               {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL',
-              }).format(dashboardData?.valor_total_contratado || 0)}
+              }).format((valorTotalDiretoria && valorTotalDiretoria > 0) ? valorTotalDiretoria : (dashboardData?.valor_total_contratado || 0))}
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-200 mt-2">
               Valor total dos contratos ativos
