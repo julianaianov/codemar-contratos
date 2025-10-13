@@ -95,3 +95,7 @@ echo ""
 echo -e "${YELLOW}📚 Para testar a API:${NC}"
 echo -e "${GREEN}curl -X POST http://localhost:8000/api/imports -F \"file=@storage/app/examples/contratos-exemplo.xml\"${NC}"
 echo ""
+
+
+
+

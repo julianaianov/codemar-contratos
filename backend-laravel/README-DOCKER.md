@@ -217,3 +217,7 @@ Para problemas ou dúvidas:
 1. Verificar logs: `docker-compose logs -f`
 2. Consultar documentação Laravel
 3. Verificar issues do projeto
+
+
+
+

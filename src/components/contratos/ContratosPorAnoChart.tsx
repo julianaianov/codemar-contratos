@@ -17,11 +17,16 @@ export const ContratosPorAnoChart: React.FC<Props> = ({ filters }) => {
   // Função para calcular altura responsiva
   const calculateChartHeight = () => {
     const width = window.innerWidth;
-    if (width >= 1920) return 700; // Telas muito grandes
-    if (width >= 1536) return 600; // xl
-    if (width >= 1280) return 500; // lg
-    if (width >= 1024) return 400; // md
-    return 350; // sm e menores
+    const height = window.innerHeight;
+    
+    // Calcular altura baseada no viewport disponível
+    const availableHeight = height * 0.6; // 60% da altura da tela
+    
+    if (width >= 1920) return Math.min(availableHeight, 500); // Telas muito grandes
+    if (width >= 1536) return Math.min(availableHeight, 450); // xl
+    if (width >= 1280) return Math.min(availableHeight, 400); // lg
+    if (width >= 1024) return Math.min(availableHeight, 350); // md
+    return Math.min(availableHeight, 300); // sm e menores
   };
 
   useEffect(() => {
@@ -83,7 +88,7 @@ export const ContratosPorAnoChart: React.FC<Props> = ({ filters }) => {
   }
 
   // Always render chart; if empty, show zeroed dataset
-  const safeData = (data && data.length > 0) ? data : [{ ano: new Date().getFullYear(), quantidade: 0, valor_total: 0, valor_pago: 0 }];
+  const safeData = (data && data.length > 0) ? data : [{ ano: new Date().getFullYear(), total: 0, count: 0, vigentes: 0, encerrados: 0, suspensos: 0, rescindidos: 0 }];
 
   // Ordenar dados por ano (mais recente primeiro)
   const sortedData = [...safeData].sort((a, b) => b.ano - a.ano);
@@ -94,7 +99,7 @@ export const ContratosPorAnoChart: React.FC<Props> = ({ filters }) => {
     datasets: [
       {
         label: 'Valor Total',
-        data: sortedData.map(item => item.valor_total),
+        data: sortedData.map(item => item.total),
         backgroundColor: chartColors,
         borderColor: chartColors,
         borderWidth: 1,
@@ -103,7 +108,7 @@ export const ContratosPorAnoChart: React.FC<Props> = ({ filters }) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full overflow-hidden" style={{ height: `${chartHeight}px` }}>
       <BarChart
         data={chartData}
         height={chartHeight}
@@ -113,6 +118,7 @@ export const ContratosPorAnoChart: React.FC<Props> = ({ filters }) => {
         gradient={gradient}
         neon={neon}
         chartKey="por-ano"
+        horizontal={true}
       />
     </div>
   );

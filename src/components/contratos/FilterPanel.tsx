@@ -23,13 +23,17 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   const [fornecedorOptions, setFornecedorOptions] = useState<SelectOption[]>([]);
   const [contratoOptions, setContratoOptions] = useState<SelectOption[]>([]);
   const [diretoriaOptions] = useState<SelectOption[]>([
-    { value: 'Presidência', label: 'Presidência' },
-    { value: 'Diretoria de Administração', label: 'Diretoria de Administração' },
-    { value: 'Diretoria Jurídica', label: 'Diretoria Jurídica' },
-    { value: 'Diretoria de Assuntos Imobiliários', label: 'Diretoria de Assuntos Imobiliários' },
-    { value: 'Diretoria de Operações', label: 'Diretoria de Operações' },
-    { value: 'Diretoria de Tecnologia da Informação e Inovação', label: 'Diretoria de Tecnologia da Informação e Inovação' },
-    { value: 'Diretoria de Governança em Licitações e Contratações', label: 'Diretoria de Governança em Licitações e Contratações' },
+    { value: 'TODAS', label: 'Todas' },
+    { value: 'OPERAÇÕES', label: 'Operações' },
+    { value: 'MERCADO E PARCERIAS', label: 'Mercado e Parcerias' },
+    { value: 'OBRAS E PROJETOS', label: 'Obras e Projetos' },
+    { value: 'COMUNICAÇÃO', label: 'Comunicação' },
+    { value: 'ADMINISTRAÇÃO', label: 'Administração' },
+    { value: 'ASSUNTOS IMOBILIÁRIOS', label: 'Assuntos Imobiliários' },
+    { value: 'PRESIDÊNCIA', label: 'Presidência' },
+    { value: 'JURÍDICO', label: 'Jurídico' },
+    { value: 'TECNOLOGIA DA INFORMAÇÃO E INOVAÇÃO', label: 'Tecnologia da Informação e Inovação' },
+    { value: 'OUTROS', label: 'Outros' },
   ]);
   const [loadingOptions, setLoadingOptions] = useState({
     orgao: false,
