@@ -62,7 +62,17 @@ export async function GET(request: NextRequest) {
     for (const c of lista) {
       const rawDir: string = (c?.diretoria || c?.secretaria || 'Não informada') as string;
       const key = canonicalize(rawDir);
-      const valor: number = Number(c?.valor ?? c?.valor_contrato ?? 0) || 0;
+      const rawValor = (c?.valor ?? c?.valor_contrato ?? 0) as any;
+      let t = typeof rawValor === 'number' ? String(rawValor) : String(rawValor);
+      t = t.replace(/[^\d.,-]/g, '');
+      const lastDot = t.lastIndexOf('.');
+      const lastComma = t.lastIndexOf(',');
+      if (lastDot !== -1 && lastComma !== -1) {
+        if (lastDot > lastComma) t = t.replace(/,/g, '');
+        else t = t.replace(/\./g, '').replace(/,/g, '.');
+      } else if (lastComma !== -1) t = t.replace(/,/g, '.');
+      const n = Number(t);
+      const valor: number = isNaN(n) ? 0 : n;
       const current = map.get(key) || { diretoria: key, quantidade: 0, valor_total: 0 };
       current.quantidade += 1;
       current.valor_total += valor;
