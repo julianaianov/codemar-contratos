@@ -53,38 +53,70 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
             if (parsed.diretoria) params.append('diretoria', parsed.diretoria);
           }
         }
-        // Nova fonte: agregação por diretoria
-        const response = await fetch(`/api/contratos/diretorias?${params.toString()}`);
-        const result = await response.json();
-        
-        if (result.success) {
-          // Função para deixar rótulos curtos e amigáveis (remover prefixos)
-          const shortLabel = (s: string) => {
-            const original = (s || '').toString().trim();
-            const upper = original.toUpperCase();
-            if (upper === 'OUTRAS DIRETORIAS') return 'Outras';
-            // remove prefixos comuns
-            const cleaned = original
-              .replace(/^\s*(DIRETORIA\s+DE\s+|DIRETORIA\s+|SECRETARIA\s+DE\s+|SECRETARIA\s+|DEPARTAMENTO\s+DE\s+)/i, '')
-              .trim();
-            // normaliza capitalização
-            return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-          };
 
-          // Adaptar para formato do pie: usar diretoria como categoria (sem o prefixo)
-          const adapted = (result.data || []).map((item: any) => ({
-            categoria: shortLabel(item.diretoria),
-            quantidade: item.quantidade,
-            valor_total: item.valor_total,
-            percentual: 0,
-            cor: '#60a5fa'
-          }));
-          setData(adapted);
-          setError(null);
+        // Se o filtro for especificamente "OUTROS", buscar as diretorias individuais que estão em OUTROS
+        const currentFilter = filters?.diretoria;
+        if (currentFilter === 'OUTROS') {
+          const response = await fetch('/api/contratos/diretorias-outros');
+          const result = await response.json();
+          
+          if (result.success) {
+            // Função para deixar rótulos curtos e amigáveis
+            const shortLabel = (s: string) => {
+              const original = (s || '').toString().trim();
+              const cleaned = original
+                .replace(/^\s*(DIRETORIA\s+DE\s+|DIRETORIA\s+|SECRETARIA\s+DE\s+|SECRETARIA\s+|DEPARTAMENTO\s+DE\s+)/i, '')
+                .trim();
+              return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+            };
+
+            const adapted = (result.data || []).map((item: any) => ({
+              categoria: shortLabel(item.diretoria),
+              quantidade: item.quantidade,
+              valor_total: item.valor_total,
+              percentual: 0,
+              cor: '#60a5fa'
+            }));
+            setData(adapted);
+            setError(null);
+          } else {
+            setData([]);
+            setError(null);
+          }
         } else {
-          // Em caso de falha, manter gráfico zerado
-          setData([]);
-          setError(null);
+          // Para TODOS os outros filtros (Todas, OPERAÇÕES, ADMINISTRAÇÃO, etc.), usar a lógica anterior
+          const response = await fetch(`/api/contratos/diretorias?${params.toString()}`);
+          const result = await response.json();
+          
+          if (result.success) {
+            // Função para deixar rótulos curtos e amigáveis (remover prefixos)
+            const shortLabel = (s: string) => {
+              const original = (s || '').toString().trim();
+              const upper = original.toUpperCase();
+              if (upper === 'OUTRAS DIRETORIAS') return 'Outras';
+              // remove prefixos comuns
+              const cleaned = original
+                .replace(/^\s*(DIRETORIA\s+DE\s+|DIRETORIA\s+|SECRETARIA\s+DE\s+|SECRETARIA\s+|DEPARTAMENTO\s+DE\s+)/i, '')
+                .trim();
+              // normaliza capitalização
+              return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+            };
+
+            // Adaptar para formato do pie: usar diretoria como categoria (sem o prefixo)
+            const adapted = (result.data || []).map((item: any) => ({
+              categoria: shortLabel(item.diretoria),
+              quantidade: item.quantidade,
+              valor_total: item.valor_total,
+              percentual: 0,
+              cor: '#60a5fa'
+            }));
+            setData(adapted);
+            setError(null);
+          } else {
+            // Em caso de falha, manter gráfico zerado
+            setData([]);
+            setError(null);
+          }
         }
       } catch (err) {
         // Não exibir erro: manter gráfico zerado

@@ -142,9 +142,12 @@ export interface ContratoImportado {
 
 export interface ContratoPorAno {
   ano: number;
-  quantidade: number;
-  valor_total: number;
-  valor_pago: number;
+  total: number;
+  count: number;
+  vigentes: number;
+  encerrados: number;
+  suspensos: number;
+  rescindidos: number;
 }
 
 export interface ContratoPorCategoria {

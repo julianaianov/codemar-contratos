@@ -40,11 +40,19 @@ export default function ConsultaContratosPage() {
 
       // Buscar contratos via rota proxy do Next para evitar CORS
       const response = await fetch(`/api/contratos/contratos?${params.toString()}`);
-      const data = await response.json();
-      // Estrutura de paginação do Laravel Paginator
-      setContratos(data.data || []);
-      setTotalPages(data.last_page || 1);
-      setTotalItems(data.total || (data.data ? data.data.length : 0));
+      const result = await response.json();
+      
+      if (result.success) {
+        // Estrutura da API Supabase
+        setContratos(result.data.data || []);
+        setTotalPages(result.data.total_pages || 1);
+        setTotalItems(result.data.count || 0);
+      } else {
+        console.error('Erro na API:', result.message);
+        setContratos([]);
+        setTotalPages(1);
+        setTotalItems(0);
+      }
     } catch (error) {
       console.error('Erro ao carregar contratos:', error);
       setContratos([]);
@@ -54,7 +62,7 @@ export default function ConsultaContratosPage() {
   };
 
 
-  const contratosFiltrados = contratos.filter(contrato => {
+  const contratosFiltrados = (Array.isArray(contratos) ? contratos : []).filter(contrato => {
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       return (
