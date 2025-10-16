@@ -8,6 +8,8 @@ import {
   BellIcon,
   MagnifyingGlassIcon,
   UserCircleIcon,
+  SparklesIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 
 interface HeaderProps {
@@ -18,6 +20,16 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 'lg:pl-64' }) => {
   const { theme, toggleTheme } = useTheme();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const handleOpenGlobalSearch = () => {
+    const event = new CustomEvent('openGlobalSearch');
+    window.dispatchEvent(event);
+  };
+
+  const handleOpenChat = () => {
+    const event = new CustomEvent('openChatWidget');
+    window.dispatchEvent(event);
+  };
 
   return (
     <header className={`text-white shadow-sm border-b border-transparent fixed top-0 inset-x-0 z-40 ${leftPaddingClass} bg-[#0091ff] dark:bg-[#111827]`}>
@@ -51,19 +63,26 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
           >
             {theme === 'dark' ? '☾' : '☀'}
           </button>
-          {/* Search */}
-          <div className="hidden md:block">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-white/80" />
-              </div>
-              <input
-                type="text"
-                placeholder="Buscar..."
-                className="block w-full pl-10 pr-3 py-2 border border-white/30 rounded-md leading-5 bg-white/10 text-white placeholder-white/70 focus:outline-none focus:placeholder-white focus:ring-1 focus:ring-white focus:border-white sm:text-sm"
-              />
-            </div>
-          </div>
+          {/* AI Search Button */}
+          <button
+            onClick={handleOpenGlobalSearch}
+            className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors duration-200"
+            title="Busca Inteligente (Ctrl+K)"
+          >
+            <SparklesIcon className="h-5 w-5" />
+            <span className="hidden sm:inline text-sm">Busca IA</span>
+            <span className="hidden md:inline text-xs opacity-70">Ctrl+K</span>
+          </button>
+
+          {/* Chat Button */}
+          <button
+            onClick={handleOpenChat}
+            className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors duration-200"
+            title="Chat IA"
+          >
+            <ChatBubbleLeftRightIcon className="h-5 w-5" />
+            <span className="hidden sm:inline text-sm">Chat IA</span>
+          </button>
 
           {/* Notifications */}
           <button className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md">
