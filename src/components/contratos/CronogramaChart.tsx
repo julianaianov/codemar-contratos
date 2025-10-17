@@ -136,7 +136,7 @@ export const CronogramaChart: React.FC<CronogramaChartProps> = ({ anoSelecionado
   const chartData = generateChartData();
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full" style={{ height: `${chartHeight}px` }}>
       <BarChart
         data={chartData}
         height={chartHeight}

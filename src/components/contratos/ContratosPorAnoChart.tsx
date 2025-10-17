@@ -108,7 +108,7 @@ export const ContratosPorAnoChart: React.FC<Props> = ({ filters }) => {
   };
 
   return (
-    <div className="w-full h-full overflow-hidden" style={{ height: `${chartHeight}px` }}>
+    <div className="w-full h-full" style={{ height: `${chartHeight}px` }}>
       <BarChart
         data={chartData}
         height={chartHeight}

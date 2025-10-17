@@ -9,7 +9,6 @@ import {
   MagnifyingGlassIcon,
   UserCircleIcon,
   SparklesIcon,
-  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 
 interface HeaderProps {
@@ -26,67 +25,53 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
     window.dispatchEvent(event);
   };
 
-  const handleOpenChat = () => {
-    const event = new CustomEvent('openChatWidget');
-    window.dispatchEvent(event);
-  };
-
   return (
     <header className={`text-white shadow-sm border-b border-transparent fixed top-0 inset-x-0 z-40 ${leftPaddingClass} bg-[#0091ff] dark:bg-[#111827]`}>
-      <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center">
+      <div className="flex items-center justify-between h-14 sm:h-16 px-2 sm:px-4 md:px-6 lg:px-8">
+        <div className="flex items-center min-w-0 flex-1">
           <button
             onClick={onMenuClick}
-            className="p-2 rounded-md text-white/80 hover:text-white hover:bg-white/10"
+            className="p-1.5 sm:p-2 rounded-md text-white/80 hover:text-white hover:bg-white/10 flex-shrink-0"
           >
-            <Bars3Icon className="w-6 h-6" />
+            <Bars3Icon className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-          <div className="ml-4 lg:ml-0 flex items-center">
+          <div className="ml-2 sm:ml-4 lg:ml-0 flex items-center min-w-0">
             <Image
               src={theme === 'dark' ? '/logo-contratos.png' : '/contrato-claro.png'}
               alt="CODEMAR Contratos"
               width={112}
               height={112}
-              className="h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 lg:h-28 lg:w-28"
+              className="h-8 w-8 sm:h-12 sm:w-12 md:h-16 md:w-16 lg:h-20 lg:w-20 flex-shrink-0"
             />
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 md:space-x-4">
+        <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-4 flex-shrink-0">
           
           {/* Theme toggle */}
           <button
             onClick={toggleTheme}
-            className="inline-flex items-center px-3 py-1.5 text-sm rounded-md bg-white/10 hover:bg-white/20 text-white"
+            className="inline-flex items-center px-2 sm:px-3 py-1.5 text-sm rounded-md bg-white/10 hover:bg-white/20 text-white"
             aria-label="Alternar tema"
             title={`Tema: ${theme === 'dark' ? 'Escuro' : 'Claro'}`}
           >
-            {theme === 'dark' ? '☾' : '☀'}
+            <span className="text-sm sm:text-base">{theme === 'dark' ? '☾' : '☀'}</span>
           </button>
-          {/* AI Search Button */}
-          <button
-            onClick={handleOpenGlobalSearch}
-            className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors duration-200"
-            title="Busca Inteligente (Ctrl+K)"
-          >
-            <SparklesIcon className="h-5 w-5" />
-            <span className="hidden sm:inline text-sm">Busca IA</span>
-            <span className="hidden md:inline text-xs opacity-70">Ctrl+K</span>
-          </button>
-
-          {/* Chat Button */}
-          <button
-            onClick={handleOpenChat}
-            className="flex items-center gap-2 px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors duration-200"
-            title="Chat IA"
-          >
-            <ChatBubbleLeftRightIcon className="h-5 w-5" />
-            <span className="hidden sm:inline text-sm">Chat IA</span>
-          </button>
+          
+                    {/* AI Search Button */}
+                    <button
+                      onClick={handleOpenGlobalSearch}
+                      className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors duration-200"
+                      title="Busca Inteligente (Ctrl+K)"
+                    >
+                      <SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <span className="hidden sm:inline text-xs sm:text-sm">Busca IA</span>
+                      <span className="hidden lg:inline text-xs opacity-70">Ctrl+K</span>
+                    </button>
 
           {/* Notifications */}
-          <button className="p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md">
-            <BellIcon className="w-6 h-6" />
+          <button className="p-1.5 sm:p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md">
+            <BellIcon className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
           {/* Profile */}
@@ -95,8 +80,8 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, leftPaddingClass = 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white focus:ring-offset-[#0091ff]"
             >
-              <UserCircleIcon className="w-8 h-8 text-white/80" />
-              <span className="ml-1 md:ml-2 text-white font-medium text-xs md:text-sm truncate max-w-16 md:max-w-none">Usuário</span>
+              <UserCircleIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white/80 flex-shrink-0" />
+              <span className="ml-1 sm:ml-2 text-white font-medium text-xs sm:text-sm truncate max-w-12 sm:max-w-16 md:max-w-none hidden xs:inline">Usuário</span>
             </button>
 
             {isProfileOpen && (

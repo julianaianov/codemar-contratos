@@ -41,18 +41,18 @@ export const IndividualColorBarChart: React.FC<IndividualColorBarChartProps> = (
   const maxValue = Math.max(...dataset.data);
   
   // Calcular dimensões do gráfico responsivas
-  const chartWidth = Math.max(1200, data.labels.length * 40); // Aumentar espaço por label
-  const chartHeight = height - 120;
-  const barSpacing = 20; // Aumentar espaçamento entre barras
-  const barWidth = Math.max(20, (chartWidth / data.labels.length) - barSpacing);
+  const chartWidth = Math.max(1200, data.labels.length * 30); // Reduzir espaço por label
+  const chartHeight = height - 100;
+  const barSpacing = 15; // Reduzir espaçamento entre barras
+  const barWidth = Math.max(15, (chartWidth / data.labels.length) - barSpacing);
   
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full h-full ${className}`} style={{ height: `${height}px` }}>
       {title && (
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{title}</h3>
       )}
-      <div className="overflow-x-auto w-full">
-        <svg width={chartWidth} height={height} viewBox={`0 0 ${chartWidth} ${height + 50}`} className="min-w-full">
+      <div className="w-full h-full">
+        <svg width="100%" height="100%" viewBox={`0 0 ${chartWidth} ${height + 50}`} className="w-full h-full">
           <defs>
             {/* Gradientes para cada barra */}
             {dataset.data.map((_, index) => (

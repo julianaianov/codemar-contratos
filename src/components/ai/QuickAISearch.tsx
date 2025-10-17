@@ -262,3 +262,5 @@ export default function QuickAISearch({
     </div>
   );
 }
+
+

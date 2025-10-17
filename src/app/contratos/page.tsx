@@ -115,108 +115,112 @@ export default function ContratosPage() {
   }, []);
 
   return (
-    <div className="p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+    <div className="px-2 sm:px-4 md:px-6 py-4 sm:py-6">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Contratos Importados
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
           Visualize e gerencie todos os contratos importados
         </p>
       </div>
 
       {/* Busca Inteligente */}
-      <div className="mb-6">
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-md p-6 text-white mb-4">
-          <div className="flex items-center gap-3 mb-4">
-            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="mb-4 sm:mb-6">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-md p-4 sm:p-6 text-white mb-4">
+          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+            <svg className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
             </svg>
-            <h2 className="text-xl font-semibold">Busca Inteligente em Contratos</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">Busca Inteligente em Contratos</h2>
           </div>
-          <p className="text-blue-100 mb-4">
+          <p className="text-blue-100 mb-3 sm:mb-4 text-sm sm:text-base">
             Pergunte sobre contratos e receba análises inteligentes
           </p>
           <QuickAISearch
             placeholder="Ex: Quais são os maiores contratos por valor?"
             searchType="contracts"
-            className="max-w-2xl"
+            className="w-full max-w-2xl"
           />
         </div>
       </div>
 
       {/* Filtros e Busca Tradicional */}
-      <div className="mb-6">
-        <div className="flex flex-col lg:flex-row gap-4">
+      <div className="mb-4 sm:mb-6">
+        <div className="flex flex-col xl:flex-row gap-3 sm:gap-4">
           {/* Busca Tradicional */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Buscar contratos..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
+                className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
               />
             </div>
           </div>
 
           {/* Filtros */}
-          <FilterPanel
-            filters={filtros}
-            onFiltersChange={setFiltros}
-            onFilter={carregarContratos}
-            loading={loading}
-          />
+          <div className="flex-shrink-0">
+            <FilterPanel
+              filters={filtros}
+              onFiltersChange={setFiltros}
+              onFilter={carregarContratos}
+              loading={loading}
+            />
+          </div>
 
           {/* Modo de Visualização */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <button
               onClick={() => setViewMode('cards')}
-              className={`p-2 rounded-lg ${
+              className={`p-2 rounded-lg transition-colors ${
                 viewMode === 'cards'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
+              title="Visualização em cards"
             >
-              <Squares2X2Icon className="h-5 w-5" />
+              <Squares2X2Icon className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`p-2 rounded-lg ${
+              className={`p-2 rounded-lg transition-colors ${
                 viewMode === 'table'
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
               }`}
+              title="Visualização em tabela"
             >
-              <ViewColumnsIcon className="h-5 w-5" />
+              <ViewColumnsIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Estatísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-blue-600">{contratos.length}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Total de Contratos</div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow">
+          <div className="text-xl sm:text-2xl font-bold text-blue-600">{contratos.length}</div>
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Total de Contratos</div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-green-600">{diretorias.length}</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Diretorias</div>
+        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow">
+          <div className="text-xl sm:text-2xl font-bold text-green-600">{diretorias.length}</div>
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Diretorias</div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-purple-600">
+        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow">
+          <div className="text-xl sm:text-2xl font-bold text-purple-600">
             {contratos.filter(c => c.status === 'VIGENTE').length}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Vigentes</div>
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Vigentes</div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-          <div className="text-2xl font-bold text-orange-600">
+        <div className="bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow">
+          <div className="text-xl sm:text-2xl font-bold text-orange-600">
             {contratos.filter(c => c.status === 'ENCERRADO').length}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Encerrados</div>
+          <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Encerrados</div>
         </div>
       </div>
 
@@ -238,26 +242,26 @@ export default function ContratosPage() {
       ) : (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
           {viewMode === 'cards' ? (
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="p-3 sm:p-4 md:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                 {contratosFiltrados.map((contrato, index) => (
                   <div
                     key={contrato.id}
-                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                    <div className="flex justify-between items-start mb-2 sm:mb-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
                           {index + 1}
                         </h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                           Contrato: {contrato.numero_contrato || getValorCampo(undefined, ['numero_contrato','nº contrato','numero contrato','contrato'], contrato) || 'N/A'}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                           {contrato.ano_numero || contrato.ano || (getValorCampo(undefined, ['ano-nº','ano_numero','ano numero','ano-numero'], contrato) as any) || 'N/A'}
                         </p>
                       </div>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
+                      <span className={`px-2 py-1 text-xs rounded-full flex-shrink-0 ml-2 ${
                         (contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato)) === 'VIGENTE'
                           ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                           : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
@@ -266,7 +270,7 @@ export default function ContratosPage() {
                       </span>
                     </div>
                     
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm">
                       <div>
                         <span className="font-medium text-gray-700 dark:text-gray-300">Empresa:</span>
                         <p className="text-gray-600 dark:text-gray-400 truncate">
@@ -275,13 +279,13 @@ export default function ContratosPage() {
                       </div>
                       <div>
                         <span className="font-medium text-gray-700 dark:text-gray-300">Diretoria:</span>
-                        <p className="text-gray-600 dark:text-gray-400">
+                        <p className="text-gray-600 dark:text-gray-400 truncate">
                           {contrato.diretoria || (contrato as any).secretaria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], contrato) || 'N/A'}
                         </p>
                       </div>
                       <div>
                         <span className="font-medium text-gray-700 dark:text-gray-300">Valor:</span>
-                        <p className="text-gray-600 dark:text-gray-400">
+                        <p className="text-gray-600 dark:text-gray-400 truncate">
                           {(contrato.valor || contrato.valor_contrato)
                             ? new Intl.NumberFormat('pt-BR', {
                                 style: 'currency',
@@ -293,10 +297,10 @@ export default function ContratosPage() {
                       </div>
                     </div>
                     
-                    <div className="mt-4 flex justify-end space-x-2">
+                    <div className="mt-3 sm:mt-4 flex justify-end space-x-1 sm:space-x-2">
                       <button
                         onClick={() => abrirDetalhe(contrato)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
+                        className="p-1.5 sm:p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900 rounded-lg transition-colors"
                       >
                         <EyeIcon className="h-4 w-4" />
                       </button>
@@ -310,22 +314,22 @@ export default function ContratosPage() {
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Contrato
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
                       Empresa
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
                       Diretoria
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
                       Valor
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Ações
                     </th>
                   </tr>
@@ -333,27 +337,45 @@ export default function ContratosPage() {
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {contratosFiltrados.map((contrato) => (
                     <tr key={contrato.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4">
                         <div>
                           <div className="text-sm font-medium text-gray-900 dark:text-white">
                             {contrato.numero_contrato || getValorCampo(undefined, ['numero_contrato','nº contrato','numero contrato','contrato'], contrato) || contrato.ano_numero || 'N/A'}
                           </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
+                          <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                             {contrato.ano_numero || contrato.ano || (getValorCampo(undefined, ['ano-nº','ano_numero','ano numero','ano-numero'], contrato) as any) || 'N/A'}
+                          </div>
+                          {/* Informações extras em mobile */}
+                          <div className="sm:hidden mt-1 space-y-1">
+                            <div className="text-xs text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Empresa:</span> {contrato.contratado || contrato.nome_empresa || getValorCampo(undefined, ['nome da empresa','nome_empresa','empresa','contratado','fornecedor','razao social','razão social'], contrato) || 'N/A'}
+                            </div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Diretoria:</span> {contrato.diretoria || (contrato as any).secretaria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], contrato) || 'N/A'}
+                            </div>
+                            <div className="text-xs text-gray-600 dark:text-gray-400">
+                              <span className="font-medium">Valor:</span> {(contrato.valor || contrato.valor_contrato)
+                                ? new Intl.NumberFormat('pt-BR', {
+                                    style: 'currency',
+                                    currency: 'BRL'
+                                  }).format((contrato.valor ?? contrato.valor_contrato) ?? 0)
+                                : 'N/A'
+                              }
+                            </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                         <div className="text-sm text-gray-900 dark:text-white truncate max-w-xs">
                           {contrato.contratado || contrato.nome_empresa || getValorCampo(undefined, ['nome da empresa','nome_empresa','empresa','contratado','fornecedor','razao social','razão social'], contrato) || 'N/A'}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                         <div className="text-sm text-gray-900 dark:text-white">
                           {contrato.diretoria || (contrato as any).secretaria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], contrato) || 'N/A'}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                         <div className="text-sm text-gray-900 dark:text-white">
                           {(contrato.valor || contrato.valor_contrato)
                             ? new Intl.NumberFormat('pt-BR', {
@@ -364,7 +386,7 @@ export default function ContratosPage() {
                           }
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 py-1 text-xs rounded-full ${
                           (contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato)) === 'VIGENTE'
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
@@ -373,7 +395,7 @@ export default function ContratosPage() {
                           {contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || 'N/A'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
                           onClick={() => abrirDetalhe(contrato)}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"

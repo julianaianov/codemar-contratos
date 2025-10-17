@@ -277,3 +277,5 @@ public/minutas/          # Arquivos de minutas
 ---
 
 **Sistema desenvolvido para garantir integridade e rastreabilidade das minutas CODEMAR** 📄✨
+
+

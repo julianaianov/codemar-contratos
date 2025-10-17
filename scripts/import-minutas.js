@@ -134,3 +134,5 @@ if (!sourceDir) {
 
 // Executar importação
 importMinutas(sourceDir);
+
+

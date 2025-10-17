@@ -51,9 +51,9 @@ export const ComparacaoPeriodosChart: React.FC<ComparacaoPeriodosChartProps> = (
   };
 
   return (
-    <div className="h-80">
+    <div className="w-full h-full" style={{ height: '300px' }}>
       <ResponsiveContainer width="100%" height="100%">
-        <RechartsLineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <RechartsLineChart data={chartData} margin={{ top: 5, right: 15, left: 15, bottom: 5 }}>
           <defs>
             <linearGradient id="empenhadoGradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3} />
@@ -72,12 +72,15 @@ export const ComparacaoPeriodosChart: React.FC<ComparacaoPeriodosChartProps> = (
           <XAxis 
             dataKey="periodo" 
             stroke="#6b7280"
-            fontSize={12}
+            fontSize={10}
+            tick={{ fontSize: 10 }}
           />
           <YAxis 
             tickFormatter={(value) => formatTooltipValue(value)}
             stroke="#6b7280"
-            fontSize={12}
+            fontSize={10}
+            tick={{ fontSize: 10 }}
+            width={50}
           />
           <Tooltip
             formatter={(value: number, name: string) => [formatTooltipValue(value), name]}

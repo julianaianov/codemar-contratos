@@ -203,41 +203,41 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
   }
 
   return (
-    <div className="space-y-6 pt-4">
+    <div className="space-y-4 sm:space-y-6 pt-2 sm:pt-4">
       {/* Título com SVG */}
-      <div className="flex justify-center mb-6">
-        <div className="w-full max-w-3xl">
+      <div className="flex justify-center mb-4 sm:mb-6">
+        <div className="w-full max-w-3xl px-2 sm:px-0">
           <img
             src={theme === 'dark' ? '/logo-contratos-light.svg' : '/logo-contratos-dark.svg'}
             alt="CODEMAR Contratos"
-            className="w-full h-auto max-h-20 object-contain"
+            className="w-full h-auto max-h-16 sm:max-h-20 object-contain"
           />
         </div>
       </div>
 
       {/* Seletor de Período do Dashboard */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 rounded-lg p-6 shadow-lg mb-6">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="text-white">
-            <h2 className="text-xl font-bold mb-1">Portal de Transparência</h2>
-            <p className="text-blue-100 text-sm">Selecione o período para visualizar os dados dos contratos</p>
+      <div className="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-950 rounded-lg p-4 sm:p-6 shadow-lg mb-4 sm:mb-6">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-3 sm:gap-4">
+          <div className="text-white text-center lg:text-left">
+            <h2 className="text-lg sm:text-xl font-bold mb-1">Portal de Transparência</h2>
+            <p className="text-blue-100 text-xs sm:text-sm">Selecione o período para visualizar os dados dos contratos</p>
           </div>
-          <div className="flex gap-2 flex-wrap justify-center">
+          <div className="flex gap-1 sm:gap-2 flex-wrap justify-center">
             <button
               onClick={() => setAnoSelecionadoDashboard('geral')}
-              className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm ${
                 anoSelecionadoDashboard === 'geral'
                   ? 'bg-white text-blue-700 shadow-xl scale-105'
                   : 'bg-blue-500 hover:bg-blue-400 text-white'
               }`}
             >
-              📊 Geral (Todos)
+              📊 <span className="hidden sm:inline">Geral (Todos)</span><span className="sm:hidden">Geral</span>
             </button>
             {anosDisponiveis.map((ano) => (
               <button
                 key={ano}
                 onClick={() => setAnoSelecionadoDashboard(ano)}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm ${
                   anoSelecionadoDashboard === ano
                     ? 'bg-white text-blue-700 shadow-xl scale-105'
                     : 'bg-blue-500 hover:bg-blue-400 text-white'
@@ -251,8 +251,8 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
         
         {/* Indicador do período selecionado */}
         {anoSelecionadoDashboard !== 'geral' && (
-          <div className="mt-4 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-            <p className="text-white text-sm text-center">
+          <div className="mt-3 sm:mt-4 bg-white/10 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-white/20">
+            <p className="text-white text-xs sm:text-sm text-center">
               ℹ️ Visualizando dados mensais de <strong>{anoSelecionadoDashboard}</strong> 
               {' '}- Os gráficos mostram a evolução ao longo dos 12 meses
             </p>
@@ -269,7 +269,7 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
       />
 
       {/* Cards de Métricas (somente vencimentos: -30 e 30-90) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-4 md:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
         {/* Total de Contratos */}
         <MetricCard
           title="TOTAL CONTRATOS"
@@ -308,17 +308,17 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
       </div>
 
       {/* Segunda linha de cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
         {/* Valor Contratado - Menor */}
-        <Card className="lg:col-span-1">
+        <Card className="sm:col-span-1 lg:col-span-1">
           <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-sm">
-              <CurrencyDollarIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              Valor Contratado
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
+              <CurrencyDollarIcon className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <span className="truncate">Valor Contratado</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+            <div className="text-lg sm:text-xl font-bold text-blue-600 dark:text-blue-400">
               {new Intl.NumberFormat('pt-BR', {
                 style: 'currency',
                 currency: 'BRL',
@@ -331,27 +331,27 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
         </Card>
 
         {/* Categoria Contratos */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-              <ChartPieIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              Categoria Contratos
+        <Card className="sm:col-span-1 lg:col-span-1">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
+              <ChartPieIcon className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <span className="truncate">Categoria Contratos</span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             <CategoriaChart filters={filters} />
           </CardContent>
         </Card>
 
         {/* Por Ano */}
-        <Card className="lg:col-span-2 flex flex-col">
-          <CardHeader className="flex-shrink-0">
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
-              <ChartBarIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-              Por Ano
+        <Card className="sm:col-span-2 lg:col-span-2 flex flex-col">
+          <CardHeader className="flex-shrink-0 pb-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-xs sm:text-sm">
+              <ChartBarIcon className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+              <span className="truncate">Por Ano</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 flex flex-col">
+          <CardContent className="flex-1 flex flex-col pt-0">
             <div className="flex-1">
               <ContratosPorAnoChart filters={filters} />
             </div>
@@ -360,9 +360,9 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
       </div>
 
       {/* Gráfico de Cronograma */}
-      <Card className="mt-8">
-        <CardHeader className="pb-4">
-          <CardTitle className="text-gray-900 dark:text-gray-100">
+      <Card className="mt-6 sm:mt-8">
+        <CardHeader className="pb-2 sm:pb-4">
+          <CardTitle className="text-gray-900 dark:text-gray-100 text-sm sm:text-base">
             {anoSelecionadoDashboard === 'geral' 
               ? 'Cronograma mensal - (2023 - 2027)' 
               : `Cronograma mensal - ${anoSelecionadoDashboard} (Jan - Dez)`
@@ -375,29 +375,29 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
       </Card>
 
       {/* NOVA SEÇÃO: Controle Financeiro */}
-      <div className="mt-8">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-950 p-6 rounded-lg shadow-lg mb-6">
-          <h2 className="text-2xl font-bold text-white mb-2">Controle Financeiro de Contratos</h2>
-          <p className="text-blue-100">Acompanhe empenhos, liquidações, pagamentos e saldos por período</p>
+      <div className="mt-6 sm:mt-8">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-950 p-4 sm:p-6 rounded-lg shadow-lg mb-4 sm:mb-6">
+          <h2 className="text-lg sm:text-2xl font-bold text-white mb-2">Controle Financeiro de Contratos</h2>
+          <p className="text-blue-100 text-sm sm:text-base">Acompanhe empenhos, liquidações, pagamentos e saldos por período</p>
         </div>
 
         {/* Seletor de Ano */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md border border-gray-200 dark:border-gray-700 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-md border border-gray-200 dark:border-gray-700 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+            <div className="text-center sm:text-left">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1">
                 Selecione o Período
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                 Escolha o ano para visualizar os dados financeiros
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2 justify-center sm:justify-end">
               {anosDisponiveis.map((ano) => (
                 <button
                   key={ano}
                   onClick={() => setAnoSelecionadoFinanceiro(ano)}
-                  className={`px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                  className={`px-3 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold transition-all duration-200 text-xs sm:text-sm ${
                     anoSelecionadoFinanceiro === ano
                       ? 'bg-blue-600 text-white shadow-lg scale-105'
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'

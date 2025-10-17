@@ -57,11 +57,11 @@ export const PieChart: React.FC<PieChartProps> = ({
   const total = pieData.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full h-full ${className}`} style={{ height: `${height}px` }}>
       {title && (
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{title}</h3>
       )}
-      <ResponsiveContainer width="100%" height={height}>
+      <ResponsiveContainer width="100%" height="100%">
         <RechartsPieChart>
           {neon && (
             <defs>
@@ -78,9 +78,9 @@ export const PieChart: React.FC<PieChartProps> = ({
             data={pieData}
             cx="50%"
             cy="50%"
-            innerRadius={donut ? Math.max(innerRadius, outerRadius * 0.5) : innerRadius}
-            outerRadius={outerRadius}
-            paddingAngle={2}
+            innerRadius={donut ? Math.max(innerRadius, outerRadius * 0.4) : innerRadius}
+            outerRadius={Math.min(outerRadius, height * 0.3)}
+            paddingAngle={1}
             dataKey="value"
             filter={neon ? 'url(#pieGlow)' : undefined}
           >
@@ -109,12 +109,12 @@ export const PieChart: React.FC<PieChartProps> = ({
                 // Alinhar cores da legenda com as do gráfico
                 const payload = (props?.payload || []) as Array<{ value: string; color: string; dataKey?: string; payload?: any; }>; 
                 return (
-                  <div className="w-full px-2 py-1">
-                    <ul className="flex flex-wrap gap-x-6 gap-y-2">
+                  <div className="w-full px-1 py-1">
+                    <ul className="flex flex-wrap gap-x-3 gap-y-1 justify-center">
                       {payload.map((entry, idx) => (
-                        <li key={idx} className="flex items-center gap-2 min-w-0">
-                          <span className="inline-block w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: entry.color || colors[idx % colors.length] }} />
-                          <span className="text-xs sm:text-sm text-gray-700 dark:text-gray-200 whitespace-normal break-words leading-snug" title={entry.value}>
+                        <li key={idx} className="flex items-center gap-1 min-w-0">
+                          <span className="inline-block w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: entry.color || colors[idx % colors.length] }} />
+                          <span className="text-xs text-gray-700 dark:text-gray-200 whitespace-normal break-words leading-tight" title={entry.value}>
                             {entry.value}
                           </span>
                         </li>

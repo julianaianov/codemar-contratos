@@ -45,8 +45,8 @@ export const CronogramaPagamentosChart: React.FC<CronogramaPagamentosChartProps>
   };
 
   return (
-    <div className="h-80">
-      <BarChart data={chartData} />
+    <div className="w-full h-full" style={{ height: '300px' }}>
+      <BarChart data={chartData} height={300} />
     </div>
   );
 };
