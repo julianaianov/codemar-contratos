@@ -1,6 +1,88 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { ContratoPowerBI, getClassificacaoContrato } from '@/types/contract-terms';
+
+// Interface para relatórios Power BI
+interface ContratoPowerBI {
+  id: string;
+  numero: string;
+  objeto: string;
+  valor_original: number;
+  valor_atual: number;
+  percentual_aditivo: number;
+  valor_aditivo_total: number;
+  quantidade_aditivos: number;
+  data_inicio: string;
+  data_fim: string;
+  fornecedor: string;
+  diretoria: string;
+  status: string;
+  tipo: string;
+  modalidade: string;
+  categoria: string;
+  data_vigencia: string;
+  data_execucao?: string;
+  
+  // Novos campos para análise de conformidade
+  classificacao_contrato: string;
+  limite_legal: number;
+  descricao_classificacao: string;
+  dentro_limite_legal: boolean;
+  percentual_restante: number;
+  valor_restante: number;
+  status_conformidade: 'CONFORME' | 'ATENCAO' | 'INCONFORME';
+}
+
+// Função para classificar contrato conforme Lei 14.133/2021
+function getClassificacaoContrato(tipoContrato: string, objetoContrato?: string): {
+  categoria: string;
+  limite: number;
+  descricao: string;
+} {
+  const tipoLower = tipoContrato.toLowerCase();
+  const objetoLower = (objetoContrato || '').toLowerCase();
+  
+  // Reforma de edifício ou equipamento (50%)
+  if (tipoLower.includes('reforma') || tipoLower.includes('equipamento') || 
+      tipoLower.includes('edifício') || tipoLower.includes('instalação') || 
+      tipoLower.includes('manutenção') || objetoLower.includes('reforma') || 
+      objetoLower.includes('equipamento') || objetoLower.includes('edifício') || 
+      objetoLower.includes('instalação') || objetoLower.includes('manutenção')) {
+    return {
+      categoria: 'REFORMA_EQUIPAMENTO',
+      limite: 50,
+      descricao: 'Reforma de Edifício ou Equipamento'
+    };
+  }
+  
+  // Obra, serviço ou compra (25%)
+  if (tipoLower.includes('obra') || tipoLower.includes('construção') || 
+      tipoLower.includes('serviço') || tipoLower.includes('compra') || 
+      tipoLower.includes('fornecimento') || objetoLower.includes('obra') || 
+      objetoLower.includes('construção') || objetoLower.includes('serviço') || 
+      objetoLower.includes('compra') || objetoLower.includes('fornecimento')) {
+    return {
+      categoria: 'OBRAS_SERVICOS_COMPRAS',
+      limite: 25,
+      descricao: 'Obras, Serviços ou Compras'
+    };
+  }
+  
+  // Sociedade mista (25%)
+  if (tipoLower.includes('sociedade') || tipoLower.includes('mista')) {
+    return {
+      categoria: 'SOCIEDADE_MISTA',
+      limite: 25,
+      descricao: 'Sociedade Mista'
+    };
+  }
+  
+  // Default (25%)
+  return {
+    categoria: 'DEFAULT',
+    limite: 25,
+    descricao: 'Demais Contratos'
+  };
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;

@@ -9,8 +9,60 @@ import {
   ClockIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
-import { TermoContratual, InstrumentoContratual, TermoTipo, InstrumentoTipo, TermoStatus, getClassificacaoContrato } from '@/types/contract-terms';
+import { TermoContratual, InstrumentoContratual, TermoTipo, InstrumentoTipo, TermoStatus } from '@/types/contract-terms';
 import { ContratoImportado } from '@/types/contratos';
+
+// Função para classificar contrato conforme Lei 14.133/2021
+function getClassificacaoContrato(tipoContrato: string, objetoContrato?: string): {
+  categoria: string;
+  limite: number;
+  descricao: string;
+} {
+  const tipoLower = tipoContrato.toLowerCase();
+  const objetoLower = (objetoContrato || '').toLowerCase();
+  
+  // Reforma de edifício ou equipamento (50%)
+  if (tipoLower.includes('reforma') || tipoLower.includes('equipamento') || 
+      tipoLower.includes('edifício') || tipoLower.includes('instalação') || 
+      tipoLower.includes('manutenção') || objetoLower.includes('reforma') || 
+      objetoLower.includes('equipamento') || objetoLower.includes('edifício') || 
+      objetoLower.includes('instalação') || objetoLower.includes('manutenção')) {
+    return {
+      categoria: 'REFORMA_EQUIPAMENTO',
+      limite: 50,
+      descricao: 'Reforma de Edifício ou Equipamento'
+    };
+  }
+  
+  // Obra, serviço ou compra (25%)
+  if (tipoLower.includes('obra') || tipoLower.includes('construção') || 
+      tipoLower.includes('serviço') || tipoLower.includes('compra') || 
+      tipoLower.includes('fornecimento') || objetoLower.includes('obra') || 
+      objetoLower.includes('construção') || objetoLower.includes('serviço') || 
+      objetoLower.includes('compra') || objetoLower.includes('fornecimento')) {
+    return {
+      categoria: 'OBRAS_SERVICOS_COMPRAS',
+      limite: 25,
+      descricao: 'Obras, Serviços ou Compras'
+    };
+  }
+  
+  // Sociedade mista (25%)
+  if (tipoLower.includes('sociedade') || tipoLower.includes('mista')) {
+    return {
+      categoria: 'SOCIEDADE_MISTA',
+      limite: 25,
+      descricao: 'Sociedade Mista'
+    };
+  }
+  
+  // Default (25%)
+  return {
+    categoria: 'DEFAULT',
+    limite: 25,
+    descricao: 'Demais Contratos'
+  };
+}
 
 interface ContratoTermsCardProps {
   contrato: ContratoImportado;
