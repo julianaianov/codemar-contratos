@@ -4,10 +4,16 @@ import React, { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import GlobalAISearch from '@/components/ai/GlobalAISearch';
+import { useGlobalSearch } from '@/hooks/useGlobalSearch';
+import ChatWidget from '@/components/ai/ChatWidget';
+import { useChatWidget } from '@/hooks/useChatWidget';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false); // mobile overlay
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // desktop collapse
+  const { isOpen: isSearchOpen, closeSearch } = useGlobalSearch();
+  const { isOpen: isChatOpen, toggleChat } = useChatWidget();
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -43,6 +49,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <div className="mx-auto w-full max-w-full overflow-x-hidden">{children}</div>
           </main>
         </div>
+
+        {/* Global AI Search Modal */}
+        <GlobalAISearch isOpen={isSearchOpen} onClose={closeSearch} />
+        
+        {/* Chat Widget */}
+        <ChatWidget isOpen={isChatOpen} onToggle={toggleChat} />
       </div>
     </QueryClientProvider>
   );

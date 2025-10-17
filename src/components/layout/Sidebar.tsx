@@ -22,6 +22,7 @@ import {
   CogIcon,
   Squares2X2Icon,
   MagnifyingGlassIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
 
 interface SidebarProps {
@@ -32,6 +33,7 @@ interface SidebarProps {
 
 const navigation = [
   { name: 'Transparência', href: '/', icon: EyeIcon },
+  { name: 'Assistente IA', href: '/assistente-ia', icon: SparklesIcon },
   { name: 'Todos os Apps', href: '/apps', icon: Squares2X2Icon },
   { name: 'Consulta', href: '/consulta/contratos', icon: MagnifyingGlassIcon },
   { name: 'Importação', href: '/importacao', icon: ArrowDownTrayIcon },

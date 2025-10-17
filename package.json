@@ -10,6 +10,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@headlessui/react": "^1.7.0",
     "@heroicons/react": "^2.0.0",
     "@hookform/resolvers": "^3.3.0",
@@ -28,10 +29,12 @@
     "chart.js": "^4.4.0",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
+    "docx": "^9.5.1",
     "dotenv": "^17.2.3",
     "framer-motion": "^10.16.0",
     "jwt-decode": "^3.1.2",
     "lucide-react": "^0.290.0",
+    "mammoth": "^1.11.0",
     "multer": "^2.0.2",
     "next": "14.0.0",
     "papaparse": "^5.5.3",
@@ -41,6 +44,7 @@
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-datepicker": "^4.21.0",
+    "react-doc-viewer": "^0.1.14",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.47.0",
     "react-hot-toast": "^2.4.0",

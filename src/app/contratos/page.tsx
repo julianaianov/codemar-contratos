@@ -5,6 +5,7 @@ import { MagnifyingGlassIcon, EyeIcon, PencilIcon, TrashIcon, ViewColumnsIcon, S
 import { ContratoImportado } from '@/types/contratos';
 import { FilterPanel } from '@/components/contratos/FilterPanel';
 import { FiltrosContratos } from '@/types/contratos';
+import QuickAISearch from '@/components/ai/QuickAISearch';
 
 export default function ContratosPage() {
   const [contratos, setContratos] = useState<ContratoImportado[]>([]);
@@ -124,10 +125,30 @@ export default function ContratosPage() {
         </p>
       </div>
 
-      {/* Filtros e Busca */}
+      {/* Busca Inteligente */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-md p-6 text-white mb-4">
+          <div className="flex items-center gap-3 mb-4">
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <h2 className="text-xl font-semibold">Busca Inteligente em Contratos</h2>
+          </div>
+          <p className="text-blue-100 mb-4">
+            Pergunte sobre contratos e receba análises inteligentes
+          </p>
+          <QuickAISearch
+            placeholder="Ex: Quais são os maiores contratos por valor?"
+            searchType="contracts"
+            className="max-w-2xl"
+          />
+        </div>
+      </div>
+
+      {/* Filtros e Busca Tradicional */}
       <div className="mb-6">
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Busca */}
+          {/* Busca Tradicional */}
           <div className="flex-1">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
