@@ -6,7 +6,7 @@ import {
   ChartBarIcon,
   DocumentTextIcon,
   LightBulbIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
 import AISearchBox from './AISearchBox';
@@ -165,7 +165,7 @@ export default function AIDashboard() {
                   className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUpIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                    <ArrowTrendingUpIcon className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                     <span className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
                       {insight.query}
                     </span>
@@ -245,7 +245,7 @@ export default function AIDashboard() {
             }}
             className="flex items-center gap-3 p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors duration-200"
           >
-            <TrendingUpIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+            <ArrowTrendingUpIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             <div className="text-left">
               <p className="font-medium text-purple-900 dark:text-purple-100">
                 Análise de Tendências
