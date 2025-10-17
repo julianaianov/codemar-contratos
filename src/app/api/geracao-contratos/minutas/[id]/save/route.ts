@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
+// Import dinâmico do pacote docx dentro do handler para evitar problemas de bundling
 
 // Interface para o modelo de minuta
 interface MinutaModel {
@@ -65,14 +65,17 @@ export async function POST(
     const nomeArquivo = minutaOriginal.arquivo.replace(/^\d+_/, `${novoId}_`);
     const filePath = path.join(MINUTAS_DIR, nomeArquivo);
 
-    // Criar novo documento DOCX a partir do conteúdo HTML
-    const doc = new Document({
+    // Importar docx dinamicamente para evitar problemas de export em tempo de build
+    const docx = await import('docx');
+
+    // Criar novo documento DOCX a partir do conteúdo
+    const doc = new docx.Document({
       sections: [{
         properties: {},
         children: [
-          new Paragraph({
+          new docx.Paragraph({
             children: [
-              new TextRun({
+              new docx.TextRun({
                 text: content || 'Documento editado',
                 size: 24,
               }),
@@ -83,7 +86,7 @@ export async function POST(
     });
 
     // Gerar buffer do documento
-    const buffer = await Packer.toBuffer(doc);
+    const buffer = await docx.Packer.toBuffer(doc);
 
     // Salvar arquivo editado
     await fs.writeFile(filePath, buffer);

@@ -7,13 +7,11 @@ import {
   UnderlineIcon,
   ListBulletIcon,
   NumberedListIcon,
-  AlignLeftIcon,
-  AlignCenterIcon,
-  AlignRightIcon,
   CheckIcon,
   XMarkIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
+import { AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 interface DocxEditorProps {
   minutaId: string;
@@ -144,21 +142,21 @@ export default function DocxEditor({
               className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200"
               title="Alinhar à esquerda"
             >
-              <AlignLeftIcon className="h-5 w-5" />
+              <AlignLeft className="h-5 w-5" />
             </button>
             <button
               onClick={() => execCommand('justifyCenter')}
               className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200"
               title="Centralizar"
             >
-              <AlignCenterIcon className="h-5 w-5" />
+              <AlignCenter className="h-5 w-5" />
             </button>
             <button
               onClick={() => execCommand('justifyRight')}
               className="p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors duration-200"
               title="Alinhar à direita"
             >
-              <AlignRightIcon className="h-5 w-5" />
+              <AlignRight className="h-5 w-5" />
             </button>
           </div>
 

@@ -53,12 +53,13 @@ export async function GET(
     
     try {
       const fileBuffer = await fs.readFile(filePath);
+      const bytes = new Uint8Array(fileBuffer);
       
-      return new NextResponse(fileBuffer, {
+      return new NextResponse(bytes, {
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
           'Content-Disposition': `attachment; filename="${minuta.nome}.docx"`,
-          'Content-Length': fileBuffer.length.toString(),
+          'Content-Length': bytes.byteLength.toString(),
         },
       });
     } catch (fileError) {
