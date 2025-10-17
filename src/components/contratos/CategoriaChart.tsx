@@ -18,11 +18,11 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
   // Função para calcular altura responsiva
   const calculateChartHeight = () => {
     const width = window.innerWidth;
-    if (width >= 1920) return 500; // Telas muito grandes
-    if (width >= 1536) return 450; // xl
-    if (width >= 1280) return 400; // lg
-    if (width >= 1024) return 350; // md
-    return 300; // sm e menores
+    if (width >= 1920) return 400; // Telas muito grandes
+    if (width >= 1536) return 350; // xl
+    if (width >= 1280) return 300; // lg
+    if (width >= 1024) return 280; // md
+    return 250; // sm e menores
   };
 
   useEffect(() => {
@@ -176,7 +176,7 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full" style={{ height: `${chartHeight}px` }}>
       <PieChart
         data={chartData}
         height={chartHeight}

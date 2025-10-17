@@ -161,14 +161,14 @@ export default function ConsultaContratosPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="px-2 sm:px-4 md:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
             Consulta de Contratos
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
             Consulte e gerencie todos os contratos cadastrados no sistema
           </p>
         </div>
@@ -183,63 +183,67 @@ export default function ConsultaContratosPage() {
       />
 
       {/* Barra de Busca e Visualização */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-        <div className="flex-1 relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar por número, objeto, contratado ou diretoria..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          />
+      <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 items-center justify-between bg-white dark:bg-gray-800 p-3 sm:p-4 rounded-lg shadow">
+        <div className="flex-1 w-full min-w-0">
+          <div className="relative">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Buscar por número, objeto, contratado ou diretoria..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
         </div>
         
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
             Visualização:
           </span>
           <div className="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button
               onClick={() => setViewMode('cards')}
-              className={`p-2 rounded ${viewMode === 'cards' 
+              className={`p-1.5 sm:p-2 rounded transition-colors ${viewMode === 'cards' 
                 ? 'bg-white dark:bg-gray-600 shadow-sm' 
                 : 'hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
+              title="Visualização em cards"
             >
-              <Squares2X2Icon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+              <Squares2X2Icon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`p-2 rounded ${viewMode === 'table' 
+              className={`p-1.5 sm:p-2 rounded transition-colors ${viewMode === 'table' 
                 ? 'bg-white dark:bg-gray-600 shadow-sm' 
                 : 'hover:bg-gray-200 dark:hover:bg-gray-600'
               }`}
+              title="Visualização em tabela"
             >
-              <ViewColumnsIcon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+              <ViewColumnsIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Resultados */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           {loading ? 'Carregando...' : `Exibindo ${contratosFiltrados.length} de ${totalItems} contratos`}
         </p>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page <= 1 || loading}
-            className={`px-3 py-1 rounded border text-sm ${page <= 1 || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+            className={`px-2 sm:px-3 py-1 rounded border text-xs sm:text-sm transition-colors ${page <= 1 || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
           >
             Anterior
           </button>
-          <span className="text-sm text-gray-600 dark:text-gray-400">Página {page} de {totalPages}</span>
+          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">Página {page} de {totalPages}</span>
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages || loading}
-            className={`px-3 py-1 rounded border text-sm ${page >= totalPages || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+            className={`px-2 sm:px-3 py-1 rounded border text-xs sm:text-sm transition-colors ${page >= totalPages || loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}
           >
             Próxima
           </button>
@@ -248,9 +252,9 @@ export default function ConsultaContratosPage() {
 
       {/* Visualização em Cards */}
       {viewMode === 'cards' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {contratosFiltrados.map((contrato, index) => (
-            <div key={contrato.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4 border-green-500 p-6 hover:shadow-lg transition-shadow">
+            <div key={contrato.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md border-l-4 border-green-500 p-4 sm:p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -371,25 +375,25 @@ export default function ConsultaContratosPage() {
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Contrato
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">
                     Objeto
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">
                     Contratado
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">
                     Diretoria
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden xl:table-cell">
                     Valor
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Ações
                   </th>
                 </tr>
@@ -397,41 +401,58 @@ export default function ConsultaContratosPage() {
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {contratosFiltrados.map((contrato) => (
                   <tr key={contrato.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
-                        {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
+                    <td className="px-3 sm:px-6 py-4">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {contrato.numero_contrato || getValorCampo(undefined, ['contrato','numero','numero_contrato','nº contrato','numero contrato'], contrato) || 'N/A'}
+                        </div>
+                        {/* Informações extras em mobile */}
+                        <div className="sm:hidden mt-1 space-y-1">
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            <span className="font-medium">Objeto:</span> {contrato.objeto || 'Não informado'}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            <span className="font-medium">Contratado:</span> {contrato.contratado || 'Não informado'}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            <span className="font-medium">Diretoria:</span> {contrato.secretaria || contrato.diretoria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], contrato) || 'Não informado'}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">
+                            <span className="font-medium">Valor:</span> {formatarValor(contrato.valor)}
+                          </div>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-4 hidden sm:table-cell">
                       <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
                         {contrato.objeto || 'Não informado'}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-3 sm:px-6 py-4 hidden md:table-cell">
                       <div className="text-sm text-gray-900 dark:text-white">
                         {contrato.contratado || 'Não informado'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 hidden lg:table-cell">
                       <div className="text-sm text-gray-900 dark:text-white">
                         {contrato.secretaria || contrato.diretoria || getValorCampo(undefined, ['diretoria requisitante','diretoria','secretaria','unidade'], contrato) || 'Não informado'}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 hidden xl:table-cell">
                       <div className="text-sm text-gray-900 dark:text-white">
                         {formatarValor(contrato.valor)}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor((contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || '') as string)}`}>
+                    <td className="px-3 sm:px-6 py-4">
+                      <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getStatusColor((contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || '') as string)}`}>
                         {contrato.status || getValorCampo(undefined, ['status','situacao','situação'], contrato) || 'N/A'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex gap-2">
+                    <td className="px-3 sm:px-6 py-4 text-sm font-medium">
+                      <div className="flex gap-1 sm:gap-2">
                         <button
                           onClick={() => handleViewContrato(contrato)}
-                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                          className="p-1 sm:p-2 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900 rounded transition-colors"
                           title="Ver detalhes"
                         >
                           <EyeIcon className="h-4 w-4" />
@@ -439,16 +460,16 @@ export default function ConsultaContratosPage() {
                         {(contrato as any).file_import_id && (
                           <button
                             onClick={() => handleViewPdf((contrato as any).file_import_id)}
-                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+                            className="p-1 sm:p-2 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors"
                             title="Ver PDF original"
                           >
                             <DocumentArrowDownIcon className="h-4 w-4" />
                           </button>
                         )}
-                        <button className="text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300" title="Editar">
+                        <button className="p-1 sm:p-2 text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900 rounded transition-colors" title="Editar">
                           <PencilIcon className="h-4 w-4" />
                         </button>
-                        <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" title="Deletar">
+                        <button className="p-1 sm:p-2 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900 rounded transition-colors" title="Deletar">
                           <TrashIcon className="h-4 w-4" />
                         </button>
                       </div>
@@ -463,26 +484,26 @@ export default function ConsultaContratosPage() {
 
       {/* Modal de Visualização */}
       {showModal && contratoSelecionado && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                   Detalhes do Contrato
                 </h2>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
                 >
                   <span className="sr-only">Fechar</span>
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
               
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-3 sm:space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Número do Contrato</label>
                     <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.numero_contrato || 'N/A'}</p>
@@ -495,7 +516,7 @@ export default function ConsultaContratosPage() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Ano-Nº</label>
                     <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.ano_numero || 'N/A'}</p>
@@ -511,7 +532,7 @@ export default function ConsultaContratosPage() {
                   <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.objeto || 'Não informado'}</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Contratado</label>
                     <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.contratado || 'Não informado'}</p>
@@ -522,7 +543,7 @@ export default function ConsultaContratosPage() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Data de Início</label>
                     <p className="text-sm text-gray-900 dark:text-white">{formatarData(contratoSelecionado.data_inicio)}</p>
@@ -533,7 +554,7 @@ export default function ConsultaContratosPage() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Prazo</label>
                     <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.prazo ? `${contratoSelecionado.prazo} ${contratoSelecionado.unidade_prazo || ''}` : 'N/A'}</p>
@@ -544,7 +565,7 @@ export default function ConsultaContratosPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Valor do Contrato</label>
                     <p className="text-sm text-gray-900 dark:text-white font-semibold">{formatarValor(contratoSelecionado.valor_contrato ?? contratoSelecionado.valor)}</p>
@@ -555,7 +576,7 @@ export default function ConsultaContratosPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Fiscal Técnico</label>
                     <p className="text-sm text-gray-900 dark:text-white">{contratoSelecionado.fiscal_tecnico || getValorCampo(undefined, ['fiscal tecnico','fiscal_técnico','fiscal_tecnico']) || 'N/A'}</p>

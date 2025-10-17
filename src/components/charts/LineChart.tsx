@@ -53,12 +53,12 @@ export const LineChart: React.FC<LineChartProps> = ({
   };
 
   return (
-    <div className={`w-full ${className}`}>
+    <div className={`w-full h-full ${className}`} style={{ height: `${height}px` }}>
       {title && (
         <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
       )}
-      <ResponsiveContainer width="100%" height={height}>
-        <RechartsLineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsLineChart data={data} margin={{ top: 5, right: 15, left: 15, bottom: 5 }}>
           {gradient && (
             <defs>
               <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
@@ -81,12 +81,15 @@ export const LineChart: React.FC<LineChartProps> = ({
             dataKey="date" 
             tickFormatter={formatXAxisLabel}
             stroke="#6b7280"
-            fontSize={12}
+            fontSize={10}
+            tick={{ fontSize: 10 }}
           />
           <YAxis 
             tickFormatter={(value) => formatTooltipValue(value)}
             stroke="#6b7280"
-            fontSize={12}
+            fontSize={10}
+            tick={{ fontSize: 10 }}
+            width={50}
           />
           <Tooltip
             formatter={(value: number) => [formatTooltipValue(value), 'Valor']}

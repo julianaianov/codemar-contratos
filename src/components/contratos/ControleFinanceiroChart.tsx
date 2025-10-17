@@ -54,8 +54,8 @@ export const ControleFinanceiroChart: React.FC<ControleFinanceiroChartProps> = (
   };
 
   return (
-    <div className="h-64">
-      <BarChart data={chartData} />
+    <div className="w-full h-full" style={{ height: '300px' }}>
+      <BarChart data={chartData} height={300} />
     </div>
   );
 };

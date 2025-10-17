@@ -131,16 +131,16 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <button
           onClick={onToggle}
-          className="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 group"
+          className="bg-purple-500 hover:bg-purple-600 text-white p-3 sm:p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 group"
           title="Abrir Chat IA"
         >
-          <ChatBubbleLeftRightIcon className="h-6 w-6" />
+          <ChatBubbleLeftRightIcon className="h-5 w-5 sm:h-6 sm:w-6" />
           {messages.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center">
-              {messages.length}
+            <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center">
+              {messages.length > 99 ? '99+' : messages.length}
             </span>
           )}
         </button>
@@ -149,14 +149,14 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-96 h-[600px] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-96 max-w-sm sm:max-w-none h-[calc(100vh-2rem)] sm:h-[600px] max-h-[600px] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-purple-500 text-white rounded-t-lg">
-        <div className="flex items-center gap-2">
-          <SparklesIcon className="h-5 w-5" />
-          <h3 className="font-semibold">Chat IA CODEMAR</h3>
+      <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-200 dark:border-gray-700 bg-purple-500 text-white rounded-t-lg">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <SparklesIcon className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+          <h3 className="font-semibold text-sm sm:text-base truncate">Chat IA CODEMAR</h3>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <button
             onClick={clearChat}
             className="p-1 hover:bg-purple-600 rounded transition-colors duration-200"
@@ -169,17 +169,17 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
             className="p-1 hover:bg-purple-600 rounded transition-colors duration-200"
             title="Fechar chat"
           >
-            <XMarkIcon className="h-5 w-5" />
+            <XMarkIcon className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         </div>
       </div>
 
       {/* Chat Type Selector */}
-      <div className="p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
-        <div className="flex gap-1">
+      <div className="p-2 sm:p-3 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+        <div className="flex gap-1 overflow-x-auto">
           <button
             onClick={() => setChatType('general')}
-            className={`px-3 py-1 text-xs rounded-full transition-colors duration-200 ${
+            className={`px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
               chatType === 'general'
                 ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
                 : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-500'
@@ -189,7 +189,7 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
           </button>
           <button
             onClick={() => setChatType('contracts')}
-            className={`px-3 py-1 text-xs rounded-full transition-colors duration-200 ${
+            className={`px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
               chatType === 'contracts'
                 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
                 : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-500'
@@ -199,7 +199,7 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
           </button>
           <button
             onClick={() => setChatType('minutas')}
-            className={`px-3 py-1 text-xs rounded-full transition-colors duration-200 ${
+            className={`px-2 sm:px-3 py-1 text-xs rounded-full transition-colors duration-200 whitespace-nowrap flex-shrink-0 ${
               chatType === 'minutas'
                 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                 : 'bg-gray-100 text-gray-600 dark:bg-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-500'
@@ -211,7 +211,7 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-2 sm:p-4 space-y-2 sm:space-y-4">
         {messages.length === 0 ? (
           <div className="text-center py-8">
             <ChatBubbleLeftRightIcon className="h-12 w-12 text-gray-400 mx-auto mb-3" />

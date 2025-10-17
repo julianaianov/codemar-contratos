@@ -68,7 +68,7 @@ export const BarChart: React.FC<BarChartProps> = ({
   }
 
   return (
-    <div className={`w-full h-full overflow-hidden ${className}`} style={{ height: `${height}px` }}>
+    <div className={`w-full h-full ${className}`} style={{ height: `${height}px` }}>
       {title && (
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{title}</h3>
       )}
@@ -81,9 +81,10 @@ export const BarChart: React.FC<BarChartProps> = ({
               [dataset.label]: dataset.data[index],
             }), {}),
           })) || []} 
-          margin={horizontal ? { top: 10, right: 60, left: 10, bottom: 10 } : { top: 40, right: 30, left: 60, bottom: 80 }}
+          margin={horizontal ? { top: 5, right: 30, left: 5, bottom: 5 } : { top: 20, right: 15, left: 30, bottom: 40 }}
           layout={horizontal ? "horizontal" : "vertical"}
-          barCategoryGap="20%"
+          barCategoryGap="10%"
+          maxBarSize={60}
         >
           {gradient && (
             <defs>
@@ -112,15 +113,17 @@ export const BarChart: React.FC<BarChartProps> = ({
                 tickFormatter={(value) => formatTooltipValue(value)}
                 stroke="currentColor"
                 className="text-gray-600 dark:text-gray-200"
-                fontSize={12}
+                fontSize={10}
+                tick={{ fontSize: 10 }}
               />
               <YAxis 
                 type="category"
                 dataKey="name" 
                 stroke="currentColor"
                 className="text-gray-600 dark:text-gray-200"
-                fontSize={11}
-                width={60}
+                fontSize={10}
+                width={50}
+                tick={{ fontSize: 10 }}
               />
             </>
           ) : (
@@ -129,16 +132,20 @@ export const BarChart: React.FC<BarChartProps> = ({
                 dataKey="name" 
                 stroke="currentColor"
                 className="text-gray-600 dark:text-gray-200"
-                fontSize={12}
+                fontSize={10}
                 angle={-45}
                 textAnchor="end"
-                height={80}
+                height={60}
+                tick={{ fontSize: 10 }}
+                interval={0}
               />
               <YAxis 
                 tickFormatter={(value) => formatTooltipValue(value)}
                 stroke="currentColor"
                 className="text-gray-600 dark:text-gray-200"
-                fontSize={12}
+                fontSize={10}
+                tick={{ fontSize: 10 }}
+                width={50}
               />
             </>
           )}
@@ -157,8 +164,9 @@ export const BarChart: React.FC<BarChartProps> = ({
               key={dataset.label}
               dataKey={dataset.label}
               fill={gradient ? `url(#barGradient-${index})` : colors[index % colors.length]}
-              radius={horizontal ? [0, 4, 4, 0] : [4, 4, 0, 0]}
+              radius={horizontal ? [0, 2, 2, 0] : [2, 2, 0, 0]}
               filter={neon ? 'url(#barGlow)' : undefined}
+              maxBarSize={40}
             />
           ))}
         </RechartsBarChart>

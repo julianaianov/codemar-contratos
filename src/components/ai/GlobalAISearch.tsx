@@ -330,3 +330,4 @@ export default function GlobalAISearch({ isOpen, onClose }: GlobalAISearchProps)
     </div>
   );
 }
+
