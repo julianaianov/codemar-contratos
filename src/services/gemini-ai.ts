@@ -83,7 +83,7 @@ FORMATO DA RESPOSTA (JSON):
   "sources": ["ID do contrato relevante 1", "ID do contrato relevante 2"]
 }
 
-IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem ```json, sem texto adicional. Apenas o objeto JSON puro.
+IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem \`\`\`json, sem texto adicional. Apenas o objeto JSON puro.
 `;
 
       const result = await model.generateContent(prompt);
@@ -178,7 +178,7 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem ```json, sem t
     }
     
     if (queryLower.includes('fornecedor')) {
-      const fornecedores = [...new Set(contracts.map(c => c.fornecedor))];
+      const fornecedores = Array.from(new Set(contracts.map(c => c.fornecedor)));
       return {
         query,
         answer: `Encontrei ${fornecedores.length} fornecedores únicos nos contratos: ${fornecedores.slice(0, 5).join(', ')}${fornecedores.length > 5 ? ' e outros.' : '.'}`,
@@ -193,7 +193,7 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem ```json, sem t
     }
     
     if (queryLower.includes('diretoria')) {
-      const diretorias = [...new Set(contracts.map(c => c.diretoria))];
+      const diretorias = Array.from(new Set(contracts.map(c => c.diretoria)));
       return {
         query,
         answer: `As diretorias com contratos são: ${diretorias.join(', ')}.`,
@@ -349,7 +349,7 @@ FORMATO (JSON):
   "sources": ["ID da minuta recomendada"]
 }
 
-IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem ```json, sem texto adicional. Apenas o objeto JSON puro.
+IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem \`\`\`json, sem texto adicional. Apenas o objeto JSON puro.
 `;
 
       const result = await model.generateContent(prompt);

@@ -45,3 +45,4 @@ echo "   source ~/.bashrc"
 echo ""
 echo "🚀 Para iniciar o servidor:"
 echo "   npm run dev"
+

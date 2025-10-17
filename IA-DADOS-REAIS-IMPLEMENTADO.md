@@ -122,3 +122,4 @@ node test-real-data.js
 2. Verificar respostas com dados atuais
 3. Monitorar logs para otimizações
 4. Expandir para outros tipos de dados se necessário
+

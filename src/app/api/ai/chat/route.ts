@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: 'Erro interno do servidor',
         result: {
-          query: message || '',
+          query: 'Erro no processamento',
           answer: 'Desculpe, ocorreu um erro ao processar sua mensagem. Tente novamente.',
           suggestions: ['Tentar novamente', 'Verificar conexão', 'Contatar suporte'],
           confidence: 0,

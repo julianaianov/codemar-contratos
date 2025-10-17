@@ -91,3 +91,4 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem \`\`\`json, se
 }
 
 testAIResponse();
+
