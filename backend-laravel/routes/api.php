@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\FileImportController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\ContratoController;
+use App\Http\Controllers\Api\TermoContratualController;
+use App\Http\Controllers\Api\InstrumentoContratualController;
+use App\Http\Controllers\Api\ConformidadeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +46,43 @@ Route::prefix('contratos')->group(function () {
     Route::get('/{id}', [ContratoController::class, 'show']);
     Route::put('/{id}', [ContratoController::class, 'update']);
     Route::delete('/{id}', [ContratoController::class, 'destroy']);
+});
+
+// Rotas de termos contratuais
+Route::prefix('termos')->group(function () {
+    Route::get('/', [TermoContratualController::class, 'index']);
+    Route::post('/', [TermoContratualController::class, 'store']);
+    Route::get('/{termoContratual}', [TermoContratualController::class, 'show']);
+    Route::put('/{termoContratual}', [TermoContratualController::class, 'update']);
+    Route::delete('/{termoContratual}', [TermoContratualController::class, 'destroy']);
+    Route::patch('/{termoContratual}/status', [TermoContratualController::class, 'updateStatus']);
+    Route::get('/tipo/{tipo}', [TermoContratualController::class, 'porTipo']);
+    Route::get('/aprovados/listar', [TermoContratualController::class, 'aprovados']);
+});
+
+// Rotas de instrumentos contratuais
+Route::prefix('instrumentos')->group(function () {
+    Route::get('/', [InstrumentoContratualController::class, 'index']);
+    Route::post('/', [InstrumentoContratualController::class, 'store']);
+    Route::get('/{instrumentoContratual}', [InstrumentoContratualController::class, 'show']);
+    Route::put('/{instrumentoContratual}', [InstrumentoContratualController::class, 'update']);
+    Route::delete('/{instrumentoContratual}', [InstrumentoContratualController::class, 'destroy']);
+    Route::patch('/{instrumentoContratual}/status', [InstrumentoContratualController::class, 'updateStatus']);
+    Route::get('/tipo/{tipo}', [InstrumentoContratualController::class, 'porTipo']);
+    Route::get('/ativos/listar', [InstrumentoContratualController::class, 'ativos']);
+    Route::get('/vigentes/listar', [InstrumentoContratualController::class, 'vigentes']);
+    Route::get('/vencidos/listar', [InstrumentoContratualController::class, 'vencidos']);
+    Route::get('/proximos-vencimento/listar', [InstrumentoContratualController::class, 'proximosVencimento']);
+});
+
+// Rotas de conformidade
+Route::prefix('conformidade')->group(function () {
+    Route::get('/estatisticas', [ConformidadeController::class, 'estatisticas']);
+    Route::get('/contrato/{contratoId}', [ConformidadeController::class, 'contrato']);
+    Route::get('/status/{status}', [ConformidadeController::class, 'porStatus']);
+    Route::get('/classificacao/{categoria}', [ConformidadeController::class, 'porClassificacao']);
+    Route::post('/verificar-aditivo', [ConformidadeController::class, 'verificarAditivo']);
+    Route::get('/powerbi', [ConformidadeController::class, 'powerBI']);
 });
 
 // Rotas de administração (requer autenticação e permissão de admin)

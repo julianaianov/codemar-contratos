@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { ContratoImportado } from '@/types/contratos';
 import { ContratoCard } from './ContratoCard';
+import { ContratoTermsCard } from './ContratoTermsCard';
+import { AddTermoModal } from './AddTermoModal';
+import { AddInstrumentoModal } from './AddInstrumentoModal';
 import { SelectFilter } from './SelectFilter';
 
 interface ContratosListProps {
@@ -20,6 +23,11 @@ export const ContratosList: React.FC<ContratosListProps> = ({
     modalidade: '',
     status: '',
   });
+
+  // Estados para modais
+  const [showAddTermoModal, setShowAddTermoModal] = useState(false);
+  const [showAddInstrumentoModal, setShowAddInstrumentoModal] = useState(false);
+  const [contratoSelecionado, setContratoSelecionado] = useState<ContratoImportado | null>(null);
 
   // Extrai opções únicas para os filtros (sem depender de spread + Set)
   const anos = contratos.reduce<number[]>((acc, c) => {
@@ -69,6 +77,38 @@ export const ContratosList: React.FC<ContratosListProps> = ({
       modalidade: '',
       status: '',
     });
+  };
+
+  // Funções para modais
+  const handleAddTermo = (contratoId: string) => {
+    const contrato = contratos.find(c => c.id.toString() === contratoId);
+    if (contrato) {
+      setContratoSelecionado(contrato);
+      setShowAddTermoModal(true);
+    }
+  };
+
+  const handleAddInstrumento = (contratoId: string) => {
+    const contrato = contratos.find(c => c.id.toString() === contratoId);
+    if (contrato) {
+      setContratoSelecionado(contrato);
+      setShowAddInstrumentoModal(true);
+    }
+  };
+
+  const handleViewDetails = (contratoId: string) => {
+    const contrato = contratos.find(c => c.id.toString() === contratoId);
+    if (contrato && onContratoClick) {
+      onContratoClick(contrato);
+    }
+  };
+
+  const handleModalSuccess = () => {
+    // Recarregar dados ou atualizar estado
+    // Por enquanto, apenas fechar os modais
+    setShowAddTermoModal(false);
+    setShowAddInstrumentoModal(false);
+    setContratoSelecionado(null);
   };
 
   if (loading) {
@@ -169,13 +209,40 @@ export const ContratosList: React.FC<ContratosListProps> = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {contratosFiltrados.map((contrato) => (
-            <ContratoCard
+            <ContratoTermsCard
               key={contrato.id}
               contrato={contrato}
-              onClick={() => onContratoClick?.(contrato)}
+              onAddTermo={handleAddTermo}
+              onAddInstrumento={handleAddInstrumento}
+              onViewDetails={handleViewDetails}
             />
           ))}
         </div>
+      )}
+
+      {/* Modais */}
+      {contratoSelecionado && (
+        <>
+          <AddTermoModal
+            isOpen={showAddTermoModal}
+            onClose={() => {
+              setShowAddTermoModal(false);
+              setContratoSelecionado(null);
+            }}
+            contrato={contratoSelecionado}
+            onSuccess={handleModalSuccess}
+          />
+          
+          <AddInstrumentoModal
+            isOpen={showAddInstrumentoModal}
+            onClose={() => {
+              setShowAddInstrumentoModal(false);
+              setContratoSelecionado(null);
+            }}
+            contrato={contratoSelecionado}
+            onSuccess={handleModalSuccess}
+          />
+        </>
       )}
     </div>
   );

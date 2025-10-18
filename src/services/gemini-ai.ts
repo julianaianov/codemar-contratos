@@ -70,10 +70,11 @@ CONSULTA DO USUÁRIO: "${query}"
 INSTRUÇÕES:
 1. Analise os dados de contratos fornecidos
 2. Responda à consulta de forma clara e precisa
-3. Forneça informações específicas quando possível (valores, datas, fornecedores)
-4. Se não encontrar informações exatas, indique isso claramente
-5. Sugira consultas relacionadas que podem ser úteis
-6. Avalie sua confiança na resposta (0-100%)
+3. Para perguntas sobre quantidade/número total de contratos, use o número exato de registros fornecidos
+4. Forneça informações específicas quando possível (valores, datas, fornecedores)
+5. Se não encontrar informações exatas, indique isso claramente
+6. Sugira consultas relacionadas que podem ser úteis
+7. Avalie sua confiança na resposta (0-100%)
 
 FORMATO DA RESPOSTA (JSON):
 {
@@ -160,6 +161,24 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem \`\`\`json, se
     }
     
     // Análise simples baseada em palavras-chave
+    
+    // Contagem total de contratos
+    if (queryLower.includes('numero') || queryLower.includes('quantidade') || queryLower.includes('quantos') || 
+        (queryLower.includes('total') && (queryLower.includes('contrato') || queryLower.includes('contratos')))) {
+      return {
+        query,
+        answer: `O sistema possui ${contracts.length} contratos cadastrados.`,
+        suggestions: [
+          'Ver contratos por valor',
+          'Filtrar por diretoria',
+          'Consultar fornecedores',
+          'Analisar por tipo de contrato'
+        ],
+        confidence: 100,
+        sources: []
+      };
+    }
+    
     if (queryLower.includes('maior') || queryLower.includes('valor')) {
       const sortedContracts = contracts.sort((a, b) => b.valor - a.valor);
       const topContract = sortedContracts[0];
@@ -207,7 +226,7 @@ IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem \`\`\`json, se
       };
     }
     
-    if (queryLower.includes('total') || queryLower.includes('soma')) {
+    if ((queryLower.includes('total') || queryLower.includes('soma')) && (queryLower.includes('valor') || queryLower.includes('financeiro'))) {
       const total = contracts.reduce((sum, c) => sum + c.valor, 0);
       return {
         query,

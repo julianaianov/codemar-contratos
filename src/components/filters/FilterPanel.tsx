@@ -11,7 +11,6 @@ interface FilterPanelProps {
 
 interface FilterData {
   exercicio: string;
-  instituicao?: number;
   credor?: string;
   elemento?: string;
   fonte?: string;
@@ -21,35 +20,15 @@ interface FilterData {
   projeto?: string;
 }
 
-interface Institution {
-  id: number;
-  descricao: string;
-}
 
 export function FilterPanel({ onFilter, onClear, loading = false }: FilterPanelProps) {
   const [filters, setFilters] = useState<FilterData>({
     exercicio: new Date().getFullYear().toString(),
   });
   
-  const [institutions, setInstitutions] = useState<Institution[]>([]);
-  const [filterBy, setFilterBy] = useState('instituicao');
+  const [filterBy, setFilterBy] = useState('credor');
 
   const availableYears = ['2025', '2024', '2023', '2022', '2021'];
-
-  useEffect(() => {
-    // Buscar instituições
-    const fetchInstitutions = async () => {
-      try {
-        const response = await fetch('/api/ecidade/database?path=institutions');
-        const data = await response.json();
-        setInstitutions(data);
-      } catch (error) {
-        console.error('Erro ao carregar instituições:', error);
-      }
-    };
-
-    fetchInstitutions();
-  }, []);
 
   const handleFilterChange = (key: keyof FilterData, value: string | number) => {
     setFilters(prev => ({
@@ -71,21 +50,6 @@ export function FilterPanel({ onFilter, onClear, loading = false }: FilterPanelP
 
   const renderFilterInput = () => {
     switch (filterBy) {
-      case 'instituicao':
-        return (
-          <select
-            value={filters.instituicao || ''}
-            onChange={(e) => handleFilterChange('instituicao', parseInt(e.target.value) || 0)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-secondary-700 text-gray-900 dark:text-gray-100"
-          >
-            <option value="">Selecione uma instituição</option>
-            {institutions.map(inst => (
-              <option key={inst.id} value={inst.id}>
-                {inst.descricao}
-              </option>
-            ))}
-          </select>
-        );
       case 'credor':
         return (
           <input
@@ -168,7 +132,6 @@ export function FilterPanel({ onFilter, onClear, loading = false }: FilterPanelP
               onChange={(e) => setFilterBy(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-secondary-700 text-gray-900 dark:text-gray-100"
             >
-              <option value="instituicao">INSTITUIÇÃO/ÓRGÃO</option>
               <option value="credor">CREDOR/INSTITUIÇÃO</option>
               <option value="elemento">ELEMENTO DE DESPESA</option>
               <option value="fonte">FONTE DE RECURSO</option>
@@ -182,8 +145,7 @@ export function FilterPanel({ onFilter, onClear, loading = false }: FilterPanelP
           {/* Campo de filtro dinâmico */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {filterBy === 'instituicao' ? 'Instituição:' : 
-               filterBy === 'credor' ? 'Credor:' :
+              {filterBy === 'credor' ? 'Credor:' :
                filterBy === 'elemento' ? 'Elemento:' : 'Filtro:'}
             </label>
             {renderFilterInput()}
