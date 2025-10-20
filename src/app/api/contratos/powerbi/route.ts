@@ -84,13 +84,29 @@ function getClassificacaoContrato(tipoContrato: string, objetoContrato?: string)
   };
 }
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Configuração do Supabase com fallback
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://syhnkxbeftosviscvmmd.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aG5reGJlZnRvc3Zpc2N2bW1kIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDMxMzY0NywiZXhwIjoyMDc1ODg5NjQ3fQ.example_service_role_key';
+
+let supabase;
+try {
+  supabase = createClient(supabaseUrl, supabaseKey);
+} catch (error) {
+  console.error('Erro ao criar cliente Supabase:', error);
+  supabase = null;
+}
 
 // GET - Dados para Power BI
 export async function GET(request: NextRequest) {
   try {
+    // Verificar se o Supabase está configurado
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Serviço de banco de dados não disponível' },
+        { status: 503 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const diretoria = searchParams.get('diretoria');
     const ano = searchParams.get('ano');

@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // Função para classificar contrato conforme Lei 14.133/2021
-function getClassificacaoContrato(tipoContrato: string, objetoContrato?: string): {
-  categoria: string;
-  limite: number;
-  descricao: string;
-} {
-  const tipoLower = tipoContrato.toLowerCase();
+function getClassificacaoContrato(tipoContrato: string, objetoContrato?: string) {
+  const tipoLower = (tipoContrato || '').toLowerCase();
   const objetoLower = (objetoContrato || '').toLowerCase();
   
   // Reforma de edifício ou equipamento (50%)
@@ -53,9 +49,17 @@ function getClassificacaoContrato(tipoContrato: string, objetoContrato?: string)
   };
 }
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Configuração do Supabase com fallback
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://syhnkxbeftosviscvmmd.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aG5reGJlZnRvc3Zpc2N2bW1kIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDMxMzY0NywiZXhwIjoyMDc1ODg5NjQ3fQ.example_service_role_key';
+
+let supabase;
+try {
+  supabase = createClient(supabaseUrl, supabaseKey);
+} catch (error) {
+  console.error('Erro ao criar cliente Supabase:', error);
+  supabase = null;
+}
 
 // GET - Análise de conformidade de um contrato específico
 export async function GET(
@@ -63,7 +67,23 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Verificar se o Supabase está configurado
+    if (!supabase) {
+      return NextResponse.json(
+        { error: 'Serviço de banco de dados não disponível' },
+        { status: 503 }
+      );
+    }
+
     const contratoId = params.id;
+
+    // Verificar se o ID é válido
+    if (!contratoId || contratoId.trim() === '') {
+      return NextResponse.json(
+        { error: 'ID do contrato é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     // Buscar dados do contrato
     const { data: contrato, error: contratoError } = await supabase
