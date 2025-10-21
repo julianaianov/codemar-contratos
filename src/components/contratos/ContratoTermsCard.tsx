@@ -128,13 +128,13 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
   const getStatusColor = (status: TermoStatus) => {
     switch (status) {
       case 'aprovado':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
       case 'rejeitado':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
       case 'em_analise':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
     }
   };
 
@@ -180,21 +180,21 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
       return {
         status: 'danger',
         message: `Aditivo acima do limite legal (${limite}%) - ${classificacao.descricao}`,
-        color: 'text-red-600',
+        color: 'text-red-600 dark:text-red-400',
         classificacao: classificacao.descricao
       };
     } else if (percentual > limite * 0.8) {
       return {
         status: 'warning',
         message: `Aditivo próximo do limite legal (${limite}%) - ${classificacao.descricao}`,
-        color: 'text-yellow-600',
+        color: 'text-yellow-600 dark:text-yellow-400',
         classificacao: classificacao.descricao
       };
     } else {
       return {
         status: 'ok',
         message: `Aditivo dentro do limite legal (${limite}%) - ${classificacao.descricao}`,
-        color: 'text-green-600',
+        color: 'text-green-600 dark:text-green-400',
         classificacao: classificacao.descricao
       };
     }
@@ -204,25 +204,25 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+          <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-4 space-y-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4 space-y-4">
       {/* Header com informações do contrato */}
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="font-semibold text-gray-900">{contrato.numero_contrato}</h3>
-          <p className="text-sm text-gray-600 truncate max-w-xs">{contrato.objeto}</p>
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">{contrato.numero_contrato}</h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-xs">{contrato.objeto}</p>
         </div>
         <div className="text-right">
-          <div className="text-sm font-medium text-gray-900">
+          <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
             R$ {(contrato.valor_atual || contrato.valor_contrato || 0).toLocaleString('pt-BR')}
           </div>
           {contrato.percentual_aditivo_total && contrato.percentual_aditivo_total > 0 && (
@@ -234,7 +234,7 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
       </div>
 
       {/* Classificação do contrato */}
-      <div className="text-xs text-gray-500">
+      <div className="text-xs text-gray-500 dark:text-gray-400">
         <span className="font-medium">Classificação:</span> {aditivoStatus.classificacao}
       </div>
 
@@ -248,37 +248,37 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
 
       {/* Métricas */}
       <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="bg-blue-50 rounded p-2">
-          <div className="text-lg font-semibold text-blue-600">
+        <div className="bg-blue-50 dark:bg-blue-900/20 rounded p-2">
+          <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
             {contrato.quantidade_aditivos || 0}
           </div>
-          <div className="text-xs text-blue-600">Aditivos</div>
+          <div className="text-xs text-blue-600 dark:text-blue-400">Aditivos</div>
         </div>
-        <div className="bg-green-50 rounded p-2">
-          <div className="text-lg font-semibold text-green-600">
+        <div className="bg-green-50 dark:bg-green-900/20 rounded p-2">
+          <div className="text-lg font-semibold text-green-600 dark:text-green-400">
             {contrato.quantidade_apostilamentos || 0}
           </div>
-          <div className="text-xs text-green-600">Apostilamentos</div>
+          <div className="text-xs text-green-600 dark:text-green-400">Apostilamentos</div>
         </div>
-        <div className="bg-red-50 rounded p-2">
-          <div className="text-lg font-semibold text-red-600">
+        <div className="bg-red-50 dark:bg-red-900/20 rounded p-2">
+          <div className="text-lg font-semibold text-red-600 dark:text-red-400">
             {contrato.quantidade_rescisoes || 0}
           </div>
-          <div className="text-xs text-red-600">Rescisões</div>
+          <div className="text-xs text-red-600 dark:text-red-400">Rescisões</div>
         </div>
       </div>
 
       {/* Termos recentes */}
       {termos.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Termos Recentes</h4>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Termos Recentes</h4>
           <div className="space-y-2">
             {termos.slice(0, 3).map((termo) => (
               <div key={termo.id} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   {getStatusIcon(termo.status)}
-                  <span className="font-medium">{formatTipoTermo(termo.tipo)}</span>
-                  <span className="text-gray-500">#{termo.numero}</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatTipoTermo(termo.tipo)}</span>
+                  <span className="text-gray-500 dark:text-gray-400">#{termo.numero}</span>
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(termo.status)}`}>
                   {termo.status}
@@ -286,7 +286,7 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
               </div>
             ))}
             {termos.length > 3 && (
-              <div className="text-xs text-gray-500 text-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
                 +{termos.length - 3} outros termos
               </div>
             )}
@@ -297,14 +297,14 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
       {/* Instrumentos recentes */}
       {instrumentos.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-gray-700 mb-2">Instrumentos</h4>
+          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Instrumentos</h4>
           <div className="space-y-2">
             {instrumentos.slice(0, 2).map((instrumento) => (
               <div key={instrumento.id} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <DocumentTextIcon className="w-4 h-4 text-gray-500" />
-                  <span className="font-medium">{formatTipoInstrumento(instrumento.tipo)}</span>
-                  <span className="text-gray-500">#{instrumento.numero}</span>
+                  <DocumentTextIcon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatTipoInstrumento(instrumento.tipo)}</span>
+                  <span className="text-gray-500 dark:text-gray-400">#{instrumento.numero}</span>
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(instrumento.status)}`}>
                   {instrumento.status}
@@ -312,7 +312,7 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
               </div>
             ))}
             {instrumentos.length > 2 && (
-              <div className="text-xs text-gray-500 text-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
                 +{instrumentos.length - 2} outros instrumentos
               </div>
             )}
@@ -321,24 +321,24 @@ export const ContratoTermsCard: React.FC<ContratoTermsCardProps> = ({
       )}
 
       {/* Botões de ação */}
-      <div className="flex gap-2 pt-2 border-t">
+      <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={() => onAddTermo?.(contrato.id.toString())}
-          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-md text-xs hover:bg-blue-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-md text-xs hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
         >
           <PlusIcon className="w-4 h-4" />
           Termo
         </button>
         <button
           onClick={() => onAddInstrumento?.(contrato.id.toString())}
-          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 text-white rounded-md text-xs hover:bg-green-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-600 dark:bg-green-700 text-white rounded-md text-xs hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
         >
           <PlusIcon className="w-4 h-4" />
           Instrumento
         </button>
         <button
           onClick={() => onViewDetails?.(contrato.id.toString())}
-          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-600 text-white rounded-md text-xs hover:bg-gray-700 transition-colors"
+          className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gray-600 dark:bg-gray-700 text-white rounded-md text-xs hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors"
         >
           <DocumentTextIcon className="w-4 h-4" />
           Detalhes

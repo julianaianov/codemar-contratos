@@ -75,36 +75,36 @@ export default function ContratoDetalhesPage() {
     switch (status?.toLowerCase()) {
       case 'ativo':
       case 'executado':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800';
       case 'pendente':
       case 'em andamento':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800';
       case 'cancelado':
       case 'suspenso':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
       </div>
     );
   }
 
   if (error || !contrato) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <XCircleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Erro</h1>
-          <p className="text-gray-600 mb-4">{error || 'Contrato não encontrado'}</p>
+          <XCircleIcon className="w-16 h-16 text-red-500 dark:text-red-400 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Erro</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error || 'Contrato não encontrado'}</p>
           <button
             onClick={() => router.back()}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600"
           >
             <ArrowLeftIcon className="w-4 h-4" />
             Voltar
@@ -115,23 +115,23 @@ export default function ContratoDetalhesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => router.back()}
-                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                className="p-2 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
               >
                 <ArrowLeftIcon className="w-5 h-5" />
               </button>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                   {contrato.numero_contrato}
                 </h1>
-                <p className="text-sm text-gray-600 truncate max-w-md">
+                <p className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-md">
                   {contrato.objeto}
                 </p>
               </div>
@@ -149,7 +149,7 @@ export default function ContratoDetalhesPage() {
 
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="border-b border-gray-200 mb-6">
+        <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
           <nav className="-mb-px flex space-x-8">
             {[
               { id: 'detalhes', label: 'Detalhes', icon: DocumentTextIcon },
@@ -161,8 +161,8 @@ export default function ContratoDetalhesPage() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? 'border-blue-500 text-blue-600 dark:border-blue-400 dark:text-blue-400'
+                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -183,28 +183,28 @@ export default function ContratoDetalhesPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Número</label>
-                    <p className="text-sm text-gray-900">{contrato.numero_contrato}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Número</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.numero_contrato}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Ano</label>
-                    <p className="text-sm text-gray-900">{contrato.ano}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Ano</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.ano}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Tipo</label>
-                    <p className="text-sm text-gray-900">{contrato.tipo_contrato}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Tipo</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.tipo_contrato}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Modalidade</label>
-                    <p className="text-sm text-gray-900">{contrato.modalidade}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Modalidade</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.modalidade}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Diretoria</label>
-                    <p className="text-sm text-gray-900">{contrato.diretoria || contrato.secretaria}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Diretoria</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.diretoria || contrato.secretaria}</p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Status</label>
-                    <p className="text-sm text-gray-900">{contrato.status}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Status</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.status}</p>
                   </div>
                 </div>
               </CardContent>
@@ -218,26 +218,26 @@ export default function ContratoDetalhesPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Valor Original</label>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Valor Original</label>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                       R$ {contrato.valor_contrato?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Valor Atual</label>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Valor Atual</label>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                       R$ {contrato.valor_atual?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">% Aditivo</label>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">% Aditivo</label>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                       {contrato.percentual_aditivo_total?.toFixed(1) || '0,0'}%
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Valor Aditivos</label>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Valor Aditivos</label>
+                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                       R$ {contrato.valor_aditivo_total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
                     </p>
                   </div>
@@ -253,26 +253,26 @@ export default function ContratoDetalhesPage() {
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Data Início</label>
-                    <p className="text-sm text-gray-900">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Data Início</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">
                       {contrato.data_inicio ? new Date(contrato.data_inicio).toLocaleDateString('pt-BR') : 'Não informado'}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Data Fim</label>
-                    <p className="text-sm text-gray-900">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Data Fim</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">
                       {contrato.data_fim ? new Date(contrato.data_fim).toLocaleDateString('pt-BR') : 'Não informado'}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Data Vigência</label>
-                    <p className="text-sm text-gray-900">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Data Vigência</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">
                       {contrato.data_vigencia ? new Date(contrato.data_vigencia).toLocaleDateString('pt-BR') : 'Não informado'}
                     </p>
                   </div>
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Data Execução</label>
-                    <p className="text-sm text-gray-900">
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Data Execução</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">
                       {contrato.data_execucao ? new Date(contrato.data_execucao).toLocaleDateString('pt-BR') : 'Não informado'}
                     </p>
                   </div>
@@ -287,8 +287,8 @@ export default function ContratoDetalhesPage() {
               </CardHeader>
               <CardContent>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Nome</label>
-                  <p className="text-sm text-gray-900">{contrato.contratado || 'Não informado'}</p>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Nome</label>
+                  <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.contratado || 'Não informado'}</p>
                 </div>
               </CardContent>
             </Card>
@@ -301,26 +301,26 @@ export default function ContratoDetalhesPage() {
               <CardContent className="space-y-4">
                 {contrato.contratante && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Contratante</label>
-                    <p className="text-sm text-gray-900">{contrato.contratante}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Contratante</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.contratante}</p>
                   </div>
                 )}
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Gestor do Contrato</label>
-                  <p className="text-sm text-gray-900">{contrato.gestor_contrato || 'Não informado'}</p>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Gestor do Contrato</label>
+                  <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.gestor_contrato || 'Não informado'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Fiscal Técnico</label>
-                  <p className="text-sm text-gray-900">{contrato.fiscal_tecnico || 'Não informado'}</p>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Fiscal Técnico</label>
+                  <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.fiscal_tecnico || 'Não informado'}</p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-500">Fiscal Administrativo</label>
-                  <p className="text-sm text-gray-900">{contrato.fiscal_administrativo || 'Não informado'}</p>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Fiscal Administrativo</label>
+                  <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.fiscal_administrativo || 'Não informado'}</p>
                 </div>
                 {contrato.suplente && (
                   <div>
-                    <label className="text-sm font-medium text-gray-500">Suplente</label>
-                    <p className="text-sm text-gray-900">{contrato.suplente}</p>
+                    <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Suplente</label>
+                    <p className="text-sm text-gray-900 dark:text-gray-100">{contrato.suplente}</p>
                   </div>
                 )}
               </CardContent>
@@ -331,18 +331,18 @@ export default function ContratoDetalhesPage() {
         {activeTab === 'termos' && contrato && (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-900">Termos e Instrumentos</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Termos e Instrumentos</h2>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowAddTermoModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600"
                 >
                   <PlusIcon className="w-4 h-4" />
                   Adicionar Termo
                 </button>
                 <button
                   onClick={() => setShowAddInstrumentoModal(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600"
                 >
                   <PlusIcon className="w-4 h-4" />
                   Adicionar Instrumento
@@ -356,7 +356,7 @@ export default function ContratoDetalhesPage() {
 
         {activeTab === 'conformidade' && contrato && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-gray-900">Análise de Conformidade</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Análise de Conformidade</h2>
             <ConformidadeContrato contratoId={String(contrato.id)} />
           </div>
         )}
