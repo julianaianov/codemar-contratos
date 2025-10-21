@@ -14,7 +14,7 @@ const MINUTAS_DIR = path.join(process.cwd(), 'public', 'minutas');
 const METADATA_FILE = path.join(MINUTAS_DIR, 'metadata.json');
 
 // Função para buscar contratos reais do Supabase
-async function getRealContracts(limit: number = 50) {
+async function getRealContracts(limit: number = 500) {
   try {
     const { data, error } = await supabase
       .from('contratos_importados')
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     // Buscar dados reais do sistema
     console.log('🔍 Buscando dados reais do sistema...');
-    const realContracts = await getRealContracts(50);
+    const realContracts = await getRealContracts(500); // Buscar até 500 contratos
     const realMinutas = await getRealMinutas();
     
     console.log(`📊 Encontrados ${realContracts.length} contratos e ${realMinutas.length} minutas`);

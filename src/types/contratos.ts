@@ -11,22 +11,6 @@ export interface Fornecedor {
   situacao: 'ativo' | 'inativo' | 'suspenso';
 }
 
-export interface Orgao {
-  id: number;
-  codigo: string;
-  nome: string;
-  sigla?: string;
-  situacao: 'ativo' | 'inativo';
-}
-
-export interface UnidadeGestora {
-  id: number;
-  codigo: string;
-  nome: string;
-  orgao_id: number;
-  orgao?: Orgao;
-  situacao: 'ativo' | 'inativo';
-}
 
 export interface Contrato {
   id: number;
@@ -41,10 +25,6 @@ export interface Contrato {
   situacao: 'ativo' | 'vencido' | 'suspenso' | 'encerrado';
   fornecedor_id: number;
   fornecedor?: Fornecedor;
-  orgao_id: number;
-  orgao?: Orgao;
-  unidade_gestora_id: number;
-  unidade_gestora?: UnidadeGestora;
   categoria_id: number;
   categoria?: CategoriaContrato;
   modalidade: string;
@@ -87,8 +67,6 @@ export interface DashboardContratos {
 }
 
 export interface FiltrosContratos {
-  orgao_id?: number;
-  unidade_gestora_id?: number;
   fornecedor_id?: number;
   contrato_id?: number;
   situacao?: string;
@@ -136,6 +114,18 @@ export interface ContratoImportado {
   fonte_recurso?: string;
   observacoes?: string;
   file_import_id?: number;
+  
+  // Novos campos para termos e instrumentos
+  data_vigencia?: string;
+  data_execucao?: string;
+  valor_original?: number;
+  valor_atual?: number;
+  percentual_aditivo_total?: number;
+  valor_aditivo_total?: number;
+  quantidade_aditivos?: number;
+  quantidade_apostilamentos?: number;
+  quantidade_rescisoes?: number;
+  
   created_at: string;
   updated_at: string;
 }
@@ -269,14 +259,3 @@ export interface FornecedorFormData {
   email: string;
 }
 
-export interface OrgaoFormData {
-  codigo: string;
-  nome: string;
-  sigla?: string;
-}
-
-export interface UnidadeGestoraFormData {
-  codigo: string;
-  nome: string;
-  orgao_id: number;
-}

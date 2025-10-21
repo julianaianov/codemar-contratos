@@ -18,8 +18,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   onFilter,
   loading = false
 }) => {
-  const [orgaoOptions, setOrgaoOptions] = useState<SelectOption[]>([]);
-  const [unidadeGestoraOptions, setUnidadeGestoraOptions] = useState<SelectOption[]>([]);
   const [fornecedorOptions, setFornecedorOptions] = useState<SelectOption[]>([]);
   const [contratoOptions, setContratoOptions] = useState<SelectOption[]>([]);
   const [diretoriaOptions] = useState<SelectOption[]>([
@@ -36,61 +34,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     { value: 'OUTROS', label: 'Outros' },
   ]);
   const [loadingOptions, setLoadingOptions] = useState({
-    orgao: false,
-    unidadeGestora: false,
     fornecedor: false,
     contrato: false
   });
 
-  // Carregar opções dos órgãos
-  useEffect(() => {
-    const loadOrgaos = async () => {
-      setLoadingOptions(prev => ({ ...prev, orgao: true }));
-      try {
-        const response = await fetch('/api/contratos/orgaos');
-        const data = await response.json();
-        if (data.success) {
-          setOrgaoOptions(data.data.map((orgao: any) => ({
-            value: orgao.id,
-            label: `${orgao.codigo} - ${orgao.nome}`
-          })));
-        }
-      } catch (error) {
-        console.error('Erro ao carregar órgãos:', error);
-      } finally {
-        setLoadingOptions(prev => ({ ...prev, orgao: false }));
-      }
-    };
 
-    loadOrgaos();
-  }, []);
-
-  // Carregar unidades gestoras quando órgão for selecionado
-  useEffect(() => {
-    if (filters.orgao_id) {
-      const loadUnidadesGestoras = async () => {
-        setLoadingOptions(prev => ({ ...prev, unidadeGestora: true }));
-        try {
-          const response = await fetch(`/api/contratos/unidades-gestoras?orgao_id=${filters.orgao_id}`);
-          const data = await response.json();
-          if (data.success) {
-            setUnidadeGestoraOptions(data.data.map((unidade: any) => ({
-              value: unidade.id,
-              label: `${unidade.codigo} - ${unidade.nome}`
-            })));
-          }
-        } catch (error) {
-          console.error('Erro ao carregar unidades gestoras:', error);
-        } finally {
-          setLoadingOptions(prev => ({ ...prev, unidadeGestora: false }));
-        }
-      };
-
-      loadUnidadesGestoras();
-    } else {
-      setUnidadeGestoraOptions([]);
-    }
-  }, [filters.orgao_id]);
 
   // Carregar fornecedores
   useEffect(() => {
@@ -159,7 +107,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       </div>
 
       {/* Campos de filtro */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-3">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
             Diretoria
@@ -173,34 +121,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Órgão
-          </label>
-          <SelectFilter
-            value={filters.orgao_id}
-            onChange={(value) => handleFilterChange('orgao_id', value)}
-            options={orgaoOptions}
-            placeholder="Selecione"
-            loading={loadingOptions.orgao}
-            clearable
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-            Unidade Gestora
-          </label>
-          <SelectFilter
-            value={filters.unidade_gestora_id}
-            onChange={(value) => handleFilterChange('unidade_gestora_id', value)}
-            options={unidadeGestoraOptions}
-            placeholder="Selecione"
-            loading={loadingOptions.unidadeGestora}
-            disabled={!filters.orgao_id}
-            clearable
-          />
-        </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
