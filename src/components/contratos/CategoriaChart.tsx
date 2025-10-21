@@ -84,29 +84,41 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
             setError(null);
           }
         } else {
-          // Para TODOS os outros filtros (Todas, OPERAÇÕES, ADMINISTRAÇÃO, etc.), usar a lógica anterior
-          const response = await fetch(`/api/contratos/diretorias?${params.toString()}`);
+          // Para TODOS os outros filtros, usar a API de categorias
+          const response = await fetch(`/api/contratos/categorias?${params.toString()}`);
           const result = await response.json();
           
           if (result.success) {
-            // Função para deixar rótulos curtos e amigáveis (remover prefixos)
+            // Função para deixar rótulos curtos e amigáveis
             const shortLabel = (s: string) => {
               const original = (s || '').toString().trim();
-              const upper = original.toUpperCase();
-              if (upper === 'OUTRAS DIRETORIAS') return 'Outras';
-              // remove prefixos comuns
-              const cleaned = original
-                .replace(/^\s*(DIRETORIA\s+DE\s+|DIRETORIA\s+|SECRETARIA\s+DE\s+|SECRETARIA\s+|DEPARTAMENTO\s+DE\s+)/i, '')
-                .trim();
-              // normaliza capitalização
-              return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+              // Simplificar nomes longos de categorias
+              if (original.includes('PROCEDIMENTO LICITATORIO')) return 'Licitação';
+              if (original.includes('DISPENSA DE LICITAÇÃO')) return 'Dispensa';
+              if (original.includes('ADESÃO A ATA')) return 'Adesão ATA';
+              if (original.includes('INEXIGIBILIDADE')) return 'Inexigibilidade';
+              if (original.includes('USO DE ATA')) return 'Uso ATA';
+              if (original.includes('TERMO DE FOMENTO')) return 'Fomento';
+              if (original.includes('CONVÊNIO')) return 'Convênio';
+              if (original.includes('TERMO DE COLABORAÇÃO')) return 'Colaboração';
+              if (original.includes('CONCESSÃO DE PATROCÍNIO')) return 'Patrocínio';
+              if (original.includes('EMERGENCIAL')) return 'Emergencial';
+              if (original.includes('TERMO DE CONCESSÃO')) return 'Concessão';
+              if (original.includes('TERMO DE PARCERIA')) return 'Parceria';
+              if (original.includes('TERMO DE COOPERAÇÃO')) return 'Cooperação';
+              if (original.includes('TERMO DE AUTORIZAÇÃO')) return 'Autorização';
+              if (original.includes('CONTRATO DE COMODATO')) return 'Comodato';
+              if (original.includes('TERMO DE CESSÃO')) return 'Cessão';
+              
+              // Para outros casos, usar o nome original
+              return original;
             };
 
-            // Adaptar para formato do pie: usar diretoria como categoria (sem o prefixo)
+            // Adaptar para formato do pie: usar categoria
             const adapted = (result.data || []).map((item: any) => ({
-              categoria: shortLabel(item.diretoria),
-              quantidade: item.quantidade,
-              valor_total: item.valor_total,
+              categoria: shortLabel(item.categoria),
+              quantidade: item.count,
+              valor_total: item.total,
               percentual: 0,
               cor: '#60a5fa'
             }));

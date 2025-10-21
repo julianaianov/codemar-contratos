@@ -27,6 +27,9 @@ export async function GET(request: NextRequest) {
     let query = supabase.from('contratos_importados').select('*', { count: 'exact' });
 
     // Aplicar filtros
+    if (filters.id) {
+      query = query.eq('id', filters.id);
+    }
     if (filters.status) {
       query = query.eq('status', filters.status);
     }

@@ -11,6 +11,7 @@ import { ContratosPorAnoChart } from './ContratosPorAnoChart';
 import { ControleFinanceiroChart } from './ControleFinanceiroChart';
 import { ComparacaoPeriodosChart } from './ComparacaoPeriodosChart';
 import { CronogramaPagamentosChart } from './CronogramaPagamentosChart';
+import { ConformidadeAditivosChart } from './ConformidadeAditivosChart';
 import { FiltrosContratos, DashboardContratos, MetricasContratos } from '@/types/contratos';
 import { useTheme } from '@/components/layout/ThemeProvider';
 import {
@@ -21,7 +22,8 @@ import {
   ChartPieIcon,
   ChartBarIcon,
   BanknotesIcon,
-  ArrowTrendingUpIcon
+  ArrowTrendingUpIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 interface ContratosDashboardProps {
@@ -340,6 +342,21 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
           </CardHeader>
           <CardContent className="pt-0">
             <CategoriaChart filters={filters} />
+          </CardContent>
+        </Card>
+
+        {/* Conformidade de Aditivos */}
+        <Card className="sm:col-span-2 lg:col-span-2 xl:col-span-2 2xl:col-span-3 flex flex-col">
+          <CardHeader className="flex-shrink-0 pb-2">
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-xs sm:text-sm lg:text-base">
+              <ShieldCheckIcon className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-green-600 dark:text-green-400 flex-shrink-0" />
+              <span className="truncate">Conformidade Aditivos (Lei 14.133/2021)</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 flex flex-col pt-0">
+            <div className="flex-1">
+              <ConformidadeAditivosChart filters={filters} />
+            </div>
           </CardContent>
         </Card>
 

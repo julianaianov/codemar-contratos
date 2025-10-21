@@ -131,21 +131,8 @@ export default function ConsultaContratosPage() {
   };
 
   const handleViewContrato = async (contrato: ContratoImportado) => {
-    try {
-      // Busca detalhes completos (inclui dados_originais) antes de abrir o modal
-      const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
-      const resp = await fetch(`${API_URL}/api/contratos/${contrato.id}`);
-      if (resp.ok) {
-        const full = await resp.json();
-        setContratoSelecionado(full);
-      } else {
-        setContratoSelecionado(contrato);
-      }
-    } catch (e) {
-      setContratoSelecionado(contrato);
-    } finally {
-      setShowModal(true);
-    }
+    // Navegar para a página de detalhes do contrato
+    window.location.href = `/contratos/${contrato.id}`;
   };
 
   const handleViewPdf = (contratoId: number) => {

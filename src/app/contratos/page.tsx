@@ -85,20 +85,8 @@ export default function ContratosPage() {
   };
 
   const abrirDetalhe = async (contrato: ContratoImportado) => {
-    try {
-      const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
-      const resp = await fetch(`${API_URL}/api/contratos/${contrato.id}`);
-      if (resp.ok) {
-        const full = await resp.json();
-        setDetalhe(full);
-      } else {
-        setDetalhe(contrato);
-      }
-    } catch (e) {
-      setDetalhe(contrato);
-    } finally {
-      setShowModal(true);
-    }
+    // Navegar para a página de detalhes do contrato
+    window.location.href = `/contratos/${contrato.id}`;
   };
 
   // Construir listas únicas sem depender de recursos ES2015 de iteração
