@@ -17,12 +17,20 @@ interface ContratosManagerProps {
   onContratoSelect?: (contrato: ContratoModel) => void;
   onEdit?: (contrato: ContratoModel) => void;
   onDelete?: (contrato: ContratoModel) => void;
+  showUpload?: boolean;
+  onCloseUpload?: () => void;
+  title?: string;
+  description?: string;
 }
 
 export default function ContratosManager({ 
   onContratoSelect, 
   onEdit, 
-  onDelete 
+  onDelete,
+  showUpload = false,
+  onCloseUpload,
+  title = "Contratos",
+  description = "Gerencie seus contratos"
 }: ContratosManagerProps) {
   const [contratos, setContratos] = useState<ContratoModel[]>([]);
   const [loading, setLoading] = useState(true);
@@ -145,6 +153,90 @@ export default function ContratosManager({
 
   return (
     <div className="space-y-6">
+      {/* Modal de Upload */}
+      {showUpload && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Upload de {title}
+                </h3>
+                <button
+                  onClick={onCloseUpload}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {description}
+                </p>
+              </div>
+              
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+                <DocumentIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">
+                  Arraste e solte um arquivo aqui ou
+                </p>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  className="hidden"
+                  id="file-upload"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      try {
+                        const formData = new FormData();
+                        formData.append('arquivo', file);
+                        formData.append('nome', file.name);
+                        formData.append('descricao', `Modelo de contrato: ${file.name}`);
+                        
+                        const response = await fetch('/api/contratos', {
+                          method: 'POST',
+                          body: formData
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success) {
+                          await carregarContratos();
+                          onCloseUpload?.();
+                        } else {
+                          alert('Erro ao fazer upload: ' + result.message);
+                        }
+                      } catch (err) {
+                        console.error('Erro no upload:', err);
+                        alert('Erro ao fazer upload');
+                      }
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer"
+                >
+                  Selecionar Arquivo
+                </label>
+              </div>
+              
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={onCloseUpload}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Estatísticas */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
