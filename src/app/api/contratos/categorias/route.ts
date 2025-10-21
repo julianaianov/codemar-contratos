@@ -1,17 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// Cliente Supabase direto
-const supabaseUrl = 'https://syhnkxbeftosviscvmmd.supabase.co';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aG5reGJlZnRvc3Zpc2N2bW1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTM2NDcsImV4cCI6MjA3NTg4OTY0N30.ppUts-2J2FUqJOYz0VY1xwWXYG1CkylKIIJDGziYi4I';
-const supabase = createClient(supabaseUrl, supabaseKey);
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Variáveis de ambiente do Supabase não configuradas');
+  }
+  
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     const diretoria = searchParams.get('diretoria') || '';
 
-    return await buscarCategorias(diretoria);
+    return await buscarCategorias(supabase, diretoria);
   } catch (error) {
     console.error('Erro ao buscar categorias:', error);
     return NextResponse.json({
@@ -24,10 +31,11 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const filters = await request.json();
     const diretoria = filters?.diretoria || '';
 
-    return await buscarCategorias(diretoria);
+    return await buscarCategorias(supabase, diretoria);
   } catch (error) {
     console.error('Erro ao buscar categorias:', error);
     return NextResponse.json({
@@ -38,7 +46,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function buscarCategorias(diretoria: string) {
+async function buscarCategorias(supabase: any, diretoria: string) {
   // Buscar categorias dos contratos no Supabase (usando modalidade como categoria)
   let query = supabase
     .from('contratos_importados')

@@ -2,13 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { TermoContratual, CriarTermoRequest, TermoTipo, TermoStatus } from '@/types/contract-terms';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Variáveis de ambiente do Supabase não configuradas');
+  }
+  
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 // GET - Listar termos de um contrato
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     const contratoId = searchParams.get('contrato_id');
 
@@ -50,6 +58,7 @@ export async function GET(request: NextRequest) {
 // POST - Criar novo termo
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const body: CriarTermoRequest = await request.json();
     
     // Validações
@@ -128,7 +137,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Atualizar métricas do contrato
-    await atualizarMetricasContrato(body.contrato_id);
+    await atualizarMetricasContrato(supabase, body.contrato_id);
 
     return NextResponse.json({
       success: true,
@@ -145,7 +154,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Função para atualizar métricas do contrato
-async function atualizarMetricasContrato(contratoId: string) {
+async function atualizarMetricasContrato(supabase: any, contratoId: string) {
   try {
     // Buscar todos os termos do contrato
     const { data: termos, error: termosError } = await supabase

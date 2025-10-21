@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { TermoStatus } from '@/types/contract-terms';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Variáveis de ambiente do Supabase não configuradas');
+  }
+  
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 // PUT - Atualizar status de um termo
 export async function PUT(
@@ -12,6 +19,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const supabase = getSupabaseClient();
     const termoId = params.id;
     const body = await request.json();
     const { status, observacoes } = body;
@@ -69,7 +77,7 @@ export async function PUT(
 
     // Se o status foi aprovado, atualizar métricas do contrato
     if (status === 'aprovado') {
-      await atualizarMetricasContrato(termo.contrato_id);
+      await atualizarMetricasContrato(supabase, termo.contrato_id);
     }
 
     return NextResponse.json({
@@ -87,7 +95,7 @@ export async function PUT(
 }
 
 // Função para atualizar métricas do contrato
-async function atualizarMetricasContrato(contratoId: string) {
+async function atualizarMetricasContrato(supabase: any, contratoId: string) {
   try {
     // Buscar todos os termos aprovados do contrato
     const { data: termos, error: termosError } = await supabase

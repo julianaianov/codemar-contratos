@@ -2,13 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { InstrumentoContratual, CriarInstrumentoRequest, InstrumentoTipo, TermoStatus } from '@/types/contract-terms';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Variáveis de ambiente do Supabase não configuradas');
+  }
+  
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 // GET - Listar instrumentos de um contrato
 export async function GET(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const { searchParams } = new URL(request.url);
     const contratoId = searchParams.get('contrato_id');
 
@@ -50,6 +58,7 @@ export async function GET(request: NextRequest) {
 // POST - Criar novo instrumento
 export async function POST(request: NextRequest) {
   try {
+    const supabase = getSupabaseClient();
     const body: CriarInstrumentoRequest = await request.json();
     
     // Validações
