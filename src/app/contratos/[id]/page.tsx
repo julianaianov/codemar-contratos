@@ -324,7 +324,7 @@ export default function ContratoDetalhesPage() {
         {activeTab === 'conformidade' && contrato && (
           <div className="space-y-6">
             <h2 className="text-lg font-semibold text-gray-900">Análise de Conformidade</h2>
-            <ConformidadeContrato contratoId={contrato.id} />
+            <ConformidadeContrato contratoId={String(contrato.id)} />
           </div>
         )}
       </div>
@@ -332,6 +332,7 @@ export default function ContratoDetalhesPage() {
       {/* Modals */}
       {showAddTermoModal && contrato && (
         <AddTermoModal
+          isOpen={showAddTermoModal}
           contrato={contrato}
           onClose={() => setShowAddTermoModal(false)}
           onSuccess={() => {
@@ -343,6 +344,7 @@ export default function ContratoDetalhesPage() {
 
       {showAddInstrumentoModal && contrato && (
         <AddInstrumentoModal
+          isOpen={showAddInstrumentoModal}
           contrato={contrato}
           onClose={() => setShowAddInstrumentoModal(false)}
           onSuccess={() => {

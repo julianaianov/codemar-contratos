@@ -130,7 +130,7 @@ export const ConformidadeAditivosChart: React.FC<Props> = ({ filters }) => {
     );
   }
 
-  // Preparar dados para o gráfico
+  // Preparar dados para o gráfico no formato esperado pelo BarChart
   const chartData = {
     labels: data.map(item => {
       // Simplificar nomes das diretorias
@@ -165,79 +165,15 @@ export const ConformidadeAditivosChart: React.FC<Props> = ({ filters }) => {
     ]
   };
 
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      title: {
-        display: true,
-        text: 'Conformidade de Aditivos por Diretoria (Lei 14.133/2021)',
-        font: {
-          size: 14,
-          weight: 'bold' as const
-        }
-      },
-      legend: {
-        display: true,
-        position: 'top' as const,
-        labels: {
-          usePointStyle: true,
-          padding: 20
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: any) {
-            const label = context.dataset.label || '';
-            const value = context.parsed.y.toFixed(1);
-            const index = context.dataIndex;
-            const item = data[index];
-            
-            if (label.includes('Conformes')) {
-              return `${label}: ${value}% (${item.contratos_conformes} contratos)`;
-            } else if (label.includes('Atenção')) {
-              return `${label}: ${value}% (${item.contratos_atencao} contratos)`;
-            } else if (label.includes('Inconformes')) {
-              return `${label}: ${value}% (${item.contratos_inconformes} contratos)`;
-            }
-            return `${label}: ${value}%`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Diretorias'
-        },
-        ticks: {
-          maxRotation: 45,
-          minRotation: 0
-        }
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Percentual (%)'
-        },
-        beginAtZero: true,
-        max: 100,
-        ticks: {
-          callback: function(value: any) {
-            return value + '%';
-          }
-        }
-      }
-    }
-  };
-
   return (
     <div className="w-full h-full" style={{ height: `${chartHeight}px` }}>
       <BarChart
         data={chartData}
-        options={options}
+        title="Conformidade de Aditivos por Diretoria (Lei 14.133/2021)"
         height={chartHeight}
+        colors={['#10b981', '#f59e0b', '#ef4444']}
+        showLegend={true}
+        showGrid={true}
       />
     </div>
   );
