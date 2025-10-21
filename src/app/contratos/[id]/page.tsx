@@ -292,6 +292,39 @@ export default function ContratoDetalhesPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Pessoas Responsáveis */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Pessoas Responsáveis</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {contrato.contratante && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Contratante</label>
+                    <p className="text-sm text-gray-900">{contrato.contratante}</p>
+                  </div>
+                )}
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Gestor do Contrato</label>
+                  <p className="text-sm text-gray-900">{contrato.gestor_contrato || 'Não informado'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Fiscal Técnico</label>
+                  <p className="text-sm text-gray-900">{contrato.fiscal_tecnico || 'Não informado'}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500">Fiscal Administrativo</label>
+                  <p className="text-sm text-gray-900">{contrato.fiscal_administrativo || 'Não informado'}</p>
+                </div>
+                {contrato.suplente && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-500">Suplente</label>
+                    <p className="text-sm text-gray-900">{contrato.suplente}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         )}
 
