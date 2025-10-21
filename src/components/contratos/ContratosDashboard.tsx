@@ -333,15 +333,17 @@ export const ContratosDashboard: React.FC<ContratosDashboardProps> = ({ initialF
         </Card>
 
         {/* Categoria Contratos */}
-        <Card className="sm:col-span-1 lg:col-span-1 xl:col-span-1 2xl:col-span-1">
-          <CardHeader className="pb-2">
+        <Card className="sm:col-span-1 lg:col-span-1 xl:col-span-1 2xl:col-span-1 flex flex-col min-h-[500px]">
+          <CardHeader className="flex-shrink-0 pb-2">
             <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-gray-100 text-xs sm:text-sm lg:text-base">
               <ChartPieIcon className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
               <span className="truncate">Categoria Contratos</span>
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-0">
-            <CategoriaChart filters={filters} />
+          <CardContent className="flex-1 flex flex-col pt-0">
+            <div className="flex-1">
+              <CategoriaChart filters={filters} />
+            </div>
           </CardContent>
         </Card>
 
