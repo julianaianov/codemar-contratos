@@ -25,7 +25,7 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_LARAVEL_API_URL || 'http://localhost:8000';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -97,10 +97,9 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
     }
 
     try {
-      console.log('API_URL:', API_URL);
-      console.log('Making request to:', `${API_URL}/api/imports`);
+      console.log('Making request to:', '/api/contratos');
       
-      const response = await fetch(`${API_URL}/api/imports`, {
+      const response = await fetch('/api/contratos', {
         method: 'POST',
         body: formData,
         // Não definir Content-Type para FormData - o browser define automaticamente com boundary
