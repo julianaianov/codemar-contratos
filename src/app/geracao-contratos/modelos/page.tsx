@@ -11,7 +11,7 @@ import {
   DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { ContratosManager } from '@/components/contratos/ContratosManager';
+import ContratosManager from '@/components/contratos/ContratosManager';
 
 export default function ModelosContratosPage() {
   const [showUpload, setShowUpload] = useState(false);
