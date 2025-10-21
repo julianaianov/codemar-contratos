@@ -88,12 +88,13 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
     setResult(null);
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('arquivo', file);
+    formData.append('nome', file.name);
+    formData.append('descricao', `Contrato importado via ${fileType.toUpperCase()}`);
     
-    // Para arquivos Excel, não envia diretoria (vem do arquivo)
-    // Para outros tipos (PDF, XML, CSV), envia diretoria se fornecida
-    if (diretoria && fileType !== 'excel') {
-      formData.append('diretoria', diretoria);
+    // Adicionar diretoria se fornecida
+    if (diretoria) {
+      formData.append('metadata', JSON.stringify({ diretoria }));
     }
 
     try {
@@ -108,20 +109,15 @@ export default function FileUpload({ acceptedFormats, fileType, onUploadSuccess,
       });
 
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
       
-      const responseText = await response.text();
-      console.log('Response text:', responseText);
-      
-      let data;
-      try {
-        data = JSON.parse(responseText);
-        console.log('Parsed JSON:', data);
-      } catch (parseError) {
-        console.error('JSON Parse Error:', parseError);
-        console.error('Response was not JSON:', responseText);
-        throw new Error(`Resposta do servidor não é JSON válido: ${parseError instanceof Error ? parseError.message : 'Erro desconhecido'}. Resposta: ${responseText.substring(0, 200)}...`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
       }
+      
+      const data = await response.json();
+      console.log('Parsed JSON:', data);
 
       if (data.success) {
         setResult({
