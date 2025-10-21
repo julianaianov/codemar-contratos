@@ -6,7 +6,7 @@ import {
   PlusIcon, 
   PencilIcon, 
   TrashIcon,
-  DownloadIcon,
+  ArrowDownTrayIcon,
   EyeIcon,
   DocumentDuplicateIcon
 } from '@heroicons/react/24/outline';
@@ -67,7 +67,7 @@ export default function ModelosContratosPage() {
               <p className="text-sm text-gray-600 dark:text-gray-400">Downloads</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">0</p>
             </div>
-            <DownloadIcon className="h-8 w-8 text-purple-500" />
+            <ArrowDownTrayIcon className="h-8 w-8 text-purple-500" />
           </div>
         </div>
         
