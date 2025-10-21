@@ -172,7 +172,9 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
           { text: '⚠️ Quais contratos estão próximos do limite de aditivos?', icon: '⚠️' },
           { text: '📈 Mostre os contratos por diretoria', icon: '📈' },
           { text: '🔍 Encontre contratos por fornecedor', icon: '🔍' },
-          { text: '📅 Contratos que vencem nos próximos 30 dias', icon: '📅' }
+          { text: '📅 Contratos que vencem nos próximos 30 dias', icon: '📅' },
+          { text: '🏢 Contratos por modalidade de licitação', icon: '🏢' },
+          { text: '📋 Relatório de contratos ativos', icon: '📋' }
         ];
       case 'minutas':
         return [
@@ -181,7 +183,9 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
           { text: '📋 Modelos de contrato de prestação de serviços', icon: '📋' },
           { text: '🏗️ Minutas para obras e construções', icon: '🏗️' },
           { text: '💼 Contratos de fornecimento de materiais', icon: '💼' },
-          { text: '📝 Minutas para convênios', icon: '📝' }
+          { text: '📝 Minutas para convênios', icon: '📝' },
+          { text: '🔧 Minutas para manutenção e reparos', icon: '🔧' },
+          { text: '📚 Minutas para consultoria técnica', icon: '📚' }
         ];
       default:
         return [
@@ -190,7 +194,9 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
           { text: '📊 Analise as tendências dos contratos', icon: '📊' },
           { text: '⚠️ Quais contratos estão próximos do limite de aditivos?', icon: '⚠️' },
           { text: '📈 Mostre os contratos por diretoria', icon: '📈' },
-          { text: '🔍 Encontre contratos por fornecedor', icon: '🔍' }
+          { text: '🔍 Encontre contratos por fornecedor', icon: '🔍' },
+          { text: '🤝 Minutas disponíveis para parcerias', icon: '🤝' },
+          { text: '📋 Modelos de contrato de prestação de serviços', icon: '📋' }
         ];
     }
   };
@@ -292,9 +298,12 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                 <button
                   key={index}
                   onClick={() => setInputMessage(prompt.text)}
-                  className="block w-full text-left p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                  className="block w-full text-left p-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 border border-gray-200 dark:border-gray-600"
                 >
-                  {prompt.text}
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg">{prompt.icon}</span>
+                    <span className="flex-1">{prompt.text}</span>
+                  </div>
                 </button>
               ))}
             </div>
