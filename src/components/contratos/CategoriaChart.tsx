@@ -89,6 +89,7 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
           const result = await response.json();
           
           if (result.success) {
+            console.log('CategoriaChart: Dados recebidos:', result.data);
             // Função para deixar rótulos curtos e amigáveis
             const shortLabel = (s: string) => {
               const original = (s || '').toString().trim();
@@ -109,7 +110,7 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
               if (original.includes('TERMO DE AUTORIZAÇÃO')) return 'Autorização';
               if (original.includes('CONTRATO DE COMODATO')) return 'Comodato';
               if (original.includes('TERMO DE CESSÃO')) return 'Cessão';
-              
+
               // Para outros casos, usar o nome original
               return original;
             };
@@ -122,9 +123,11 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
               percentual: 0,
               cor: '#60a5fa'
             }));
+            console.log('CategoriaChart: Dados adaptados:', adapted);
             setData(adapted);
             setError(null);
           } else {
+            console.log('CategoriaChart: Erro na API:', result);
             // Em caso de falha, manter gráfico zerado
             setData([]);
             setError(null);
@@ -152,9 +155,11 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
   }
 
   // Sempre renderizar o gráfico; se não houver dados, usar dataset zerado
+  console.log('CategoriaChart: Dados atuais:', data);
   const effectiveData: ContratoPorCategoria[] = (data && data.length > 0)
     ? data
     : [{ categoria: 'Sem dados', quantidade: 0, valor_total: 0, percentual: 0, cor: '#e5e7eb' }];
+  console.log('CategoriaChart: Dados efetivos:', effectiveData);
 
   const baseColors = getColorsForChart('categorias');
   // Colore cada diretoria de forma consistente: hash do nome -> índice
@@ -179,13 +184,15 @@ export const CategoriaChart: React.FC<Props> = ({ filters }) => {
   const chartData = {
     labels: effectiveData.map(item => item.categoria),
     datasets: [{
-      label: 'Valor por Diretoria',
+      label: 'Valor por Categoria',
       data: effectiveData.map(item => item.valor_total),
       backgroundColor: pieColors,
       borderColor: pieColors,
       borderWidth: 2,
     }]
   };
+  
+  console.log('CategoriaChart: Dados do gráfico:', chartData);
 
   return (
     <div className="w-full h-full" style={{ height: `${chartHeight}px` }}>
