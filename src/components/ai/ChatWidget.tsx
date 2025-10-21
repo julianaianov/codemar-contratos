@@ -129,6 +129,72 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
     });
   };
 
+  const formatAIContent = (content: string) => {
+    // Quebrar linhas em pontos, dois pontos e quebras de linha
+    let formattedContent = content
+      .replace(/\n/g, '<br>')
+      .replace(/(\d+\.\s)/g, '<br>$1')
+      .replace(/([A-Z][^.!?]*:)/g, '<br>$1')
+      .replace(/^<br>/, ''); // Remove quebra de linha inicial
+
+    // Formatar campos específicos com destaque
+    const fieldPatterns = [
+      { pattern: /(ID:\s*\d+)/g, replacement: '<br><strong class="text-blue-600 dark:text-blue-400">Contrato:</strong>' },
+      { pattern: /(Contrato:\s*[^<\n]+)/g, replacement: '<br><strong class="text-blue-600 dark:text-blue-400">$1</strong>' },
+      { pattern: /(Número:\s*[^<\n]+)/g, replacement: '<br><strong class="text-blue-600 dark:text-blue-400">$1</strong>' },
+      { pattern: /(Nome:\s*[^<\n]+)/g, replacement: '<br><strong class="text-green-600 dark:text-green-400">$1</strong>' },
+      { pattern: /(Valor:\s*[^<\n]+)/g, replacement: '<br><strong class="text-purple-600 dark:text-purple-400">$1</strong>' },
+      { pattern: /(Fornecedor:\s*[^<\n]+)/g, replacement: '<br><strong class="text-orange-600 dark:text-orange-400">$1</strong>' },
+      { pattern: /(Status:\s*[^<\n]+)/g, replacement: '<br><strong class="text-red-600 dark:text-red-400">$1</strong>' },
+      { pattern: /(Tipo:\s*[^<\n]+)/g, replacement: '<br><strong class="text-indigo-600 dark:text-indigo-400">$1</strong>' },
+      { pattern: /(Modalidade:\s*[^<\n]+)/g, replacement: '<br><strong class="text-pink-600 dark:text-pink-400">$1</strong>' },
+      { pattern: /(Diretoria:\s*[^<\n]+)/g, replacement: '<br><strong class="text-teal-600 dark:text-teal-400">$1</strong>' }
+    ];
+
+    fieldPatterns.forEach(({ pattern, replacement }) => {
+      formattedContent = formattedContent.replace(pattern, replacement);
+    });
+
+    // Adicionar espaçamento entre seções
+    formattedContent = formattedContent
+      .replace(/(<br><strong[^>]*>[^<]+<\/strong>)/g, '<div class="mt-2">$1</div>')
+      .replace(/(<br>\d+\.\s)/g, '<div class="mt-3">$1</div>');
+
+    return formattedContent;
+  };
+
+  const getPromptsForChatType = (type: 'general' | 'contracts' | 'minutas') => {
+    switch (type) {
+      case 'contracts':
+        return [
+          { text: '💰 Quais são os maiores contratos por valor?', icon: '💰' },
+          { text: '📊 Analise as tendências dos contratos', icon: '📊' },
+          { text: '⚠️ Quais contratos estão próximos do limite de aditivos?', icon: '⚠️' },
+          { text: '📈 Mostre os contratos por diretoria', icon: '📈' },
+          { text: '🔍 Encontre contratos por fornecedor', icon: '🔍' },
+          { text: '📅 Contratos que vencem nos próximos 30 dias', icon: '📅' }
+        ];
+      case 'minutas':
+        return [
+          { text: '📄 Qual minuta usar para acordo de cooperação?', icon: '📄' },
+          { text: '🤝 Minutas disponíveis para parcerias', icon: '🤝' },
+          { text: '📋 Modelos de contrato de prestação de serviços', icon: '📋' },
+          { text: '🏗️ Minutas para obras e construções', icon: '🏗️' },
+          { text: '💼 Contratos de fornecimento de materiais', icon: '💼' },
+          { text: '📝 Minutas para convênios', icon: '📝' }
+        ];
+      default:
+        return [
+          { text: '💰 Quais são os maiores contratos por valor?', icon: '💰' },
+          { text: '📄 Qual minuta usar para acordo de cooperação?', icon: '📄' },
+          { text: '📊 Analise as tendências dos contratos', icon: '📊' },
+          { text: '⚠️ Quais contratos estão próximos do limite de aditivos?', icon: '⚠️' },
+          { text: '📈 Mostre os contratos por diretoria', icon: '📈' },
+          { text: '🔍 Encontre contratos por fornecedor', icon: '🔍' }
+        ];
+    }
+  };
+
   if (!isOpen) {
     return (
       <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
@@ -222,24 +288,15 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
               Como posso ajudá-lo hoje?
             </p>
             <div className="space-y-2">
-              <button
-                onClick={() => setInputMessage('Quais são os maiores contratos por valor?')}
-                className="block w-full text-left p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-              >
-                💰 Quais são os maiores contratos por valor?
-              </button>
-              <button
-                onClick={() => setInputMessage('Qual minuta usar para acordo de cooperação?')}
-                className="block w-full text-left p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-              >
-                📄 Qual minuta usar para acordo de cooperação?
-              </button>
-              <button
-                onClick={() => setInputMessage('Analise as tendências dos contratos')}
-                className="block w-full text-left p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-              >
-                📊 Analise as tendências dos contratos
-              </button>
+              {getPromptsForChatType(chatType).map((prompt, index) => (
+                <button
+                  key={index}
+                  onClick={() => setInputMessage(prompt.text)}
+                  className="block w-full text-left p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                >
+                  {prompt.text}
+                </button>
+              ))}
             </div>
           </div>
         ) : (
@@ -255,7 +312,12 @@ export default function ChatWidget({ isOpen, onToggle }: ChatWidgetProps) {
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                 }`}
               >
-                <p className="text-sm leading-relaxed">{message.content}</p>
+                <div 
+                  className="text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{ 
+                    __html: message.type === 'ai' ? formatAIContent(message.content) : message.content 
+                  }}
+                />
                 <div className="flex items-center justify-between mt-2">
                   <span className="text-xs opacity-70">
                     {formatTime(message.timestamp)}

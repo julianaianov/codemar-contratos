@@ -69,7 +69,8 @@ export async function POST(request: NextRequest) {
     
     // Converter contratos reais para o formato esperado pela IA
     const contractsForAI = realContracts.map(contract => ({
-      id: contract.id?.toString() || '',
+      id: contract.numero_contrato || contract.id?.toString() || '',
+      numero: contract.numero_contrato || '',
       nome: contract.objeto || contract.numero_contrato || 'Contrato sem nome',
       descricao: contract.objeto || 'Sem descrição',
       valor: contract.valor_contrato || 0,

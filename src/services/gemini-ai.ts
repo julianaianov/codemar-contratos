@@ -81,7 +81,7 @@ FORMATO DA RESPOSTA (JSON):
   "answer": "Resposta detalhada à consulta",
   "suggestions": ["Sugestão 1", "Sugestão 2", "Sugestão 3"],
   "confidence": 85,
-  "sources": ["ID do contrato relevante 1", "ID do contrato relevante 2"]
+  "sources": ["Número do contrato relevante 1", "Número do contrato relevante 2"]
 }
 
 IMPORTANTE: Responda APENAS com o JSON válido, sem markdown, sem \`\`\`json, sem texto adicional. Apenas o objeto JSON puro.
@@ -319,7 +319,7 @@ FORMATO: Retorne apenas uma lista JSON de strings:
    */
   private static formatContractsForAI(contracts: ContractData[]): string {
     return contracts.map(contract => `
-ID: ${contract.id}
+Contrato: ${contract.id}
 Nome: ${contract.nome}
 Descrição: ${contract.descricao}
 Valor: R$ ${contract.valor.toLocaleString('pt-BR')}
