@@ -42,8 +42,8 @@ export default function ContratoDetalhesPage() {
       const response = await fetch(`/api/contratos/contratos?id=${contratoId}`);
       const result = await response.json();
       
-      if (result.success && result.data.length > 0) {
-        setContrato(result.data[0]);
+      if (result.success && result.data.data && result.data.data.length > 0) {
+        setContrato(result.data.data[0]);
       } else {
         setError('Contrato não encontrado');
       }
